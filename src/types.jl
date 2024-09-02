@@ -9,7 +9,12 @@ end
 
 Base.:(==)(x::GaussianState, y::GaussianState) = x.mean == y.mean && x.covar == y.covar
 function Base.summary(io::IO, x::GaussianState)
-    print(io, "$(typeof(x)) with $(Int(length(x.mean)/2)) modes")
+    modenum = Int(length(x.disp)/2)
+    if isone(modenum)
+        print(io, "$(typeof(x)) for $(modenum) mode \n")
+    else
+        print(io, "$(typeof(x)) for $(modenum) modes \n")
+    end
     print(io, "\n  mean vector: ")
     Base.show(io, x.mean)
     print(io, "\n  covariance matrix: ")
@@ -61,20 +66,107 @@ function directsum(state1::GaussianState, state2::GaussianState)
     return GaussianState(mean′, covar′)
 end
 
+struct GaussianUnitary{D,S} <: AbstractOperator{D,S}
+    disp::D
+    symplectic::S
+    function GaussianUnitary(d::D, s::S) where {D,S}
+        all(length(d) .== size(s)) || throw(DimensionMismatch(UNITARY_ERROR))
+        return new{D,S}(d, s)
+    end
+end
+
+Base.:(==)(x::GaussianUnitary, y::GaussianUnitary) = x.disp == y.disp && x.symplectic == y.symplectic
+function Base.summary(io::IO, x::GaussianUnitary)
+    modenum = Int(length(x.disp)/2)
+    if isone(modenum)
+        print(io, "$(typeof(x)) for $(modenum) mode \n")
+    else
+        print(io, "$(typeof(x)) for $(modenum) modes \n")
+    end
+    print(io, "  displacement vector: ")
+    Base.show(io, x.disp)
+    print(io, "  symplectic matrix: ")
+    Base.show(io, x.symplectic)
+end
+Base.show(io::IO, x::GaussianUnitary) = Base.summary(io, x)
+
+function directsum(::Type{Td}, ::Type{Ts}, op1::GaussianUnitary, op2::GaussianUnitary) where {Td,Ts}
+    disp1, disp2 = op1.disp, op2.disp
+    length1, length2 = length(disp1), length(disp2)
+    slengths = length1 + length2
+    symp1, symp2 = op1.symplectic, op2.symplectic
+    disp′ = zeros(slengths)
+    @inbounds for i in eachindex(disp1)
+        disp′[i] = disp1[i]
+    end
+    @inbounds for i in eachindex(disp2)
+        disp′[i+length1] = disp2[i]
+    end
+    symplectic′ = zeros(slengths, slengths)
+    @inbounds for (i,j) in axes(symp1)
+        symplectic′[i,j] = symp1[i,j]
+    end
+    @inbounds for (i,j) in axes(symp2)
+        symplectic′[i+length1,j+length1] = symp2[i,j]
+    end
+    return GaussianUnitary(Td(disp′), Ts(symplectic′))
+end
+directsum(::Type{T}, op1::GaussianUnitary, op2::GaussianUnitary) where {T} = directsum(T, T, op1, op2)
+function directsum(op1::GaussianUnitary, op2::GaussianUnitary)
+    disp1, disp2 = op1.disp, op2.disp
+    length1, length2 = length(disp1), length(disp2)
+    slengths = length1 + length2
+    symp1, symp2 = op1.symplectic, op2.symplectic
+    disp′ = zeros(slengths)
+    @inbounds for i in eachindex(disp1)
+        disp′[i] = disp1[i]
+    end
+    @inbounds for i in eachindex(disp2)
+        disp′[i+length1] = disp2[i]
+    end
+    symplectic′ = zeros(slengths, slengths)
+    @inbounds for (i,j) in axes(symp1)
+        symplectic′[i,j] = symp1[i,j]
+    end
+    @inbounds for (i,j) in axes(symp2)
+        symplectic′[i+length1,j+length1] = symp2[i,j]
+    end
+    return GaussianUnitary(disp′, symplectic′)
+end
+function apply(state::GaussianState, op::GaussianUnitary)
+    d, S, = op.disp, op.symplectic
+    length(d) == length(state.mean) || throw(DimensionMismatch(ACTION_ERROR))
+    mean′ = S * state.mean .+ d
+    covar′ = S * state.covar * transpose(S)
+    return GaussianState(mean′, covar′)
+end
+Base.:(*)(op::GaussianUnitary, state::GaussianState) = apply(state, op)
+function apply!(state::GaussianState, op::GaussianUnitary)
+    d, S = op.disp, op.symplectic
+    length(d) == length(state.mean) || throw(DimensionMismatch(ACTION_ERROR))
+    state.mean .= S * state.mean .+ d
+    state.covar .= S * state.covar * transpose(S)
+    return state
+end
+
 struct GaussianChannel{D,T} <: AbstractOperator{D,T}
     disp::D
     transform::T
     noise::T
-    function GaussianChannel{D,T}(d::D, t::T, n::T) where {D,T}
+    function GaussianChannel(d::D, t::T, n::T) where {D,T}
         all(length(d) .== size(t) .== size(n)) || throw(DimensionMismatch(CHANNEL_ERROR))
-        return new(d, t, n)
+        return new{D,T}(d, t, n)
     end
 end
-GaussianChannel(d::D, t::T, n::T) where {D,T} = GaussianChannel{D,T}(d, t, n)
 
 Base.:(==)(x::GaussianChannel, y::GaussianChannel) = x.disp == y.disp && x.transform == y.transform && x.noise == y.noise
 function Base.summary(io::IO, x::GaussianChannel)
-    print(io, "$(typeof(x)) for $(Int(length(x.disp)/2))) modes \n")
+    modenum = Int(length(x.disp)/2)
+    if isone(modenum)
+        print(io, "$(typeof(x)) for $(modenum) mode \n")
+    else
+        print(io, "$(typeof(x)) for $(modenum) modes \n")
+    end
     print(io, "  displacement vector: ")
     Base.show(io, x.disp)
     print(io, "  transform matrix: ")
@@ -147,7 +239,7 @@ function apply(state::GaussianState, op::GaussianChannel)
     d, T, N = op.disp, op.transform, op.noise
     length(d) == length(state.mean) || throw(DimensionMismatch(ACTION_ERROR))
     mean′ = T * state.mean .+ d
-    covar′ = T * state.covar * transpose(T) + N
+    covar′ = T * state.covar * transpose(T) .+ N
     return GaussianState(mean′, covar′)
 end
 Base.:(*)(op::GaussianChannel, state::GaussianState) = apply(state, op)
@@ -155,6 +247,6 @@ function apply!(state::GaussianState, op::GaussianChannel)
     d, T, N = op.disp, op.transform, op.noise
     length(d) == length(state.mean) || throw(DimensionMismatch(ACTION_ERROR))
     state.mean .= T * state.mean .+ d
-    state.covar .= T * state.covar * transpose(T) + N
+    state.covar .= T * state.covar * transpose(T) .+ N
     return state
 end

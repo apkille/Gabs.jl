@@ -2,37 +2,47 @@
     using Gabs, StaticArrays
 
     @testset "vacuum states" begin
-        @test_nowarn vacuumstate()
-        @test_nowarn vacuumstate(SVector{2}, SMatrix{2,2})
+        @test vacuumstate() isa GaussianState
+        @test vacuumstate(SVector{2}, SMatrix{2,2}) isa GaussianState
     end
 
     @testset "thermal states" begin
-        @test_nowarn thermalstate(2)
-        @test_nowarn thermalstate(SVector{2}, SMatrix{2,2}, 2)
+        n = rand(Int64)
+        @test thermalstate(n) isa GaussianState
+        @test thermalstate(SVector{2}, SMatrix{2,2}, n) isa GaussianState
     end
 
     @testset "coherent states" begin
-        @test_nowarn coherentstate(1.0+pi*im)
-        @test_nowarn coherentstate(SVector{2}, SMatrix{2,2}, 1.0+pi*im)
+        alpha = rand(ComplexF64)
+        @test coherentstate(alpha) isa GaussianState
+        @test coherentstate(SVector{2}, SMatrix{2,2}, alpha) isa GaussianState
     end
 
     @testset "squeezed states" begin
-        @test_nowarn squeezedstate(1.0, 2.0)
-        @test_nowarn squeezedstate(SVector{2}, SMatrix{2,2}, 1.0, 2.0)
+        r, theta = rand(Float64), rand(Float64)
+        @test squeezedstate(r, theta) isa GaussianState
+        @test squeezedstate(SVector{2}, SMatrix{2,2}, r, theta) isa GaussianState
     end
 
     @testset "epr states" begin
-        @test_nowarn eprstate(1.0, 2.0)
-        @test_nowarn eprstate(SVector{4}, SMatrix{4,4}, 1.0, 2.0)
+        r, theta = rand(Float64), rand(Float64)
+        @test eprstate(r, theta) isa GaussianState
+        @test eprstate(SVector{4}, SMatrix{4,4}, r, theta) isa GaussianState
     end
 
     @testset "direct sums" begin
         v1, v2 = vacuumstate(), vacuumstate()
-        @test directsum(v1, v2) == v1 ⊕ v2
-        @test_nowarn directsum(SVector{4}, SMatrix{4,4}, v1, v2)
-        c = coherentstate(1.0 + pi*im)
+        ds = directsum(v1, v2)
+        @test ds isa GaussianState
+        @test directsum(SVector{4}, SMatrix{4,4}, v1, v2) isa GaussianState
+        @test ds == v1 ⊕ v2
+
+        alpha = rand(ComplexF64)
+        c = coherentstate(alpha)
         @test directsum(c, directsum(v1, v2)) == c ⊕ v1 ⊕ v2
-        s1, s2 = squeezedstate(1.0, 2.0), squeezedstate(1.0, 2.0)
-        @testset s1 ⊕ s2 == eprstate(1.0, 2.0)
+
+        r, theta = rand(Float64), rand(Float64)
+        s1, s2 = squeezedstate(r, theta), squeezedstate(r, theta)
+        @testset s1 ⊕ s2 == eprstate(r, theta)
     end
 end

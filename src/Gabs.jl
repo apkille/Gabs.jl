@@ -7,7 +7,7 @@ import QuantumInterface: StateVector, AbstractOperator, apply!, directsum, ⊕
 
 export 
     # types
-    GaussianState, GaussianChannel,
+    GaussianState, GaussianUnitary, GaussianChannel,
     # operations
     directsum, ⊕, apply, apply!,
     # predefined Gaussian states
@@ -20,6 +20,8 @@ include("errors.jl")
 include("types.jl")
 
 include("states.jl")
+
+include("unitaries.jl")
 
 include("channels.jl")
 
