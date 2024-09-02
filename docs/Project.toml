@@ -1,0 +1,6 @@
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+DocumenterCitations = "daee34ce-89f3-4625-b898-19384cb65244"
+Gabs = "0eb812ee-a11f-4f5e-b8d4-bb8a44f06f50"
+QuantumInterface = "5717a53b-5d69-4fa3-b976-0bf2f97ca1e5"
+Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
