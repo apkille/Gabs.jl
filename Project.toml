@@ -5,6 +5,12 @@ version = "1.0.0-DEV"
 
 [compat]
 julia = "1.6.7"
+LinearAlgebra = "1.9"
+QuantumInterface = "0.3.4"
+
+[deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+QuantumInterface = "5717a53b-5d69-4fa3-b976-0bf2f97ca1e5"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
