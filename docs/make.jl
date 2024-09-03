@@ -25,9 +25,12 @@ function main()
     authors = "Andrew Kille",
     pages = [
         "Gabs.jl" => "index.md",
+        "Getting Started with Gabs" => "intro.md",
         "Manual" => "manual.md",
+        "Tutorials" => "tutorials.md",
         "Gaussian Zoos" => "zoos.md",
         "API" => "API.md",
+        "References" => "bibliography.md"
     ]
     )
 

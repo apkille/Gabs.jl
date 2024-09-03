@@ -71,7 +71,7 @@ This is a rather clean way to characterize a large group of Gaussian transformat
 an `N`-mode Gaussian bosonic system. As long as we have a displacement vector of size `2N` and symplectic matrix of size `2N x 2N`, we can create a Gaussian transformation. 
 
 !!! note
-    A matrix $\mathbf{S}$ is symplectic when it satisfies the following relation:
+    A matrix $\mathbf{S}$ of size $2N\times 2N$ is symplectic when it satisfies the following relation:
 
     
     $$\mathbf{S} \mathbf{\Omega} \mathbf{S}^{\text{T}} = \mathbf{\Omega}, \qquad \mathbf{\Omega} \equiv \bigoplus_{i=1}^{N} \begin{pmatrix} 0 & -1 \\ -1 & 0 \end{pmatrix}.$$
