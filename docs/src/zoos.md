@@ -10,6 +10,12 @@ squeezedstate
 eprstate
 ```
 
-## Unitary Zoo
+## Operator Zoo
 
-## Channel Zoo
+```@docs; canonical = false
+displace
+squeeze
+twosqueeze
+phaseshift
+beamsplitter
+```

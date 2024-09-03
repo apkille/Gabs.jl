@@ -55,13 +55,38 @@ covariance: 6×6 Matrix{Float64}:
  0.0  0.0  0.0  0.0  0.184235  0.748048
 ```
 
-## Gaussian Unitary Operators
+## Gaussian Operators
+
+To transform Gaussian states into Gaussian states, we need Gaussian maps. There are various ways to construct Gaussian transformations, which we will discuss in this section.
+
+### Gaussian Unitaries
+
+Let's begin with the simplest Gaussian transformation, a unitary transformation, which can be created with the [`GaussianUnitary`](@ref) type:
 
 ```@docs; canonical = false
 GaussianUnitary
 ```
 
-## Gaussian Channels
+This is a rather clean way to characterize a large group of Gaussian transformations on
+an `N`-mode Gaussian bosonic system. As long as we have a displacement vector of size `2N` and symplectic matrix of size `2N x 2N`, we can create a Gaussian transformation. 
+
+!!! note
+    A matrix $\mathbf{S}$ is symplectic when it satisfies the following relation:
+
+    
+    $$\mathbf{S} \mathbf{\Omega} \mathbf{S}^{\text{T}} = \mathbf{\Omega}, \qquad \mathbf{\Omega} \equiv \bigoplus_{i=1}^{N} \begin{pmatrix} 0 & -1 \\ -1 & 0 \end{pmatrix}.$$
+
+This library has a number of predefined Gaussian unitaries, which are listed below:
+
+- [`displace`](@ref)
+- [`squeeze`](@ref)
+- [`twosqueeze`](@ref)
+- [`phaseshift`](@ref)
+- [`beamsplitter`](@ref)
+  
+Detailed discussions and mathematical descriptions for each of these unitaries are given in the [Gaussian Zoos](@ref) page.
+
+### Gaussian Channels
 
 ```@docs; canonical = false
 GaussianChannel

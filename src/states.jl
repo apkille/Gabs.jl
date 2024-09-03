@@ -92,7 +92,7 @@ matrix ``\\mathbf{V}``, expressed respectively as follows:
 
 ```math
 \\mathbf{\\bar{x}} = \\sqrt{2}\\left(\\text{Re}(\\alpha), \\text{Im}(\\alpha)\\right)^{\\text{T}},
-\\quad \\mathbf{V} = \\left(\\bar{n} + \\frac{1}{2}\\right)\\mathbf{I}.
+\\quad \\mathbf{V} = \\mathbf{I}.
 ```
 
 ## Example
