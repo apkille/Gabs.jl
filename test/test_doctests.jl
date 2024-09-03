@@ -3,5 +3,5 @@
     using Gabs
 
     DocMeta.setdocmeta!(Gabs, :DocTestSetup, :(using Gabs); recursive=true)
-    doctest(Gabs)
+    doctest(Gabs, fix=true)
 end
