@@ -6,7 +6,9 @@ DocTestSetup = quote
 end
 ```
 
-Simply put, `Gabs.jl` is a package for creating and transforming Gaussian bosonic systems. This section discusses the "lower level" tools for simulating such phenomena.
+Simply put, Gabs.jl is a package for creating and transforming Gaussian bosonic systems. This section discusses the "lower level" tools for simulating such phenomena, with
+mathematical explanations when appropriate. For a comprehensive review of Gaussian
+quantum information, see [weedbrook2012](@cite) or [wang2007](@cite).
 
 ## Gaussian States
 
@@ -32,7 +34,7 @@ Detailed discussions and mathematical descriptions for each of these states are 
 If we were operating in the state (Fock) space, and wanted to describe multi-mode Gaussian states,
 we would take the tensor product of multiple density operators. That method, however,
 is quite computationally expensive and requires a finite truncation of the Fock basis. To create
-such state vector simulations, we recommend using the [`QuantumOptics.jl`](https://github.com/qojulia/QuantumOptics.jl) library. For our purposes in the phase space, we can manually create multi-mode Gaussian systems with a direct sum, which can be called with either [`directsum`](@ref) or `⊕`, the direct sum symbol
+such state vector simulations, we recommend using the [QuantumOptics.jl](https://github.com/qojulia/QuantumOptics.jl) library. For our purposes in the phase space, we can manually create multi-mode Gaussian systems with a direct sum, which can be called with either [`directsum`](@ref) or `⊕`, the direct sum symbol
 which can be typed in the Julia REPL as `\oplus<TAB>`. Take the following example, where we
 produce a 3-mode Gaussian state that consists of a coherent state, vacuumstate, and squeezed state:
 

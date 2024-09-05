@@ -34,5 +34,3 @@ using Gabs
 
 Now, the entire library is loaded into the current workspace, with access to its
 high-level interface and predefined objects.
-
-
