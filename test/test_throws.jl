@@ -1,5 +1,5 @@
 @testitem "Throws" begin
-    using Gabs
+    using Gabs, CairoMakie
 
     @testset "type throws" begin
         @test_throws DimensionMismatch GaussianState([1.0, 2.0, 3.0], [3.0 4.0; 5.0 6.0])
@@ -9,8 +9,13 @@
 
     @testset "action throws" begin
         v = vacuumstate()
-        ts = twosqueeze(1.0, 4.0)
+        ts = twosqueeze(rand(), rand())
         @test_throws DimensionMismatch apply(v, ts)
         @test_throws DimensionMismatch apply!(v, ts)
+    end
+
+    @testset "plot extension throws" begin
+        ts = twosqueeze(rand(), rand())
+        @test_throws ArgumentError Makie.heatmap(collect(-3.0:0.25:3.0), collect(-3.0:0.25:3.0), ts)
     end
 end

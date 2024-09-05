@@ -20,3 +20,6 @@ ACTION_ERROR = lazy"The number of modes for the Gaussian operator
 
 WIGNER_ERROR = lazy"The length of your input array does not match the
     number of modes for the Gaussian state."
+
+MAKIE_ERROR = lazy"The input Gaussian state describes more than one mode. 
+    A heat map visualization for a multi-mode Gaussian state is not possible."
