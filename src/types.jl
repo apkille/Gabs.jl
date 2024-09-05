@@ -269,10 +269,7 @@ described by its maps on the statistical moments of the Gaussian state:
 ## Example
 
 ```jldoctest
-julia> noise = [1.0 -3.0; 4.0 2.0]
-2×2 Matrix{Float64}:
- 1.0  -3.0
- 4.0   2.0
+julia> noise = [1.0 -3.0; 4.0 2.0];
 
 julia> displace(1.0+im, noise)
 GaussianChannel

@@ -23,7 +23,7 @@ matrix ``\\mathbf{S}``, expressed respectively as follows:
 
 ```jldoctest
 julia> displace(1.0+im)
-GaussianUnitary for 1 mode.
+GaussianUnitary
 displacement: 2-element Vector{Float64}:
  1.4142135623730951
  1.4142135623730951
@@ -73,7 +73,7 @@ where ``\\mathbf{R}(\\theta)`` is the rotation matrix.
 
 ```jldoctest
 julia> squeeze(0.25, pi/4)
-GaussianUnitary for 1 mode.
+GaussianUnitary
 displacement: 2-element Vector{Float64}:
  0.0
  0.0
@@ -129,7 +129,7 @@ where ``\\mathbf{R}(\\theta)`` is the rotation matrix.
 
 ```jldoctest
 julia> twosqueeze(0.25, pi/4)
-GaussianUnitary for 2 modes.
+GaussianUnitary
 displacement: 4-element Vector{Float64}:
  0.0
  0.0
@@ -188,7 +188,7 @@ matrix ``\\mathbf{S}``, expressed respectively as follows:
 
 ```jldoctest
 julia> phaseshift(3pi/4)
-GaussianUnitary for 1 mode.
+GaussianUnitary
 displacement: 2-element Vector{Float64}:
  0.0
  0.0
@@ -240,7 +240,7 @@ matrix ``\\mathbf{S}``, expressed respectively as follows:
 
 ```jldoctest
 julia> beamsplitter(0.75)
-GaussianUnitary for 2 modes.
+GaussianUnitary
 displacement: 4-element Vector{Float64}:
  0.0
  0.0
