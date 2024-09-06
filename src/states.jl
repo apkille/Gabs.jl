@@ -1,3 +1,7 @@
+##
+# Predefined Gaussian states
+##
+
 """
     vacuumstate([Tm=Vector{Float64}, Tc=Matrix{Float64}])
 
@@ -223,4 +227,77 @@ function eprstate(r::N, theta::N) where {N<:Real}
     v2 = (1/2) * sinh(2*r) * [cos(theta) sin(theta); sin(theta) -cos(theta)]
     covar = [v1 v2; v2 v1]
     return GaussianState(mean, covar)
+end
+
+##
+# Operations on Gaussian states
+##
+
+"""
+    directsum([Td=Vector{Float64}, Ts=Matrix{Float64},] op1::GaussianState, op2::GaussianState)
+
+Direct sum of Gaussian states, which can also be called with `⊕`.
+
+## Example
+```jldoctest
+julia> coherentstate(1.0+im) ⊕ thermalstate(2)
+GaussianState
+mean: 4-element Vector{Float64}:
+ 1.4142135623730951
+ 1.4142135623730951
+ 0.0
+ 0.0
+covariance: 4×4 Matrix{Float64}:
+ 1.0  0.0  0.0  0.0
+ 0.0  1.0  0.0  0.0
+ 0.0  0.0  2.5  0.0
+ 0.0  0.0  0.0  2.5
+```
+"""
+function directsum(::Type{Tm}, ::Type{Tc}, state1::GaussianState, state2::GaussianState) where {Tm,Tc}
+    mean1, mean2 = state1.mean, state2.mean
+    length1, length2 = length(mean1), length(mean2)
+    slengths = length1 + length2
+    covar1, covar2 = state1.covar, state2.covar
+    mean′ = zeros(length1+length2)
+    @inbounds for i in eachindex(mean1)
+        mean′[i] = mean1[i]
+    end
+    @inbounds for i in eachindex(mean2)
+        mean′[i+length1] = mean2[i]
+    end
+    covar′ = zeros(slengths, slengths)
+    axes1 = axes(covar1)
+    @inbounds for i in axes1[1], j in axes1[2]
+        covar′[i,j] = covar1[i,j]
+    end
+    axes2 = axes(covar2)
+    @inbounds for i in axes2[1], j in axes2[2]
+        covar′[i+length1,j+length1] = covar2[i,j]
+    end
+    return GaussianState(Tm(mean′), Tc(covar′))
+end
+directsum(::Type{T}, state1::GaussianState, state2::GaussianState) where {T} = directsum(T, T, state1, state2)
+function directsum(state1::GaussianState, state2::GaussianState)
+    mean1, mean2 = state1.mean, state2.mean
+    length1, length2 = length(mean1), length(mean2)
+    slengths = length1 + length2
+    covar1, covar2 = state1.covar, state2.covar
+    mean′ = zeros(length1+length2)
+    @inbounds for i in eachindex(mean1)
+        mean′[i] = mean1[i]
+    end
+    @inbounds for i in eachindex(mean2)
+        mean′[i+length1] = mean2[i]
+    end
+    covar′ = zeros(slengths, slengths)
+    axes1 = axes(covar1)
+    @inbounds for i in axes1[1], j in axes1[2]
+        covar′[i,j] = covar1[i,j]
+    end
+    axes2 = axes(covar2)
+    @inbounds for i in axes2[1], j in axes2[2]
+        covar′[i+length1,j+length1] = covar2[i,j]
+    end
+    return GaussianState(mean′, covar′)
 end

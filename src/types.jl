@@ -51,74 +51,6 @@ function Base.show(io::IO, mime::MIME"text/plain", x::GaussianState)
     Base.show(io, mime, x.covar)
 end
 
-"""
-    directsum([Td=Vector{Float64}, Ts=Matrix{Float64},] op1::GaussianState, op2::GaussianState)
-
-Direct sum of Gaussian states, which can also be called with `⊕`.
-
-## Example
-```jldoctest
-julia> coherentstate(1.0+im) ⊕ thermalstate(2)
-GaussianState
-mean: 4-element Vector{Float64}:
- 1.4142135623730951
- 1.4142135623730951
- 0.0
- 0.0
-covariance: 4×4 Matrix{Float64}:
- 1.0  0.0  0.0  0.0
- 0.0  1.0  0.0  0.0
- 0.0  0.0  2.5  0.0
- 0.0  0.0  0.0  2.5
-```
-"""
-function directsum(::Type{Tm}, ::Type{Tc}, state1::GaussianState, state2::GaussianState) where {Tm,Tc}
-    mean1, mean2 = state1.mean, state2.mean
-    length1, length2 = length(mean1), length(mean2)
-    slengths = length1 + length2
-    covar1, covar2 = state1.covar, state2.covar
-    mean′ = zeros(length1+length2)
-    @inbounds for i in eachindex(mean1)
-        mean′[i] = mean1[i]
-    end
-    @inbounds for i in eachindex(mean2)
-        mean′[i+length1] = mean2[i]
-    end
-    covar′ = zeros(slengths, slengths)
-    axes1 = axes(covar1)
-    @inbounds for i in axes1[1], j in axes1[2]
-        covar′[i,j] = covar1[i,j]
-    end
-    axes2 = axes(covar2)
-    @inbounds for i in axes2[1], j in axes2[2]
-        covar′[i+length1,j+length1] = covar2[i,j]
-    end
-    return GaussianState(Tm(mean′), Tc(covar′))
-end
-directsum(::Type{T}, state1::GaussianState, state2::GaussianState) where {T} = directsum(T, T, state1, state2)
-function directsum(state1::GaussianState, state2::GaussianState)
-    mean1, mean2 = state1.mean, state2.mean
-    length1, length2 = length(mean1), length(mean2)
-    slengths = length1 + length2
-    covar1, covar2 = state1.covar, state2.covar
-    mean′ = zeros(length1+length2)
-    @inbounds for i in eachindex(mean1)
-        mean′[i] = mean1[i]
-    end
-    @inbounds for i in eachindex(mean2)
-        mean′[i+length1] = mean2[i]
-    end
-    covar′ = zeros(slengths, slengths)
-    axes1 = axes(covar1)
-    @inbounds for i in axes1[1], j in axes1[2]
-        covar′[i,j] = covar1[i,j]
-    end
-    axes2 = axes(covar2)
-    @inbounds for i in axes2[1], j in axes2[2]
-        covar′[i+length1,j+length1] = covar2[i,j]
-    end
-    return GaussianState(mean′, covar′)
-end
 
 """
 Defines a Gaussian unitary for an N-mode bosonic system over a 2N-dimensional phase space.
@@ -180,53 +112,6 @@ function Base.show(io::IO, mime::MIME"text/plain", x::GaussianUnitary)
     Base.show(io, mime, x.symplectic)
 end
 
-function directsum(::Type{Td}, ::Type{Ts}, op1::GaussianUnitary, op2::GaussianUnitary) where {Td,Ts}
-    disp1, disp2 = op1.disp, op2.disp
-    length1, length2 = length(disp1), length(disp2)
-    slengths = length1 + length2
-    symp1, symp2 = op1.symplectic, op2.symplectic
-    disp′ = zeros(slengths)
-    @inbounds for i in eachindex(disp1)
-        disp′[i] = disp1[i]
-    end
-    @inbounds for i in eachindex(disp2)
-        disp′[i+length1] = disp2[i]
-    end
-    symplectic′ = zeros(slengths, slengths)
-    axes1 = axes(symp1)
-    @inbounds for i in axes1[1], j in axes1[2]
-        symplectic′[i,j] = symp1[i,j]
-    end
-    axes2 = axes(symp2)
-    @inbounds for i in axes2[1], j in axes2[2]
-        symplectic′[i+length1,j+length1] = symp2[i,j]
-    end
-    return GaussianUnitary(Td(disp′), Ts(symplectic′))
-end
-directsum(::Type{T}, op1::GaussianUnitary, op2::GaussianUnitary) where {T} = directsum(T, T, op1, op2)
-function directsum(op1::GaussianUnitary, op2::GaussianUnitary)
-    disp1, disp2 = op1.disp, op2.disp
-    length1, length2 = length(disp1), length(disp2)
-    slengths = length1 + length2
-    symp1, symp2 = op1.symplectic, op2.symplectic
-    disp′ = zeros(slengths)
-    @inbounds for i in eachindex(disp1)
-        disp′[i] = disp1[i]
-    end
-    @inbounds for i in eachindex(disp2)
-        disp′[i+length1] = disp2[i]
-    end
-    symplectic′ = zeros(slengths, slengths)
-    axes1 = axes(symp1)
-    @inbounds for i in axes1[1], j in axes1[2]
-        symplectic′[i,j] = symp1[i,j]
-    end
-    axes2 = axes(symp2)
-    @inbounds for i in axes2[1], j in axes2[2]
-        symplectic′[i+length1,j+length1] = symp2[i,j]
-    end
-    return GaussianUnitary(disp′, symplectic′)
-end
 function apply(state::GaussianState, op::GaussianUnitary)
     d, S, = op.disp, op.symplectic
     length(d) == length(state.mean) || throw(DimensionMismatch(ACTION_ERROR))
@@ -315,73 +200,6 @@ function Base.summary(io::IO, x::Union{GaussianState,GaussianUnitary,GaussianCha
     printstyled(io, typeof(x); color=:blue)
 end
 
-function directsum(::Type{Td}, ::Type{Tt}, op1::GaussianChannel, op2::GaussianChannel) where {Td,Tt}
-    disp1, disp2 = op1.disp, op2.disp
-    length1, length2 = length(disp1), length(disp2)
-    slengths = length1 + length2
-    trans1, trans2 = op1.transform, op2.transform
-    disp′ = zeros(slengths)
-    @inbounds for i in eachindex(disp1)
-        disp′[i] = disp1[i]
-    end
-    @inbounds for i in eachindex(disp2)
-        disp′[i+length1] = disp2[i]
-    end
-    transform′ = zeros(slengths, slengths)
-    taxes1 = axes(trans1)
-    @inbounds for i in taxes1[1], j in taxes1[2]
-        transform′[i,j] = trans1[i,j]
-    end
-    taxes2 = axes(trans2)
-    @inbounds for i in taxes2[1], j in taxes2[2]
-        transform′[i+length1,j+length1] = trans2[i,j]
-    end
-    noise1, noise2 = op1.noise, op2.noise
-    noise′ = zeros(slengths, slengths)
-    naxes1 = axes(noise1)
-    @inbounds for i in naxes1[1], j in naxes1[2]
-        noise′[i,j] = noise1[i,j]
-    end
-    naxes2 = axes(noise2)
-    @inbounds for i in naxes2[1], j in naxes2[2]
-        noise′[i+length1,j+length1] = noise2[i,j]
-    end
-    return GaussianChannel(Td(disp′), Tt(transform′), Tt(noise′))
-end
-directsum(::Type{T}, op1::GaussianChannel, op2::GaussianChannel) where {T} = directsum(T, T, op1, op2)
-function directsum(op1::GaussianChannel, op2::GaussianChannel)
-    disp1, disp2 = op1.disp, op2.disp
-    length1, length2 = length(disp1), length(disp2)
-    slengths = length1 + length2
-    trans1, trans2 = op1.transform, op2.transform
-    disp′ = zeros(slengths)
-    @inbounds for i in eachindex(disp1)
-        disp′[i] = disp1[i]
-    end
-    @inbounds for i in eachindex(disp2)
-        disp′[i+length1] = disp2[i]
-    end
-    transform′ = zeros(slengths, slengths)
-    taxes1 = axes(trans1)
-    @inbounds for i in taxes1[1], j in taxes1[2]
-        transform′[i,j] = trans1[i,j]
-    end
-    taxes2 = axes(trans2)
-    @inbounds for i in taxes2[1], j in taxes2[2]
-        transform′[i+length1,j+length1] = trans2[i,j]
-    end
-    noise1, noise2 = op1.noise, op2.noise
-    noise′ = zeros(slengths, slengths)
-    naxes1 = axes(noise1)
-    @inbounds for i in naxes1[1], j in naxes1[2]
-        noise′[i,j] = noise1[i,j]
-    end
-    naxes2 = axes(noise2)
-    @inbounds for i in naxes2[1], j in naxes2[2]
-        noise′[i+length1,j+length1] = noise2[i,j]
-    end
-    return GaussianChannel(disp′, transform′, noise′)
-end
 function apply(state::GaussianState, op::GaussianChannel)
     d, T, N = op.disp, op.transform, op.noise
     length(d) == length(state.mean) || throw(DimensionMismatch(ACTION_ERROR))
