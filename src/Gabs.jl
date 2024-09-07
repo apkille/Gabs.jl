@@ -9,7 +9,7 @@ export
     # types
     GaussianState, GaussianUnitary, GaussianChannel,
     # operations
-    directsum, ⊕, apply, apply!,
+    directsum, ⊕, apply, apply!, ptrace,
     # predefined Gaussian states
     vacuumstate, thermalstate, coherentstate, squeezedstate, eprstate,
     # predefined Gaussian channels

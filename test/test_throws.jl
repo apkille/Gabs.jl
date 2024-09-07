@@ -1,5 +1,6 @@
 @testitem "Throws" begin
-    using Gabs, CairoMakie
+    using Gabs
+    using CairoMakie
 
     @testset "type throws" begin
         @test_throws DimensionMismatch GaussianState([1.0, 2.0, 3.0], [3.0 4.0; 5.0 6.0])

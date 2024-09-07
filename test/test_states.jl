@@ -1,5 +1,6 @@
 @testitem "States" begin
-    using Gabs, StaticArrays
+    using Gabs
+    using StaticArrays
 
     @testset "vacuum states" begin
         @test vacuumstate() isa GaussianState

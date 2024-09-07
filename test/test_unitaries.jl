@@ -1,5 +1,6 @@
 @testitem "Unitaries" begin
-    using Gabs, StaticArrays
+    using Gabs
+    using StaticArrays
     
     @testset "displacement operator" begin
         alpha = rand(ComplexF64)

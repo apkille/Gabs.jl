@@ -1,5 +1,6 @@
 @testitem "Channels" begin
-    using Gabs, StaticArrays
+    using Gabs
+    using StaticArrays
 
     noise2 = rand(Float64, (2,2))
     noise2_ds = [noise2 zeros(2,2); zeros(2,2) noise2]

@@ -1,5 +1,6 @@
 @testitem "Wigner" begin
-    using Gabs, StaticArrays
+    using Gabs
+    using StaticArrays
 
     @testset "symplectic form" begin
         Omega = symplecticform(2)
