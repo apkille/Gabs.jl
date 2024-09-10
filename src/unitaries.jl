@@ -278,34 +278,20 @@ end
 ##
 
 function directsum(::Type{Td}, ::Type{Ts}, op1::GaussianUnitary, op2::GaussianUnitary) where {Td,Ts}
-    disp1, disp2 = op1.disp, op2.disp
-    length1, length2 = length(disp1), length(disp2)
-    slengths = length1 + length2
-    symp1, symp2 = op1.symplectic, op2.symplectic
-    disp′ = zeros(slengths)
-    @inbounds for i in eachindex(disp1)
-        disp′[i] = disp1[i]
-    end
-    @inbounds for i in eachindex(disp2)
-        disp′[i+length1] = disp2[i]
-    end
-    symplectic′ = zeros(slengths, slengths)
-    axes1 = axes(symp1)
-    @inbounds for i in axes1[1], j in axes1[2]
-        symplectic′[i,j] = symp1[i,j]
-    end
-    axes2 = axes(symp2)
-    @inbounds for i in axes2[1], j in axes2[2]
-        symplectic′[i+length1,j+length1] = symp2[i,j]
-    end
+    disp′, symplectic′ = _directsum_fields(op1, op2)
     return GaussianUnitary(Td(disp′), Ts(symplectic′))
 end
 directsum(::Type{T}, op1::GaussianUnitary, op2::GaussianUnitary) where {T} = directsum(T, T, op1, op2)
 function directsum(op1::GaussianUnitary, op2::GaussianUnitary)
+    disp′, symplectic′ = _directsum_fields(op1, op2)
+    return GaussianUnitary(disp′, symplectic′)
+end
+function _directsum_fields(op1::GaussianUnitary, op2::GaussianUnitary)
     disp1, disp2 = op1.disp, op2.disp
     length1, length2 = length(disp1), length(disp2)
     slengths = length1 + length2
     symp1, symp2 = op1.symplectic, op2.symplectic
+    # initialize direct sum of displacement vectors
     disp′ = zeros(slengths)
     @inbounds for i in eachindex(disp1)
         disp′[i] = disp1[i]
@@ -313,6 +299,7 @@ function directsum(op1::GaussianUnitary, op2::GaussianUnitary)
     @inbounds for i in eachindex(disp2)
         disp′[i+length1] = disp2[i]
     end
+    # initialize direct sum of symplectic matrices
     symplectic′ = zeros(slengths, slengths)
     axes1 = axes(symp1)
     @inbounds for i in axes1[1], j in axes1[2]
@@ -322,5 +309,5 @@ function directsum(op1::GaussianUnitary, op2::GaussianUnitary)
     @inbounds for i in axes2[1], j in axes2[2]
         symplectic′[i+length1,j+length1] = symp2[i,j]
     end
-    return GaussianUnitary(disp′, symplectic′)
+    return disp′, symplectic′
 end

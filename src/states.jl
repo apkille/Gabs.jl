@@ -255,34 +255,20 @@ covariance: 4×4 Matrix{Float64}:
 ```
 """
 function directsum(::Type{Tm}, ::Type{Tc}, state1::GaussianState, state2::GaussianState) where {Tm,Tc}
-    mean1, mean2 = state1.mean, state2.mean
-    length1, length2 = length(mean1), length(mean2)
-    slengths = length1 + length2
-    covar1, covar2 = state1.covar, state2.covar
-    mean′ = zeros(length1+length2)
-    @inbounds for i in eachindex(mean1)
-        mean′[i] = mean1[i]
-    end
-    @inbounds for i in eachindex(mean2)
-        mean′[i+length1] = mean2[i]
-    end
-    covar′ = zeros(slengths, slengths)
-    axes1 = axes(covar1)
-    @inbounds for i in axes1[1], j in axes1[2]
-        covar′[i,j] = covar1[i,j]
-    end
-    axes2 = axes(covar2)
-    @inbounds for i in axes2[1], j in axes2[2]
-        covar′[i+length1,j+length1] = covar2[i,j]
-    end
+    mean′, covar′ = _directsum_fields(state1, state2)
     return GaussianState(Tm(mean′), Tc(covar′))
 end
 directsum(::Type{T}, state1::GaussianState, state2::GaussianState) where {T} = directsum(T, T, state1, state2)
 function directsum(state1::GaussianState, state2::GaussianState)
+    mean′, covar′ = _directsum_fields(state1, state2)
+    return GaussianState(mean′, covar′)
+end
+function _directsum_fields(state1::GaussianState, state2::GaussianState)
     mean1, mean2 = state1.mean, state2.mean
     length1, length2 = length(mean1), length(mean2)
     slengths = length1 + length2
     covar1, covar2 = state1.covar, state2.covar
+    # initialize direct sum of mean vectors
     mean′ = zeros(length1+length2)
     @inbounds for i in eachindex(mean1)
         mean′[i] = mean1[i]
@@ -290,6 +276,7 @@ function directsum(state1::GaussianState, state2::GaussianState)
     @inbounds for i in eachindex(mean2)
         mean′[i+length1] = mean2[i]
     end
+    # initialize direct sum of covariance matrices
     covar′ = zeros(slengths, slengths)
     axes1 = axes(covar1)
     @inbounds for i in axes1[1], j in axes1[2]
@@ -299,5 +286,5 @@ function directsum(state1::GaussianState, state2::GaussianState)
     @inbounds for i in axes2[1], j in axes2[2]
         covar′[i+length1,j+length1] = covar2[i,j]
     end
-    return GaussianState(mean′, covar′)
+    return mean′, covar′
 end

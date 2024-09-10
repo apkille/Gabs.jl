@@ -78,44 +78,20 @@ end
 ##
 
 function directsum(::Type{Td}, ::Type{Tt}, op1::GaussianChannel, op2::GaussianChannel) where {Td,Tt}
-    disp1, disp2 = op1.disp, op2.disp
-    length1, length2 = length(disp1), length(disp2)
-    slengths = length1 + length2
-    trans1, trans2 = op1.transform, op2.transform
-    disp′ = zeros(slengths)
-    @inbounds for i in eachindex(disp1)
-        disp′[i] = disp1[i]
-    end
-    @inbounds for i in eachindex(disp2)
-        disp′[i+length1] = disp2[i]
-    end
-    transform′ = zeros(slengths, slengths)
-    taxes1 = axes(trans1)
-    @inbounds for i in taxes1[1], j in taxes1[2]
-        transform′[i,j] = trans1[i,j]
-    end
-    taxes2 = axes(trans2)
-    @inbounds for i in taxes2[1], j in taxes2[2]
-        transform′[i+length1,j+length1] = trans2[i,j]
-    end
-    noise1, noise2 = op1.noise, op2.noise
-    noise′ = zeros(slengths, slengths)
-    naxes1 = axes(noise1)
-    @inbounds for i in naxes1[1], j in naxes1[2]
-        noise′[i,j] = noise1[i,j]
-    end
-    naxes2 = axes(noise2)
-    @inbounds for i in naxes2[1], j in naxes2[2]
-        noise′[i+length1,j+length1] = noise2[i,j]
-    end
+    disp′, transform′, noise′ = _directsum_fields(op1, op2)
     return GaussianChannel(Td(disp′), Tt(transform′), Tt(noise′))
 end
 directsum(::Type{T}, op1::GaussianChannel, op2::GaussianChannel) where {T} = directsum(T, T, op1, op2)
 function directsum(op1::GaussianChannel, op2::GaussianChannel)
+    disp′, transform′, noise′ = _directsum_fields(op1, op2)
+    return GaussianChannel(disp′, transform′, noise′)
+end
+function _directsum_fields(op1::GaussianChannel, op2::GaussianChannel)
     disp1, disp2 = op1.disp, op2.disp
     length1, length2 = length(disp1), length(disp2)
     slengths = length1 + length2
     trans1, trans2 = op1.transform, op2.transform
+    # initialize direct sum of displacement vectors
     disp′ = zeros(slengths)
     @inbounds for i in eachindex(disp1)
         disp′[i] = disp1[i]
@@ -123,6 +99,7 @@ function directsum(op1::GaussianChannel, op2::GaussianChannel)
     @inbounds for i in eachindex(disp2)
         disp′[i+length1] = disp2[i]
     end
+    # initialize direct sum of transform matrix
     transform′ = zeros(slengths, slengths)
     taxes1 = axes(trans1)
     @inbounds for i in taxes1[1], j in taxes1[2]
@@ -133,6 +110,7 @@ function directsum(op1::GaussianChannel, op2::GaussianChannel)
         transform′[i+length1,j+length1] = trans2[i,j]
     end
     noise1, noise2 = op1.noise, op2.noise
+    # initialize direct sum of noise matrix
     noise′ = zeros(slengths, slengths)
     naxes1 = axes(noise1)
     @inbounds for i in naxes1[1], j in naxes1[2]
@@ -142,5 +120,5 @@ function directsum(op1::GaussianChannel, op2::GaussianChannel)
     @inbounds for i in naxes2[1], j in naxes2[2]
         noise′[i+length1,j+length1] = noise2[i,j]
     end
-    return GaussianChannel(disp′, transform′, noise′)
+    return disp′, transform′, noise′
 end
