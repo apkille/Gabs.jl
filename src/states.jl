@@ -288,3 +288,99 @@ function _directsum_fields(state1::GaussianState, state2::GaussianState)
     end
     return mean′, covar′
 end
+
+"""
+    ptrace([Tm=Vector{Float64}, Tc=Matrix{Float64},] state::GaussianState, idx<:Int)
+    ptrace([Tm=Vector{Float64}, Tc=Matrix{Float64},] state::GaussianState, indices<:AbstractVector)
+
+Partial trace of a Gaussian state over a subsytem indicated by `idx`, or multiple subsystems
+indicated by `indices`.
+
+## Example
+```jldoctest
+julia> state = coherentstate(1.0+im) ⊕ thermalstate(2) ⊕ squeezedstate(3.0, pi/4)
+GaussianState
+mean: 6-element Vector{Float64}:
+ 1.4142135623730951
+ 1.4142135623730951
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+covariance: 6×6 Matrix{Float64}:
+ 1.0  0.0  0.0  0.0   0.0       0.0
+ 0.0  1.0  0.0  0.0   0.0       0.0
+ 0.0  0.0  2.5  0.0   0.0       0.0
+ 0.0  0.0  0.0  2.5   0.0       0.0
+ 0.0  0.0  0.0  0.0  29.5414   71.3164
+ 0.0  0.0  0.0  0.0  71.3164  172.174
+
+julia> ptrace(state, 2)
+GaussianState
+mean: 2-element Vector{Float64}:
+ 0.0
+ 0.0
+covariance: 2×2 Matrix{Float64}:
+ 2.5  0.0
+ 0.0  2.5
+
+julia> ptrace(state, [1, 3])
+GaussianState
+mean: 4-element Vector{Float64}:
+ 1.4142135623730951
+ 1.4142135623730951
+ 0.0
+ 0.0
+covariance: 4×4 Matrix{Float64}:
+ 1.0  0.0   0.0       0.0
+ 0.0  1.0   0.0       0.0
+ 0.0  0.0  29.5414   71.3164
+ 0.0  0.0  71.3164  172.174
+```
+"""
+function ptrace(::Type{Tm}, ::Type{Tc}, state::GaussianState, idx::N) where {Tm,Tc,N<:Int}
+    mean′, covar′ = _ptrace_fields(state, idx)
+    return GaussianState(Tm(mean′), Tc(covar′))
+end
+ptrace(::Type{T}, state::GaussianState, idx::N) where {T,N<:Int} = ptrace(T, T, state, idx)
+function ptrace(state::GaussianState, idx::N) where {N<:Int}
+    mean′, covar′ = _ptrace_fields(state, idx)
+    return GaussianState(mean′, covar′)
+end
+function ptrace(::Type{Tm}, ::Type{Tc}, state::GaussianState, indices::N) where {Tm,Tc,N<:AbstractVector}
+    mean′, covar′ = _ptrace_fields(state, indices)
+    return GaussianState(Tm(mean′), Tc(covar′))
+end
+ptrace(::Type{T}, state::GaussianState, indices::N) where {T,N<:AbstractVector} = ptrace(T, T, state, indices)
+function ptrace(state::GaussianState, indices::T) where {T<:AbstractVector}
+    mean′, covar′ = _ptrace_fields(state, indices)
+    return GaussianState(mean′, covar′)
+end
+function _ptrace_fields(state::GaussianState, idx::T) where {T<:Int}
+    idxV = 2*idx-1:(2*idx)
+    # initialize partial trace of mean vector
+    mean′ = state.mean[idxV]
+    # initialize partial trace of covariance matrix
+    covar′ = state.covar[idxV, idxV]
+    return mean′, covar′
+end
+function _ptrace_fields(state::GaussianState, indices::T) where {T<:AbstractVector}
+    idxlength = length(indices)
+    # initialize partial trace of mean vector
+    mean′ = zeros(2*idxlength)
+    @inbounds for i in eachindex(indices)
+        idx = indices[i]
+        mean′[2*i-1] = state.mean[2*idx-1]
+        mean′[2*i] = state.mean[2*idx]
+    end
+    # initialize partial trace of covariance matrix
+    covar′ = zeros(2*idxlength, 2*idxlength)
+    @inbounds for i in eachindex(indices)
+        idx = indices[i]
+        covar′[2*i-1, 2*i-1] = state.covar[2*idx-1, 2*idx-1]
+        covar′[2*i-1, 2*i] = state.covar[2*idx-1, 2*idx]
+        covar′[2*i, 2*i-1] = state.covar[2*idx, 2*idx-1]
+        covar′[2*i, 2*i] = state.covar[2*idx, 2*idx]
+    end 
+    return mean′, covar′
+end
