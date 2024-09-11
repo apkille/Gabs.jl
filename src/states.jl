@@ -234,7 +234,7 @@ end
 ##
 
 """
-    directsum([Td=Vector{Float64}, Ts=Matrix{Float64},] op1::GaussianState, op2::GaussianState)
+    directsum([Td=Vector{Float64}, Ts=Matrix{Float64},] state1::GaussianState, state2::GaussianState)
 
 Direct sum of Gaussian states, which can also be called with `⊕`.
 
