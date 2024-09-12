@@ -96,6 +96,11 @@ Noisy bosonic channels are an important model for describing the interaction bet
 GaussianChannel
 ```
 
+Listed below are a list of predefined Gaussian channels supported by Gabs.jl:
+
+- [`attenuator`](@ref)
+- [`amplifier`](@ref)
+  
 !!! note
     When its noise matrix $\mathbf{N} = \mathbf{0}$ and transform operator $\mathbf{T}$ is a symplectic matrix, a Gaussian channel is a unitary operator. Any predefined Gaussian unitary
     method can be called with an additional noise matrix to create a [`GaussianChannel`](@ref) object. For instance, a noisy displacement operator can be called with [`displace`](@ref) as follows:
@@ -104,9 +109,9 @@ GaussianChannel
     julia> noise = [1.0 -2.0; 4.0 -3.0];
 
     julia> displace(1.0-im, noise)
-    GaussianChannel for 1 mode.
+    GaussianChannel
     displacement: 2-element Vector{Float64}:
-     1.4142135623730951
+      1.4142135623730951
      -1.4142135623730951
     transform: 2×2 Matrix{Float64}:
      1.0  0.0
