@@ -36,6 +36,13 @@
         @test beamsplitter(SVector{4}, SMatrix{4,4}, theta, noise4) isa GaussianChannel
     end
 
+    @testset "attenuator channel" begin
+        theta = rand(Float64)
+        n = rand(Int64)
+        @test attenuator(theta, n) isa GaussianChannel
+        @test attenuator(SVector{2}, SMatrix{2,2}, theta, n) isa GaussianChannel
+    end
+
     @testset "direct sums" begin
         alpha1, alpha2 = rand(ComplexF64), rand(ComplexF64)
         d1, d2 = displace(alpha1, noise2), displace(alpha2, noise2)

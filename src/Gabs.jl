@@ -13,7 +13,7 @@ export
     # predefined Gaussian states
     vacuumstate, thermalstate, coherentstate, squeezedstate, eprstate,
     # predefined Gaussian channels
-    displace, squeeze, twosqueeze, phaseshift, beamsplitter,
+    displace, squeeze, twosqueeze, phaseshift, beamsplitter, attenuator,
     # wigner functions
     wigner, wignerchar,
     # symplectic form

@@ -18,4 +18,5 @@ squeeze
 twosqueeze
 phaseshift
 beamsplitter
+attenuator
 ```

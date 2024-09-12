@@ -73,6 +73,55 @@ function beamsplitter(transmit::R, noise::N) where {R<:Real,N}
     return GaussianChannel(disp, transform, noise)
 end
 
+"""
+    attenuator([Td=Vector{Float64}, Tt=Matrix{Float64},] theta<:Real, n<:Int)
+
+Gaussian channel describing the effect of a thermal environment on a single mode Gaussian
+state, which can be defined in terms of a beam splitter operation with angle `theta` and
+thermal noise `n`.
+
+## Mathematical description of an attenuator channel
+
+An attenuator channel, ``\\mathcal{E}_{\\theta}^{n_{\\text{th}}}``, where ``\\theta`` is
+the beam splitter rotation parameter and ``n_{\\text{th}}`` is the thermal noise parameter,
+is characterized by the displacement vector ``\\mathbf{d}``, transformation matrix ``\\mathbf{T}``,
+and noise matrix ``\\mathbf{N}``, expressed respectively as follows:
+
+```math
+\\mathbf{d} = \\mathbf{0},
+\\quad \\mathbf{T} = \\cos\\theta\\mathbf{I},
+\\qquad \\mathbf{N} = (\\sin\\theta)^2 n_{\\text{th}} \\mathbf{I}.
+```
+
+## Example
+
+```jldoctest
+julia> attenuator(pi/6, 3)
+GaussianChannel for 1 mode.
+displacement: 2-element Vector{Float64}:
+ 0.0
+ 0.0
+transform: 2×2 Matrix{Float64}:
+ 0.866025  0.0
+ 0.0       0.866025
+noise: 2×2 Matrix{Float64}:
+ 0.75  0.0
+ 0.0   0.75
+```
+"""
+function attenuator(::Type{Td}, ::Type{Tt}, theta::R, n::N) where {Td,Tt,R<:Real,N<:Int}
+    disp = zeros(2)
+    transform = cos(theta) * Matrix{Float64}(I, 2, 2)
+    noise = (sin(theta))^2 * n * Matrix{Float64}(I, 2, 2)
+    return GaussianChannel(Td(disp), Tt(transform), Tt(noise))
+end
+attenuator(::Type{T}, theta::R, n::N) where {T,R<:Real,N<:Int} = attenuator(T, T, theta, n)
+function attenuator(theta::R, n::N) where {R<:Real,N<:Int}
+    disp = zeros(2)
+    transform = cos(theta) * Matrix{Float64}(I, 2, 2)
+    noise = (sin(theta))^2 * n * Matrix{Float64}(I, 2, 2)
+    return GaussianChannel(disp, transform, noise)
+end
 ##
 # Predefined operations on Gaussian channels
 ##
