@@ -19,4 +19,5 @@ twosqueeze
 phaseshift
 beamsplitter
 attenuator
+amplifier
 ```

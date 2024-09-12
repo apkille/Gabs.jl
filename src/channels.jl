@@ -76,14 +76,14 @@ end
 """
     attenuator([Td=Vector{Float64}, Tt=Matrix{Float64},] theta<:Real, n<:Int)
 
-Gaussian channel describing the interaction of an input
+Gaussian channel describing the coupling of an input
 single mode Gaussian state and its environment via a beam splitter operation. The channel is paramatrized
 by beam splitter rotation angle `theta` and thermal noise `n`.
 
 ## Mathematical description of an attenuator channel
 
 An attenuator channel, ``\\mathcal{E}_{\\theta}^{n_{\\text{th}}}``, where ``\\theta`` is
-the beam splitter rotation parameter and ``n_{\\text{th}}`` is the thermal noise parameter,
+the beam splitter rotation parameter and ``n_{\\text{th}} \\geq 1`` is the thermal noise parameter,
 is characterized by the displacement vector ``\\mathbf{d}``, transformation matrix ``\\mathbf{T}``,
 and noise matrix ``\\mathbf{N}``, expressed respectively as follows:
 
@@ -97,7 +97,7 @@ and noise matrix ``\\mathbf{N}``, expressed respectively as follows:
 
 ```jldoctest
 julia> attenuator(pi/6, 3)
-GaussianChannel for 1 mode.
+GaussianChannel
 displacement: 2-element Vector{Float64}:
  0.0
  0.0
@@ -122,6 +122,57 @@ function attenuator(theta::R, n::N) where {R<:Real,N<:Int}
     noise = (sin(theta))^2 * n * Matrix{Float64}(I, 2, 2)
     return GaussianChannel(disp, transform, noise)
 end
+
+"""
+    amplifier([Td=Vector{Float64}, Tt=Matrix{Float64},] r<:Real, n<:Int)
+
+Gaussian channel describing the interaction of an input
+single mode Gaussian state and its environment via a two-mode squeezing operation. The channel is paramatrized
+by squeezing amplitude parameter `r` and thermal noise `n`.
+
+## Mathematical description of an amplifier channel
+
+An amplifier channel, ``\\mathcal{A}_{\\theta}^{n_{\\text{th}}}``, where ``r`` is
+the squeezing amplitude parameter and ``n_{\\text{th}} \\geq 1`` is the thermal noise parameter,
+is characterized by the displacement vector ``\\mathbf{d}``, transformation matrix ``\\mathbf{T}``,
+and noise matrix ``\\mathbf{N}``, expressed respectively as follows:
+
+```math
+\\mathbf{d} = \\mathbf{0},
+\\quad \\mathbf{T} = \\cosh r\\mathbf{I},
+\\qquad \\mathbf{N} = (\\sinh r)^2 n_{\\text{th}} \\mathbf{I}.
+```
+
+## Example
+
+```jldoctest
+julia> amplifier(2.0, 3)
+GaussianChannel
+displacement: 2-element Vector{Float64}:
+ 0.0
+ 0.0
+transform: 2×2 Matrix{Float64}:
+ 3.7622  0.0
+ 0.0     3.7622
+noise: 2×2 Matrix{Float64}:
+ 39.4623   0.0
+  0.0     39.4623
+```
+"""
+function amplifier(::Type{Td}, ::Type{Tt}, r::R, n::N) where {Td,Tt,R<:Real,N<:Int}
+    disp = zeros(2)
+    transform = cosh(r) * Matrix{Float64}(I, 2, 2)
+    noise = (sinh(r))^2 * n * Matrix{Float64}(I, 2, 2)
+    return GaussianChannel(Td(disp), Tt(transform), Tt(noise))
+end
+amplifier(::Type{T}, r::R, n::N) where {T,R<:Real,N<:Int} = amplifier(T, T, theta, n)
+function amplifier(r::R, n::N) where {R<:Real,N<:Int}
+    disp = zeros(2)
+    transform = cosh(r) * Matrix{Float64}(I, 2, 2)
+    noise = (sinh(r))^2 * n * Matrix{Float64}(I, 2, 2)
+    return GaussianChannel(disp, transform, noise)
+end
+
 ##
 # Predefined operations on Gaussian channels
 ##
