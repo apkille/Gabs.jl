@@ -77,7 +77,7 @@ end
     attenuator([Td=Vector{Float64}, Tt=Matrix{Float64},] theta<:Real, n<:Int)
 
 Gaussian channel describing the interaction of an input
-single mode Gaussian state and its environment with a beam splitter operation. The channel is paramatrized
+single mode Gaussian state and its environment via a beam splitter operation. The channel is paramatrized
 by beam splitter rotation angle `theta` and thermal noise `n`.
 
 ## Mathematical description of an attenuator channel
