@@ -298,23 +298,44 @@ indicated by `indices`.
 
 ## Example
 ```jldoctest
-julia> state = coherentstate(1.0+im) ⊕ thermalstate(2) ⊕ squeezedstate(3.0, pi/4)
-ERROR: UndefVarError: `⊕` not defined
-Stacktrace:
- [1] top-level scope
-   @ none:1
+julia> state = coherentstate(1.0+im) ⊗ thermalstate(2) ⊗ squeezedstate(3.0, pi/4)
+GaussianState
+mean: 6-element Vector{Float64}:
+ 1.4142135623730951
+ 1.4142135623730951
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+covariance: 6×6 Matrix{Float64}:
+ 1.0  0.0  0.0  0.0   0.0       0.0
+ 0.0  1.0  0.0  0.0   0.0       0.0
+ 0.0  0.0  2.5  0.0   0.0       0.0
+ 0.0  0.0  0.0  2.5   0.0       0.0
+ 0.0  0.0  0.0  0.0  29.5414   71.3164
+ 0.0  0.0  0.0  0.0  71.3164  172.174
 
 julia> ptrace(state, 2)
-ERROR: UndefVarError: `state` not defined
-Stacktrace:
- [1] top-level scope
-   @ none:1
+GaussianState
+mean: 2-element Vector{Float64}:
+ 0.0
+ 0.0
+covariance: 2×2 Matrix{Float64}:
+ 2.5  0.0
+ 0.0  2.5
 
 julia> ptrace(state, [1, 3])
-ERROR: UndefVarError: `state` not defined
-Stacktrace:
- [1] top-level scope
-   @ none:1
+GaussianState
+mean: 4-element Vector{Float64}:
+ 1.4142135623730951
+ 1.4142135623730951
+ 0.0
+ 0.0
+covariance: 4×4 Matrix{Float64}:
+ 1.0  0.0   0.0       0.0
+ 0.0  1.0   0.0       0.0
+ 0.0  0.0  29.5414   71.3164
+ 0.0  0.0  71.3164  172.174
 ```
 """
 function ptrace(::Type{Tm}, ::Type{Tc}, state::GaussianState, idx::N) where {Tm,Tc,N<:Int}
