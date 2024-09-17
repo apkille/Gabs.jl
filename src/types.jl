@@ -112,14 +112,13 @@ function Base.show(io::IO, mime::MIME"text/plain", x::GaussianUnitary)
     Base.show(io, mime, x.symplectic)
 end
 
-function apply(state::GaussianState, op::GaussianUnitary)
+function Base.:(*)(op::GaussianUnitary, state::GaussianState)
     d, S, = op.disp, op.symplectic
     length(d) == length(state.mean) || throw(DimensionMismatch(ACTION_ERROR))
     mean′ = S * state.mean .+ d
     covar′ = S * state.covar * transpose(S)
     return GaussianState(mean′, covar′)
 end
-Base.:(*)(op::GaussianUnitary, state::GaussianState) = apply(state, op)
 function apply!(state::GaussianState, op::GaussianUnitary)
     d, S = op.disp, op.symplectic
     length(d) == length(state.mean) || throw(DimensionMismatch(ACTION_ERROR))
@@ -200,14 +199,13 @@ function Base.summary(io::IO, x::Union{GaussianState,GaussianUnitary,GaussianCha
     printstyled(io, typeof(x); color=:blue)
 end
 
-function apply(state::GaussianState, op::GaussianChannel)
+function Base.:(*)(op::GaussianChannel, state::GaussianState)
     d, T, N = op.disp, op.transform, op.noise
     length(d) == length(state.mean) || throw(DimensionMismatch(ACTION_ERROR))
     mean′ = T * state.mean .+ d
     covar′ = T * state.covar * transpose(T) .+ N
     return GaussianState(mean′, covar′)
 end
-Base.:(*)(op::GaussianChannel, state::GaussianState) = apply(state, op)
 function apply!(state::GaussianState, op::GaussianChannel)
     d, T, N = op.disp, op.transform, op.noise
     length(d) == length(state.mean) || throw(DimensionMismatch(ACTION_ERROR))

@@ -11,7 +11,7 @@
     @testset "action throws" begin
         v = vacuumstate()
         ts = twosqueeze(rand(), rand())
-        @test_throws DimensionMismatch apply(v, ts)
+        @test_throws DimensionMismatch ts * v
         @test_throws DimensionMismatch apply!(v, ts)
     end
 

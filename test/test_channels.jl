@@ -72,13 +72,13 @@
         d = displace(alpha, z)
         v = vacuumstate()
         c = coherentstate(alpha)
-        @test apply(v, d) == c
+        @test d * v == c
         @test apply!(v, d) == c
 
         v1, v2 = vacuumstate(), vacuumstate()
         alpha1, alpha2 = rand(ComplexF64), rand(ComplexF64)
         d1, d2 = displace(alpha1, z), displace(alpha2, z)
         c1, c2 = coherentstate(alpha1), coherentstate(alpha2)
-        @test apply(v1 ⊗ v2, d1 ⊗ d2) == c1 ⊗ c2
+        @test (d1 ⊗ d2) * (v1 ⊗ v2) == c1 ⊗ c2
     end
 end
