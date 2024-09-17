@@ -177,16 +177,16 @@ end
 # Predefined operations on Gaussian channels
 ##
 
-function directsum(::Type{Td}, ::Type{Tt}, op1::GaussianChannel, op2::GaussianChannel) where {Td,Tt}
-    disp′, transform′, noise′ = _directsum_fields(op1, op2)
+function tensor(::Type{Td}, ::Type{Tt}, op1::GaussianChannel, op2::GaussianChannel) where {Td,Tt}
+    disp′, transform′, noise′ = _tensor_fields(op1, op2)
     return GaussianChannel(Td(disp′), Tt(transform′), Tt(noise′))
 end
-directsum(::Type{T}, op1::GaussianChannel, op2::GaussianChannel) where {T} = directsum(T, T, op1, op2)
-function directsum(op1::GaussianChannel, op2::GaussianChannel)
-    disp′, transform′, noise′ = _directsum_fields(op1, op2)
+tensor(::Type{T}, op1::GaussianChannel, op2::GaussianChannel) where {T} = tensor(T, T, op1, op2)
+function tensor(op1::GaussianChannel, op2::GaussianChannel)
+    disp′, transform′, noise′ = _tensor_fields(op1, op2)
     return GaussianChannel(disp′, transform′, noise′)
 end
-function _directsum_fields(op1::GaussianChannel, op2::GaussianChannel)
+function _tensor_fields(op1::GaussianChannel, op2::GaussianChannel)
     disp1, disp2 = op1.disp, op2.disp
     length1, length2 = length(disp1), length(disp2)
     slengths = length1 + length2

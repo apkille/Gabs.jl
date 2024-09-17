@@ -50,20 +50,20 @@
         @test attenuator(SVector{2}, SMatrix{2,2}, theta, n) isa GaussianChannel
     end
     
-    @testset "direct sums" begin
+    @testset "tensor products" begin
         alpha1, alpha2 = rand(ComplexF64), rand(ComplexF64)
         d1, d2 = displace(alpha1, noise2), displace(alpha2, noise2)
-        ds = directsum(d1, d2)
+        ds = tensor(d1, d2)
         @test ds isa GaussianChannel
-        @test ds == d1 ⊕ d2
-        @test directsum(SVector{4}, SMatrix{4,4}, d1, d2) isa GaussianChannel
+        @test ds == d1 ⊗ d2
+        @test tensor(SVector{4}, SMatrix{4,4}, d1, d2) isa GaussianChannel
 
         r, theta = rand(Float64), rand(Float64)
         p = phaseshift(theta, noise2)
-        @test directsum(directsum(p, d1), d2) == p ⊕ d1 ⊕ d2
+        @test tensor(tensor(p, d1), d2) == p ⊗ d1 ⊗ d2
 
         s1, s2 = squeeze(r, theta, noise2), squeeze(r, theta, noise2)
-        @testset s1 ⊕ s2 == twosqueeze(r, theta, noise2_ds)
+        @testset s1 ⊗ s2 == twosqueeze(r, theta, noise2_ds)
     end
 
     @testset "actions" begin
@@ -79,6 +79,6 @@
         alpha1, alpha2 = rand(ComplexF64), rand(ComplexF64)
         d1, d2 = displace(alpha1, z), displace(alpha2, z)
         c1, c2 = coherentstate(alpha1), coherentstate(alpha2)
-        @test apply(v1 ⊕ v2, d1 ⊕ d2) == c1 ⊕ c2
+        @test apply(v1 ⊗ v2, d1 ⊗ d2) == c1 ⊗ c2
     end
 end

@@ -277,16 +277,16 @@ end
 # Operations on Gaussian unitaries
 ##
 
-function directsum(::Type{Td}, ::Type{Ts}, op1::GaussianUnitary, op2::GaussianUnitary) where {Td,Ts}
-    disp′, symplectic′ = _directsum_fields(op1, op2)
+function tensor(::Type{Td}, ::Type{Ts}, op1::GaussianUnitary, op2::GaussianUnitary) where {Td,Ts}
+    disp′, symplectic′ = _tensor_fields(op1, op2)
     return GaussianUnitary(Td(disp′), Ts(symplectic′))
 end
-directsum(::Type{T}, op1::GaussianUnitary, op2::GaussianUnitary) where {T} = directsum(T, T, op1, op2)
-function directsum(op1::GaussianUnitary, op2::GaussianUnitary)
-    disp′, symplectic′ = _directsum_fields(op1, op2)
+tensor(::Type{T}, op1::GaussianUnitary, op2::GaussianUnitary) where {T} = tensor(T, T, op1, op2)
+function tensor(op1::GaussianUnitary, op2::GaussianUnitary)
+    disp′, symplectic′ = _tensor_fields(op1, op2)
     return GaussianUnitary(disp′, symplectic′)
 end
-function _directsum_fields(op1::GaussianUnitary, op2::GaussianUnitary)
+function _tensor_fields(op1::GaussianUnitary, op2::GaussianUnitary)
     disp1, disp2 = op1.disp, op2.disp
     length1, length2 = length(disp1), length(disp2)
     slengths = length1 + length2

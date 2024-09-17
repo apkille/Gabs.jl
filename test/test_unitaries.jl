@@ -35,17 +35,17 @@
     @testset "direct sums" begin
         alpha1, alpha2 = rand(ComplexF64), rand(ComplexF64)
         d1, d2 = displace(alpha1), displace(alpha2)
-        ds = directsum(d1, d2)
+        ds = tensor(d1, d2)
         @test ds isa GaussianUnitary
-        @test ds == d1 ⊕ d2
-        @test directsum(SVector{4}, SMatrix{4,4}, d1, d2) isa GaussianUnitary
+        @test ds == d1 ⊗ d2
+        @test tensor(SVector{4}, SMatrix{4,4}, d1, d2) isa GaussianUnitary
 
         r, theta = rand(Float64), rand(Float64)
         p = phaseshift(theta)
-        @test directsum(p, directsum(d1, d2)) == p ⊕ d1 ⊕ d2
+        @test tensor(p, tensor(d1, d2)) == p ⊗ d1 ⊗ d2
 
         s1, s2 = squeeze(r, theta), squeeze(r, theta)
-        @testset s1 ⊕ s2 == twosqueeze(r, theta)
+        @testset s1 ⊗ s2 == twosqueeze(r, theta)
     end
 
     @testset "actions" begin
@@ -60,6 +60,6 @@
         alpha1, alpha2 = rand(ComplexF64), rand(ComplexF64)
         d1, d2 = displace(alpha1), displace(alpha2)
         c1, c2 = coherentstate(alpha1), coherentstate(alpha2)
-        @test apply(v1 ⊕ v2, d1 ⊕ d2) == c1 ⊕ c2
+        @test apply(v1 ⊗ v2, d1 ⊗ d2) == c1 ⊗ c2
     end
 end

@@ -234,13 +234,13 @@ end
 ##
 
 """
-    directsum([Td=Vector{Float64}, Ts=Matrix{Float64},] state1::GaussianState, state2::GaussianState)
+    tensor([Td=Vector{Float64}, Ts=Matrix{Float64},] state1::GaussianState, state2::GaussianState)
 
-Direct sum of Gaussian states, which can also be called with `⊕`.
+tensor product of Gaussian states, which can also be called with `⊗`.
 
 ## Example
 ```jldoctest
-julia> coherentstate(1.0+im) ⊕ thermalstate(2)
+julia> coherentstate(1.0+im) ⊗ thermalstate(2)
 GaussianState
 mean: 4-element Vector{Float64}:
  1.4142135623730951
@@ -254,16 +254,16 @@ covariance: 4×4 Matrix{Float64}:
  0.0  0.0  0.0  2.5
 ```
 """
-function directsum(::Type{Tm}, ::Type{Tc}, state1::GaussianState, state2::GaussianState) where {Tm,Tc}
-    mean′, covar′ = _directsum_fields(state1, state2)
+function tensor(::Type{Tm}, ::Type{Tc}, state1::GaussianState, state2::GaussianState) where {Tm,Tc}
+    mean′, covar′ = _tensor_fields(state1, state2)
     return GaussianState(Tm(mean′), Tc(covar′))
 end
-directsum(::Type{T}, state1::GaussianState, state2::GaussianState) where {T} = directsum(T, T, state1, state2)
-function directsum(state1::GaussianState, state2::GaussianState)
-    mean′, covar′ = _directsum_fields(state1, state2)
+tensor(::Type{T}, state1::GaussianState, state2::GaussianState) where {T} = tensor(T, T, state1, state2)
+function tensor(state1::GaussianState, state2::GaussianState)
+    mean′, covar′ = _tensor_fields(state1, state2)
     return GaussianState(mean′, covar′)
 end
-function _directsum_fields(state1::GaussianState, state2::GaussianState)
+function _tensor_fields(state1::GaussianState, state2::GaussianState)
     mean1, mean2 = state1.mean, state2.mean
     length1, length2 = length(mean1), length(mean2)
     slengths = length1 + length2
@@ -299,43 +299,22 @@ indicated by `indices`.
 ## Example
 ```jldoctest
 julia> state = coherentstate(1.0+im) ⊕ thermalstate(2) ⊕ squeezedstate(3.0, pi/4)
-GaussianState
-mean: 6-element Vector{Float64}:
- 1.4142135623730951
- 1.4142135623730951
- 0.0
- 0.0
- 0.0
- 0.0
-covariance: 6×6 Matrix{Float64}:
- 1.0  0.0  0.0  0.0   0.0       0.0
- 0.0  1.0  0.0  0.0   0.0       0.0
- 0.0  0.0  2.5  0.0   0.0       0.0
- 0.0  0.0  0.0  2.5   0.0       0.0
- 0.0  0.0  0.0  0.0  29.5414   71.3164
- 0.0  0.0  0.0  0.0  71.3164  172.174
+ERROR: UndefVarError: `⊕` not defined
+Stacktrace:
+ [1] top-level scope
+   @ none:1
 
 julia> ptrace(state, 2)
-GaussianState
-mean: 2-element Vector{Float64}:
- 0.0
- 0.0
-covariance: 2×2 Matrix{Float64}:
- 2.5  0.0
- 0.0  2.5
+ERROR: UndefVarError: `state` not defined
+Stacktrace:
+ [1] top-level scope
+   @ none:1
 
 julia> ptrace(state, [1, 3])
-GaussianState
-mean: 4-element Vector{Float64}:
- 1.4142135623730951
- 1.4142135623730951
- 0.0
- 0.0
-covariance: 4×4 Matrix{Float64}:
- 1.0  0.0   0.0       0.0
- 0.0  1.0   0.0       0.0
- 0.0  0.0  29.5414   71.3164
- 0.0  0.0  71.3164  172.174
+ERROR: UndefVarError: `state` not defined
+Stacktrace:
+ [1] top-level scope
+   @ none:1
 ```
 """
 function ptrace(::Type{Tm}, ::Type{Tc}, state::GaussianState, idx::N) where {Tm,Tc,N<:Int}

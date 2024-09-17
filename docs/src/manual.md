@@ -34,12 +34,11 @@ Detailed discussions and mathematical descriptions for each of these states are 
 If we were operating in the state (Fock) space, and wanted to describe multi-mode Gaussian states,
 we would take the tensor product of multiple density operators. That method, however,
 is quite computationally expensive and requires a finite truncation of the Fock basis. To create
-such state vector simulations, we recommend using the [QuantumOptics.jl](https://github.com/qojulia/QuantumOptics.jl) library. For our purposes in the phase space, we can manually create multi-mode Gaussian systems with a direct sum, which can be called with either [`directsum`](@ref) or `⊕`, the direct sum symbol
-which can be typed in the Julia REPL as `\oplus<TAB>`. Take the following example, where we
-produce a 3-mode Gaussian state that consists of a coherent state, vacuumstate, and squeezed state:
+such state vector simulations, we recommend using the [QuantumOptics.jl](https://github.com/qojulia/QuantumOptics.jl) library. For our purposes in the phase space, we can manually create multi-mode Gaussian systems with a tensor product, which can be called with either [`tensor`](@ref) or `⊗`, the Kronecker product symbol
+which can be typed in the Julia REPL as `\otimes<TAB>`. Take the following example, where we produce a 3-mode Gaussian state that consists of a coherent state, vacuumstate, and squeezed state:
 
 ```jldoctest
-julia> coherentstate(-1.0) ⊕ vacuumstate() ⊕ squeezedstate(0.25, pi/4)
+julia> coherentstate(-1.0) ⊗ vacuumstate() ⊗ squeezedstate(0.25, pi/4)
 GaussianState
 mean: 6-element Vector{Float64}:
  -1.4142135623730951

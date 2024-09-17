@@ -3,13 +3,13 @@ module Gabs
 import LinearAlgebra
 using LinearAlgebra: I, det
 
-import QuantumInterface: StateVector, AbstractOperator, apply!, directsum, ⊕
+import QuantumInterface: StateVector, AbstractOperator, apply!, tensor, ⊗
 
 export 
     # types
     GaussianState, GaussianUnitary, GaussianChannel,
     # operations
-    directsum, ⊕, apply, apply!, ptrace,
+    tensor, ⊗, apply, apply!, ptrace,
     # predefined Gaussian states
     vacuumstate, thermalstate, coherentstate, squeezedstate, eprstate,
     # predefined Gaussian channels
