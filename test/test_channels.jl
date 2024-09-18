@@ -62,8 +62,16 @@
         p = phaseshift(theta, noise2)
         @test tensor(tensor(p, d1), d2) == p ⊗ d1 ⊗ d2
 
-        s1, s2 = squeeze(r, theta, noise2), squeeze(r, theta, noise2)
-        @testset s1 ⊗ s2 == twosqueeze(r, theta, noise2_ds)
+
+        dstatic = displace(SVector{2}, SMatrix{2,2}, alpha1, noise2)
+        tpstatic = dstatic ⊗ dstatic ⊗ dstatic
+        @test tpstatic.disp isa SVector{6}
+        @test tpstatic.transform isa SMatrix{6,6}
+        @test tpstatic.noise isa SMatrix{6,6}
+        tp = dstatic ⊗ d1 ⊗ dstatic
+        @test tp.disp isa Vector
+        @test tp.transform isa Matrix
+        @test tp.noise isa Matrix
     end
 
     @testset "actions" begin

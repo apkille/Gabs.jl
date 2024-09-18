@@ -234,7 +234,7 @@ end
 ##
 
 """
-    tensor([Td=Vector{Float64}, Ts=Matrix{Float64},] state1::GaussianState, state2::GaussianState)
+    tensor(state1::GaussianState, state2::GaussianState)
 
 tensor product of Gaussian states, which can also be called with `⊗`.
 
@@ -286,7 +286,10 @@ function _tensor_fields(state1::GaussianState, state2::GaussianState)
     @inbounds for i in axes2[1], j in axes2[2]
         covar′[i+length1,j+length1] = covar2[i,j]
     end
-    return mean′, covar′
+    # extract output array types
+    mean′′ = _promote_output_vector(typeof(mean1), typeof(mean2), mean′)
+    covar′′ = _promote_output_matrix(typeof(covar1), typeof(covar2), covar′)
+    return mean′′, covar′′
 end
 
 """

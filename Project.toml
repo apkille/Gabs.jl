@@ -8,10 +8,12 @@ julia = "1.6.7"
 LinearAlgebra = "1.9"
 Makie = "0.21.9"
 QuantumInterface = "0.3.4"
+StaticArrays = "1.9.7"
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 QuantumInterface = "5717a53b-5d69-4fa3-b976-0bf2f97ca1e5"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [weakdeps]
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"

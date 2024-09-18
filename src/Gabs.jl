@@ -3,6 +3,8 @@ module Gabs
 import LinearAlgebra
 using LinearAlgebra: I, det
 
+using StaticArrays: SVector, SMatrix, SArray
+
 import QuantumInterface: StateVector, AbstractOperator, apply!, tensor, ⊗
 
 export 
@@ -21,6 +23,8 @@ export
     symplecticform
 
 include("errors.jl")
+
+include("utils.jl")
 
 include("types.jl")
 

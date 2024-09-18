@@ -220,5 +220,9 @@ function _tensor_fields(op1::GaussianChannel, op2::GaussianChannel)
     @inbounds for i in naxes2[1], j in naxes2[2]
         noise′[i+length1,j+length1] = noise2[i,j]
     end
-    return disp′, transform′, noise′
+    # extract output array types
+    disp′′ = _promote_output_vector(typeof(disp1), typeof(disp2), disp′)
+    transform′′ = _promote_output_matrix(typeof(trans1), typeof(trans2), transform′)
+    noise′′ = _promote_output_matrix(typeof(noise1), typeof(noise2), noise′)
+    return disp′′, transform′′, noise′′
 end

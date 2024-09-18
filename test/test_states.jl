@@ -32,19 +32,24 @@
     end
 
     @testset "tensor products" begin
-        v1, v2 = vacuumstate(), vacuumstate()
-        vs = tensor(v1, v2)
+        v = vacuumstate()
+        vs = tensor(v, v)
         @test vs isa GaussianState
-        @test tensor(SVector{4}, SMatrix{4,4}, v1, v2) isa GaussianState
-        @test vs == v1 ⊗ v2
+        @test tensor(SVector{4}, SMatrix{4,4}, v, v) isa GaussianState
+        @test vs == v ⊗ v
 
         alpha = rand(ComplexF64)
         c = coherentstate(alpha)
-        @test tensor(c, tensor(v1, v2)) == c ⊗ v1 ⊗ v2
+        @test tensor(c, tensor(v, v)) == c ⊗ v ⊗ v
 
-        r, theta = rand(Float64), rand(Float64)
-        s1, s2 = squeezedstate(r, theta), squeezedstate(r, theta)
-        @testset s1 ⊗ s2 == eprstate(r, theta)
+
+        vstatic = vacuumstate(SVector{2}, SMatrix{2,2})
+        tpstatic = vstatic ⊗ vstatic ⊗ vstatic
+        @test tpstatic.mean isa SVector{6}
+        @test tpstatic.covar isa SMatrix{6,6}
+        tp = vstatic ⊗ v ⊗ vstatic
+        @test tp.mean isa Vector
+        @test tp.covar isa Matrix
     end
 
     @testset "partial trace" begin

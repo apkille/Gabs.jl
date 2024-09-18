@@ -309,5 +309,8 @@ function _tensor_fields(op1::GaussianUnitary, op2::GaussianUnitary)
     @inbounds for i in axes2[1], j in axes2[2]
         symplectic′[i+length1,j+length1] = symp2[i,j]
     end
-    return disp′, symplectic′
+    # extract output array types
+    disp′′ = _promote_output_vector(typeof(disp1), typeof(disp2), disp′)
+    symplectic′′ = _promote_output_matrix(typeof(symp1), typeof(symp2), symplectic′)
+    return disp′′, symplectic′′
 end
