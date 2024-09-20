@@ -361,29 +361,38 @@ function ptrace(state::GaussianState, indices::T) where {T<:AbstractVector}
 end
 function _ptrace_fields(state::GaussianState, idx::T) where {T<:Int}
     idxV = 2*idx-1:(2*idx)
+    mean = state.mean
+    covar = state.covar
     # initialize partial trace of mean vector
-    mean′ = state.mean[idxV]
+    mean′ = mean[idxV]
     # initialize partial trace of covariance matrix
-    covar′ = state.covar[idxV, idxV]
-    return mean′, covar′
+    covar′ = covar[idxV, idxV]
+    # extract output array types
+    mean′′ = _promote_output_vector(typeof(mean), mean′, 2)
+    covar′′ = _promote_output_matrix(typeof(covar), covar′, 2)
+    return mean′′, covar′′
 end
 function _ptrace_fields(state::GaussianState, indices::T) where {T<:AbstractVector}
     idxlength = length(indices)
+    mean = state.mean
+    covar = state.covar
     # initialize partial trace of mean vector
     mean′ = zeros(2*idxlength)
     @inbounds for i in eachindex(indices)
         idx = indices[i]
-        mean′[2*i-1] = state.mean[2*idx-1]
-        mean′[2*i] = state.mean[2*idx]
+        mean′[2*i-1] = mean[2*idx-1]
+        mean′[2*i] = mean[2*idx]
     end
     # initialize partial trace of covariance matrix
     covar′ = zeros(2*idxlength, 2*idxlength)
     @inbounds for i in eachindex(indices)
         idx = indices[i]
-        covar′[2*i-1, 2*i-1] = state.covar[2*idx-1, 2*idx-1]
-        covar′[2*i-1, 2*i] = state.covar[2*idx-1, 2*idx]
-        covar′[2*i, 2*i-1] = state.covar[2*idx, 2*idx-1]
-        covar′[2*i, 2*i] = state.covar[2*idx, 2*idx]
+        covar′[2*i-1, 2*i-1] = covar[2*idx-1, 2*idx-1]
+        covar′[2*i-1, 2*i] = covar[2*idx-1, 2*idx]
+        covar′[2*i, 2*i-1] = covar[2*idx, 2*idx-1]
+        covar′[2*i, 2*i] = covar[2*idx, 2*idx]
     end 
-    return mean′, covar′
+    mean′′ = _promote_output_vector(typeof(mean), mean′, 2*idxlength)
+    covar′′ = _promote_output_matrix(typeof(covar), covar′, 2*idxlength)
+    return mean′′, covar′′
 end

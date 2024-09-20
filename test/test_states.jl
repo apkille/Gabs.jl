@@ -65,6 +65,11 @@
         @test ptrace(state, [1, 3]) == s1 ⊗ s3
         @test ptrace(state, [2, 3]) == s2 ⊗ s3
 
+        sstatic = coherentstate(SVector{2}, SMatrix{2,2}, alpha)
+        tpstatic = sstatic ⊗ sstatic ⊗ sstatic
+        @test ptrace(tpstatic, 1) == sstatic
+        @test ptrace(tpstatic, [1,3]) == sstatic ⊗ sstatic
+
         @test ptrace(SVector{2}, SMatrix{2,2}, state, 1) isa GaussianState
         @test ptrace(SVector{4}, SMatrix{4,4}, state, [1, 3]) isa GaussianState
 end
