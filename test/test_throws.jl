@@ -3,9 +3,9 @@
     using CairoMakie
 
     @testset "type throws" begin
-        @test_throws DimensionMismatch GaussianState([1.0, 2.0, 3.0], [3.0 4.0; 5.0 6.0])
-        @test_throws DimensionMismatch GaussianChannel([1.0, 2.0, 3.0], [3.0 4.0; 5.0 6.0], [3.0 4.0; 5.0 6.0])
-        @test_throws DimensionMismatch GaussianChannel([1.0, 2.0], [3.0 4.0; 5.0 6.0], [3.0 4.0 4.0; 5.0 6.0 4.0])
+        @test_throws DimensionMismatch GaussianState([1.0, 2.0, 3.0], [3.0 4.0; 5.0 6.0], 1)
+        @test_throws DimensionMismatch GaussianChannel([1.0, 2.0, 3.0], [3.0 4.0; 5.0 6.0], [3.0 4.0; 5.0 6.0], 1)
+        @test_throws DimensionMismatch GaussianChannel([1.0, 2.0], [3.0 4.0; 5.0 6.0], [3.0 4.0 4.0; 5.0 6.0 4.0], 1)
     end
 
     @testset "action throws" begin

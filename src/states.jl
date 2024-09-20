@@ -32,13 +32,13 @@ covariance: 2×2 Matrix{Float64}:
 function vacuumstate(::Type{Tm}, ::Type{Tc}) where {Tm,Tc}
     mean = Tm(zeros(2))
     covar = Tc(Matrix{Float64}(I, 2, 2))
-    return GaussianState(mean, covar)
+    return GaussianState(mean, covar, 1)
 end
 vacuumstate(::Type{T}) where {T} = vacuumstate(T, T)
 function vacuumstate()
     mean = zeros(2)
     covar = Matrix{Float64}(I, 2, 2)
-    return GaussianState(mean, covar)
+    return GaussianState(mean, covar, 1)
 end
 
 """
@@ -73,13 +73,13 @@ covariance: 2×2 Matrix{Float64}:
 function thermalstate(::Type{Tm}, ::Type{Tc}, photons::N) where {Tm,Tc,N<:Int}
     mean = Tm(zeros(2))
     covar = (photons + 1/2) * Tc(Matrix{Float64}(I, 2, 2))
-    return GaussianState(mean, covar)
+    return GaussianState(mean, covar, 1)
 end
 thermalstate(::Type{T}, photons::N) where {T, N<:Int} = thermalstate(T, T, photons)
 function thermalstate(photons::N) where {N<:Int}
     mean = zeros(2)
     covar = (photons + 1/2) * Matrix{Float64}(I, 2, 2)
-    return GaussianState(mean, covar)
+    return GaussianState(mean, covar, 1)
 end
 
 """
@@ -115,13 +115,13 @@ covariance: 2×2 Matrix{Float64}:
 function coherentstate(::Type{Tm}, ::Type{Tc}, alpha::N) where {Tm,Tc,N<:Number}
     mean = sqrt(2) * Tm([real(alpha), imag(alpha)])
     covar = Tc(Matrix{Float64}(I, 2, 2))
-    return GaussianState(mean, covar)
+    return GaussianState(mean, covar, 1)
 end
 coherentstate(::Type{T}, alpha::N) where {T, N<:Number} = coherentstate(T, T, alpha)
 function coherentstate(alpha::N) where {N<:Number}
     mean = sqrt(2) * [real(alpha), imag(alpha)]
     covar = Matrix{Float64}(I, 2, 2)
-    return GaussianState(mean, covar)
+    return GaussianState(mean, covar, 1)
 end
 
 """
@@ -163,14 +163,14 @@ function squeezedstate(::Type{Tm}, ::Type{Tc}, r::N, theta::N) where {Tm,Tc,N<:R
     cr, sr = cosh(2*r), sinh(2*r)
     v = (1/2) * [cr-sr*cos(theta) sr*sin(theta); sr*sin(theta) cr+sr*cos(theta)]
     covar = Tc(v)
-    return GaussianState(mean, covar)
+    return GaussianState(mean, covar, 1)
 end
 squeezedstate(::Type{T}, r::N, theta::N) where {T,N<:Real} = squeezedstate(T, T, r, theta)
 function squeezedstate(r::N, theta::N) where {N<:Real}
     mean = zeros(2)
     cr, sr = cosh(2*r), sinh(2*r)
     covar = (1/2) * [cr-sr*cos(theta) sr*sin(theta); sr*sin(theta) cr+sr*cos(theta)]
-    return GaussianState(mean, covar)
+    return GaussianState(mean, covar, 1)
 end
 
 """
@@ -218,7 +218,7 @@ function eprstate(::Type{Tm}, ::Type{Tc}, r::N, theta::N) where {Tm,Tc,N<:Real}
     v1 = (1/2) * cosh(2*r) * Matrix{Float64}(I, 2, 2)
     v2 = (1/2) * sinh(2*r) * [cos(theta) sin(theta); sin(theta) -cos(theta)]
     covar = Tc([v1 v2; v2 v1])
-    return GaussianState(mean, covar)
+    return GaussianState(mean, covar, 2)
 end
 eprstate(::Type{T}, r::N, theta::N) where {T,N<:Real} = eprstate(T, T, r, theta)
 function eprstate(r::N, theta::N) where {N<:Real}
@@ -226,7 +226,7 @@ function eprstate(r::N, theta::N) where {N<:Real}
     v1 = (1/2) * cosh(2*r) * Matrix{Float64}(I, 2, 2)
     v2 = (1/2) * sinh(2*r) * [cos(theta) sin(theta); sin(theta) -cos(theta)]
     covar = [v1 v2; v2 v1]
-    return GaussianState(mean, covar)
+    return GaussianState(mean, covar, 2)
 end
 
 ##
@@ -256,12 +256,12 @@ covariance: 4×4 Matrix{Float64}:
 """
 function tensor(::Type{Tm}, ::Type{Tc}, state1::GaussianState, state2::GaussianState) where {Tm,Tc}
     mean′, covar′ = _tensor_fields(state1, state2)
-    return GaussianState(Tm(mean′), Tc(covar′))
+    return GaussianState(Tm(mean′), Tc(covar′), state1.nmodes + state2.nmodes)
 end
 tensor(::Type{T}, state1::GaussianState, state2::GaussianState) where {T} = tensor(T, T, state1, state2)
 function tensor(state1::GaussianState, state2::GaussianState)
     mean′, covar′ = _tensor_fields(state1, state2)
-    return GaussianState(mean′, covar′)
+    return GaussianState(mean′, covar′, state1.nmodes + state2.nmodes)
 end
 function _tensor_fields(state1::GaussianState, state2::GaussianState)
     mean1, mean2 = state1.mean, state2.mean
@@ -343,21 +343,21 @@ covariance: 4×4 Matrix{Float64}:
 """
 function ptrace(::Type{Tm}, ::Type{Tc}, state::GaussianState, idx::N) where {Tm,Tc,N<:Int}
     mean′, covar′ = _ptrace_fields(state, idx)
-    return GaussianState(Tm(mean′), Tc(covar′))
+    return GaussianState(Tm(mean′), Tc(covar′), 1)
 end
 ptrace(::Type{T}, state::GaussianState, idx::N) where {T,N<:Int} = ptrace(T, T, state, idx)
 function ptrace(state::GaussianState, idx::N) where {N<:Int}
     mean′, covar′ = _ptrace_fields(state, idx)
-    return GaussianState(mean′, covar′)
+    return GaussianState(mean′, covar′, 1)
 end
 function ptrace(::Type{Tm}, ::Type{Tc}, state::GaussianState, indices::N) where {Tm,Tc,N<:AbstractVector}
     mean′, covar′ = _ptrace_fields(state, indices)
-    return GaussianState(Tm(mean′), Tc(covar′))
+    return GaussianState(Tm(mean′), Tc(covar′), length(indices))
 end
 ptrace(::Type{T}, state::GaussianState, indices::N) where {T,N<:AbstractVector} = ptrace(T, T, state, indices)
 function ptrace(state::GaussianState, indices::T) where {T<:AbstractVector}
     mean′, covar′ = _ptrace_fields(state, indices)
-    return GaussianState(mean′, covar′)
+    return GaussianState(mean′, covar′, length(indices))
 end
 function _ptrace_fields(state::GaussianState, idx::T) where {T<:Int}
     idxV = 2*idx-1:(2*idx)
