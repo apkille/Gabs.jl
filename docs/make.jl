@@ -35,7 +35,9 @@ function main()
     ]
     )
 
-    deploydocs(repo = "github.com/apkille/Gabs.jl.git")
+    deploydocs(
+        repo = "github.com/apkille/Gabs.jl.git"
+    )
 end
 
 main()
