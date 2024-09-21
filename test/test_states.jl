@@ -72,4 +72,5 @@
 
         @test ptrace(SVector{2}, SMatrix{2,2}, state, 1) isa GaussianState
         @test ptrace(SVector{4}, SMatrix{4,4}, state, [1, 3]) isa GaussianState
+    end
 end

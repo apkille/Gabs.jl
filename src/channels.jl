@@ -188,7 +188,7 @@ function tensor(op1::GaussianChannel, op2::GaussianChannel)
 end
 function _tensor_fields(op1::GaussianChannel, op2::GaussianChannel)
     disp1, disp2 = op1.disp, op2.disp
-    length1, length2 = length(disp1), length(disp2)
+    length1, length2 = 2*op1.nmodes, 2*op2.nmodes
     slengths = length1 + length2
     trans1, trans2 = op1.transform, op2.transform
     # initialize direct sum of displacement vectors
@@ -201,23 +201,21 @@ function _tensor_fields(op1::GaussianChannel, op2::GaussianChannel)
     end
     # initialize direct sum of transform matrix
     transform′ = zeros(slengths, slengths)
-    taxes1 = axes(trans1)
-    @inbounds for i in taxes1[1], j in taxes1[2]
+    axes1 = (Base.OneTo(length1), Base.OneTo(length1))
+    @inbounds for i in axes1[1], j in axes1[2]
         transform′[i,j] = trans1[i,j]
     end
-    taxes2 = axes(trans2)
-    @inbounds for i in taxes2[1], j in taxes2[2]
+    axes2 = (Base.OneTo(length2), Base.OneTo(length2))
+    @inbounds for i in axes2[1], j in axes2[2]
         transform′[i+length1,j+length1] = trans2[i,j]
     end
     noise1, noise2 = op1.noise, op2.noise
     # initialize direct sum of noise matrix
     noise′ = zeros(slengths, slengths)
-    naxes1 = axes(noise1)
-    @inbounds for i in naxes1[1], j in naxes1[2]
+    @inbounds for i in axes1[1], j in axes1[2]
         noise′[i,j] = noise1[i,j]
     end
-    naxes2 = axes(noise2)
-    @inbounds for i in naxes2[1], j in naxes2[2]
+    @inbounds for i in axes2[1], j in axes2[2]
         noise′[i+length1,j+length1] = noise2[i,j]
     end
     # extract output array types

@@ -288,7 +288,7 @@ function tensor(op1::GaussianUnitary, op2::GaussianUnitary)
 end
 function _tensor_fields(op1::GaussianUnitary, op2::GaussianUnitary)
     disp1, disp2 = op1.disp, op2.disp
-    length1, length2 = length(disp1), length(disp2)
+    length1, length2 = 2*op1.nmodes, 2*op2.nmodes
     slengths = length1 + length2
     symp1, symp2 = op1.symplectic, op2.symplectic
     # initialize direct sum of displacement vectors
@@ -301,11 +301,11 @@ function _tensor_fields(op1::GaussianUnitary, op2::GaussianUnitary)
     end
     # initialize direct sum of symplectic matrices
     symplectic′ = zeros(slengths, slengths)
-    axes1 = axes(symp1)
+    axes1 = (Base.OneTo(length1), Base.OneTo(length1))
     @inbounds for i in axes1[1], j in axes1[2]
         symplectic′[i,j] = symp1[i,j]
     end
-    axes2 = axes(symp2)
+    axes2 = (Base.OneTo(length2), Base.OneTo(length2))
     @inbounds for i in axes2[1], j in axes2[2]
         symplectic′[i+length1,j+length1] = symp2[i,j]
     end

@@ -265,7 +265,7 @@ function tensor(state1::GaussianState, state2::GaussianState)
 end
 function _tensor_fields(state1::GaussianState, state2::GaussianState)
     mean1, mean2 = state1.mean, state2.mean
-    length1, length2 = length(mean1), length(mean2)
+    length1, length2 = 2*state1.nmodes, 2*state2.nmodes
     slengths = length1 + length2
     covar1, covar2 = state1.covar, state2.covar
     # initialize direct sum of mean vectors

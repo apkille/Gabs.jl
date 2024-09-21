@@ -123,7 +123,7 @@ function Base.:(*)(op::GaussianUnitary, state::GaussianState)
     op.nmodes == state.nmodes || throw(DimensionMismatch(ACTION_ERROR))
     mean′ = S * state.mean .+ d
     covar′ = S * state.covar * transpose(S)
-    return GaussianState(mean′, covar′)
+    return GaussianState(mean′, covar′, state.nmodes)
 end
 function apply!(state::GaussianState, op::GaussianUnitary)
     d, S = op.disp, op.symplectic
@@ -213,7 +213,7 @@ function Base.:(*)(op::GaussianChannel, state::GaussianState)
     op.nmodes == state.nmodes || throw(DimensionMismatch(ACTION_ERROR))
     mean′ = T * state.mean .+ d
     covar′ = T * state.covar * transpose(T) .+ N
-    return GaussianState(mean′, covar′)
+    return GaussianState(mean′, covar′, state.nmodes)
 end
 function apply!(state::GaussianState, op::GaussianChannel)
     d, T, N = op.disp, op.transform, op.noise
