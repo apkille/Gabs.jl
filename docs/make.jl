@@ -17,7 +17,8 @@ function main()
     clean = true,
     sitename = "Gabs.jl",
     format = Documenter.HTML(
-        assets=["assets/init.js"]
+        assets=["assets/init.js"],
+        canonical = "https://apkille.github.io/Gabs.jl"
     ),
     modules = [Gabs, QuantumInterface],
     checkdocs = :exports,
