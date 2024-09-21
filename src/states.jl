@@ -20,7 +20,7 @@ matrix ``\\mathbf{V}``, expressed respectively as follows:
 
 ```jldoctest
 julia> vacuumstate()
-GaussianState
+GaussianState for 1 mode.
 mean: 2-element Vector{Float64}:
  0.0
  0.0
@@ -61,7 +61,7 @@ matrix ``\\mathbf{V}``, expressed respectively as follows:
 
 ```jldoctest
 julia> thermalstate(4)
-GaussianState
+GaussianState for 1 mode.
 mean: 2-element Vector{Float64}:
  0.0
  0.0
@@ -103,7 +103,7 @@ matrix ``\\mathbf{V}``, expressed respectively as follows:
 
 ```jldoctest
 julia> coherentstate(1.0+im)
-GaussianState
+GaussianState for 1 mode.
 mean: 2-element Vector{Float64}:
  1.4142135623730951
  1.4142135623730951
@@ -149,7 +149,7 @@ where ``\\mathbf{R}(\\theta)`` is the rotation matrix.
 
 ```jldoctest
 julia> squeezedstate(0.5, pi/4)
-GaussianState
+GaussianState for 1 mode.
 mean: 2-element Vector{Float64}:
  0.0
  0.0
@@ -200,7 +200,7 @@ where ``\\mathbf{R}(\\theta)`` is the rotation matrix.
 
 ```jldoctest
 julia> eprstate(0.5, pi/4)
-GaussianState
+GaussianState for 2 modes.
 mean: 4-element Vector{Float64}:
  0.0
  0.0
@@ -241,7 +241,7 @@ tensor product of Gaussian states, which can also be called with `⊗`.
 ## Example
 ```jldoctest
 julia> coherentstate(1.0+im) ⊗ thermalstate(2)
-GaussianState
+GaussianState for 2 modes.
 mean: 4-element Vector{Float64}:
  1.4142135623730951
  1.4142135623730951
@@ -302,7 +302,7 @@ indicated by `indices`.
 ## Example
 ```jldoctest
 julia> state = coherentstate(1.0+im) ⊗ thermalstate(2) ⊗ squeezedstate(3.0, pi/4)
-GaussianState
+GaussianState for 3 modes.
 mean: 6-element Vector{Float64}:
  1.4142135623730951
  1.4142135623730951
@@ -319,7 +319,7 @@ covariance: 6×6 Matrix{Float64}:
  0.0  0.0  0.0  0.0  71.3164  172.174
 
 julia> ptrace(state, 2)
-GaussianState
+GaussianState for 1 mode.
 mean: 2-element Vector{Float64}:
  0.0
  0.0
@@ -328,7 +328,7 @@ covariance: 2×2 Matrix{Float64}:
  0.0  2.5
 
 julia> ptrace(state, [1, 3])
-GaussianState
+GaussianState for 2 modes.
 mean: 4-element Vector{Float64}:
  1.4142135623730951
  1.4142135623730951

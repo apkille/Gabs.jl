@@ -97,7 +97,7 @@ and noise matrix ``\\mathbf{N}``, expressed respectively as follows:
 
 ```jldoctest
 julia> attenuator(pi/6, 3)
-GaussianChannel
+GaussianChannel for 1 mode.
 displacement: 2-element Vector{Float64}:
  0.0
  0.0
@@ -147,7 +147,7 @@ and noise matrix ``\\mathbf{N}``, expressed respectively as follows:
 
 ```jldoctest
 julia> amplifier(2.0, 3)
-GaussianChannel
+GaussianChannel for 1 mode.
 displacement: 2-element Vector{Float64}:
  0.0
  0.0

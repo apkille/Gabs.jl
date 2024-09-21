@@ -18,7 +18,7 @@ the Wigner representation of a Gaussian state is a Gaussian function.
 
 ```jldoctest
 julia> coherentstate(1.0+im)
-GaussianState
+GaussianState for 1 mode.
 mean: 2-element Vector{Float64}:
  1.4142135623730951
  1.4142135623730951
@@ -40,14 +40,7 @@ GaussianState(mean::M, covar::V) where {M,V} = GaussianState(mean, covar, Int(le
 
 Base.:(==)(x::GaussianState, y::GaussianState) = x.mean == y.mean && x.covar == y.covar
 function Base.show(io::IO, mime::MIME"text/plain", x::GaussianState)
-    modenum = x.nmodes
-    if isone(modenum)
-        printstyled(io, nameof(typeof(x)); color=:blue)
-        print(" for $(modenum) mode.")
-    else
-        printstyled(io, nameof(typeof(x)); color=:blue)
-        print(" for $(modenum) modes.")
-    end
+    Base.summary(io, x)
     print(io, "\nmean: ")
     Base.show(io, mime, x.mean)
     print(io, "\ncovariance: ")
@@ -82,7 +75,7 @@ the statistical moments of the Gaussian state:
 
 ```jldoctest
 julia> displace(1.0+im)
-GaussianUnitary
+GaussianUnitary for 1 mode.
 displacement: 2-element Vector{Float64}:
  1.4142135623730951
  1.4142135623730951
@@ -104,14 +97,7 @@ GaussianUnitary(disp::D, symplectic::S) where {D,S} = GaussianUnitary(disp, symp
 
 Base.:(==)(x::GaussianUnitary, y::GaussianUnitary) = x.disp == y.disp && x.symplectic == y.symplectic
 function Base.show(io::IO, mime::MIME"text/plain", x::GaussianUnitary)
-    modenum = x.nmodes
-    if isone(modenum)
-        printstyled(io, nameof(typeof(x)); color=:blue)
-        print(" for $(modenum) mode.")
-    else
-        printstyled(io, nameof(typeof(x)); color=:blue)
-        print(" for $(modenum) modes.")
-    end
+    Base.summary(io, x)
     print(io, "\ndisplacement: ")
     Base.show(io, mime, x.disp)
     print(io, "\nsymplectic: ")
@@ -163,7 +149,7 @@ described by its maps on the statistical moments of the Gaussian state:
 julia> noise = [1.0 -3.0; 4.0 2.0];
 
 julia> displace(1.0+im, noise)
-GaussianChannel
+GaussianChannel for 1 mode.
 displacement: 2-element Vector{Float64}:
  1.4142135623730951
  1.4142135623730951
@@ -189,14 +175,7 @@ GaussianChannel(disp::D, transform::T, noise::T) where {D,T} = GaussianChannel(d
 
 Base.:(==)(x::GaussianChannel, y::GaussianChannel) = x.disp == y.disp && x.transform == y.transform && x.noise == y.noise
 function Base.show(io::IO, mime::MIME"text/plain", x::GaussianChannel)
-    modenum = x.nmodes
-    if isone(modenum)
-        printstyled(io, nameof(typeof(x)); color=:blue)
-        print(" for $(modenum) mode.")
-    else
-        printstyled(io, nameof(typeof(x)); color=:blue)
-        print(" for $(modenum) modes.")
-    end
+    Base.summary(io, x)
     print(io, "\ndisplacement: ")
     Base.show(io, mime, x.disp)
     print(io, "\ntransform: ")
@@ -205,7 +184,13 @@ function Base.show(io::IO, mime::MIME"text/plain", x::GaussianChannel)
     Base.show(io, mime, x.noise)
 end
 function Base.summary(io::IO, x::Union{GaussianState,GaussianUnitary,GaussianChannel})
-    printstyled(io, typeof(x); color=:blue)
+    printstyled(io, nameof(typeof(x)); color=:blue)
+    modenum = x.nmodes
+    if isone(modenum)
+        print(io, " for $(modenum) mode.")
+    else
+        print(io, " for $(modenum) modes.")
+    end
 end
 
 function Base.:(*)(op::GaussianChannel, state::GaussianState)

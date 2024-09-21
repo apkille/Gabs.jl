@@ -39,7 +39,7 @@ which can be typed in the Julia REPL as `\otimes<TAB>`. Take the following examp
 
 ```jldoctest
 julia> coherentstate(-1.0) ⊗ vacuumstate() ⊗ squeezedstate(0.25, pi/4)
-GaussianState
+GaussianState for 3 modes.
 mean: 6-element Vector{Float64}:
  -1.4142135623730951
   0.0
@@ -108,7 +108,7 @@ Listed below are a list of predefined Gaussian channels supported by Gabs.jl:
     julia> noise = [1.0 -2.0; 4.0 -3.0];
 
     julia> displace(1.0-im, noise)
-    GaussianChannel
+    GaussianChannel for 1 mode.
     displacement: 2-element Vector{Float64}:
       1.4142135623730951
      -1.4142135623730951
