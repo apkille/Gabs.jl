@@ -7,4 +7,9 @@
 [![JET static analysis](https://img.shields.io/badge/%F0%9F%9B%A9%EF%B8%8F_tested_with-JET.jl-233f9a)](https://github.com/aviatesk/JET.jl)
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
+Gabs.jl is a numerical tooling package for simulating Gaussian quantum information.
 
+Gaussian states and operators have the convenient property that they can be
+characterized by low-dimensional matrices in the phase space representation.
+Thus, a large class of continuous variable quantum information can be efficiently
+simulated on a classical computer, lending to applications in quantum cryptography, quantum machine learning, integrated quantum photonics, and more. Gabs.jl provides a high-level [Julia](https://julialang.org) interface for performing such efficient simulations in a straightforward manner.
