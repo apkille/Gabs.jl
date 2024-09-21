@@ -44,7 +44,6 @@
         p = phaseshift(theta)
         @test tensor(p, tensor(d1, d2)) == p ⊗ d1 ⊗ d2
 
-
         dstatic = displace(SVector{2}, SMatrix{2,2}, alpha1)
         tpstatic = dstatic ⊗ dstatic ⊗ dstatic
         @test tpstatic.disp isa SVector{6}
