@@ -7,8 +7,8 @@ end
 ```
 
 Simply put, Gabs.jl is a package for creating and transforming Gaussian bosonic systems. This section discusses the "lower level" tools for simulating such phenomena, with
-mathematical explanations when appropriate. For a comprehensive review of Gaussian
-quantum information, see [weedbrook2012](@cite) or [wang2007](@cite).
+mathematical explanations when appropriate. For comprehensive reviews of Gaussian
+quantum information, see the [suggested readings page](@ref References).
 
 ## Gaussian States
 

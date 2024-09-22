@@ -31,7 +31,7 @@ function main()
         "Tutorials" => "tutorials.md",
         "Gaussian Zoos" => "zoos.md",
         "API" => "API.md",
-        "References" => "bibliography.md"
+        "Suggested Readings and References" => "bibliography.md"
     ]
     )
 

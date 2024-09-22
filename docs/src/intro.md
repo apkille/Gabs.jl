@@ -12,11 +12,11 @@ In the sections below, a getting started tutorial is provided to introduce the c
 - [Tutorials](@ref) - explanations for using particular features of the library,
 - [Gaussian Zoos](@ref) - a description of predefined Gaussian states and operators,
 - [API](@ref Full-API) - the full API of the library,
-- [References](@ref) - suggested readings on Gaussian quantum information.
+- [Suggested Readings and References](@ref References) - publications and learning resources on Gaussian quantum information.
 
 !!! note
     This documentation assumes familiarity with linear algebra and quantum information.
-    Introductory books and tutorials for these topics are provided in the [References page](@ref References).
+    Introductory books and tutorials for these topics are provided in the [Suggested Readings and References page](@ref References).
 
 ## Installation
 
