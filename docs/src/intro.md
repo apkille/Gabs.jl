@@ -24,7 +24,7 @@ To install Gabs.jl, start Julia and run the following command:
 
 ```julia
 using Pkg
-Pkg.add("https://github.com/apkille/Gabs.jl")
+Pkg.add("Gabs.jl")
 ```
 To use the package, run the command
 
