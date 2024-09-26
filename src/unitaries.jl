@@ -148,17 +148,17 @@ symplectic: 4×4 Matrix{Float64}:
 """
 function twosqueeze(::Type{Td}, ::Type{Ts}, r::N, theta::N) where {Td,Ts,N<:Real}
     disp = Td(zeros(4))
-    v1 = cosh(r) * Matrix{Float64}(I, 2, 2)
-    v2 = sinh(r) * [cos(theta) sin(theta); sin(theta) -cos(theta)]
-    symplectic = Ts([v1 -v2; -v2 v1])
+    cr, sr = cosh(r), sinh(r)
+    ct, st = cos(theta), sin(theta)
+    symplectic = Ts([cr 0.0 -(sr*ct) -(sr*st); 0.0 cr -(sr*st) sr*ct; -(sr*ct) -(sr*st) cr 0.0; -(sr*st) sr*ct 0.0 cr])
     return GaussianUnitary(disp, symplectic, 2)
 end
 twosqueeze(::Type{T}, r::N, theta::N) where {T,N<:Real} = twosqueeze(T, T, r, theta)
 function twosqueeze(r::N, theta::N) where {N<:Real}
     disp = zeros(4)
-    v1 = cosh(r) * Matrix{Float64}(I, 2, 2)
-    v2 = sinh(r) * [cos(theta) sin(theta); sin(theta) -cos(theta)]
-    symplectic = [v1 -v2; -v2 v1]
+    cr, sr = cosh(r), sinh(r)
+    ct, st = cos(theta), sin(theta)
+    symplectic = [cr 0.0 -(sr*ct) -(sr*st); 0.0 cr -(sr*st) sr*ct; -(sr*ct) -(sr*st) cr 0.0; -(sr*st) sr*ct 0.0 cr]
     return GaussianUnitary(disp, symplectic, 2)
 end
 
@@ -253,15 +253,14 @@ displacement: 4-element Vector{Float64}:
 symplectic: 4×4 Matrix{Float64}:
   0.866025   0.0       0.5       0.0
   0.0        0.866025  0.0       0.5
- -0.5       -0.0       0.866025  0.0
- -0.0       -0.5       0.0       0.866025
+ -0.5        0.0       0.866025  0.0
+  0.0       -0.5       0.0       0.866025
 ```
 """
 function beamsplitter(::Type{Td}, ::Type{Ts}, transmit::N) where {Td,Ts,N<:Real}
     disp = Td(zeros(4))
-    I2 = Matrix{Float64}(I, 2, 2)
     a1, a2 = sqrt(transmit), sqrt(1 - transmit)
-    symplectic = Ts([a1*I2 a2*I2; -a2*I2 a1*I2])
+    symplectic = Ts([a1 0.0 a2 0.0; 0.0 a1 0.0 a2; -a2 0.0 a1 0.0; 0.0 -a2 0.0 a1])
     return GaussianUnitary(disp, symplectic, 2)
 end
 beamsplitter(::Type{T}, transmit::N) where {T,N<:Real} = beamsplitter(T, T, transmit)
@@ -269,7 +268,7 @@ function beamsplitter(transmit::N) where {N<:Real}
     disp = zeros(4)
     I2 = Matrix{Float64}(I, 2, 2)
     a1, a2 = sqrt(transmit), sqrt(1 - transmit)
-    symplectic = [a1*I2 a2*I2; -a2*I2 a1*I2]
+    symplectic = [a1 0.0 a2 0.0; 0.0 a1 0.0 a2; -a2 0.0 a1 0.0; 0.0 -a2 0.0 a1]
     return GaussianUnitary(disp, symplectic, 2)
 end
 

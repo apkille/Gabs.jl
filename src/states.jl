@@ -215,17 +215,17 @@ covariance: 4×4 Matrix{Float64}:
 """
 function eprstate(::Type{Tm}, ::Type{Tc}, r::N, theta::N) where {Tm,Tc,N<:Real}
     mean = Tm(zeros(4))
-    v1 = (1/2) * cosh(2*r) * Matrix{Float64}(I, 2, 2)
-    v2 = (1/2) * sinh(2*r) * [cos(theta) sin(theta); sin(theta) -cos(theta)]
-    covar = Tc([v1 v2; v2 v1])
+    cr, sr = (1/2)*cosh(2*r), (1/2)*sinh(2*r)
+    ct, st = cos(theta), sin(theta)
+    covar = Tc([cr 0.0 sr*ct sr*st; 0.0 cr sr*st -sr*ct; sr*ct sr*st cr 0.0; sr*st -sr*ct 0.0 cr])
     return GaussianState(mean, covar, 2)
 end
 eprstate(::Type{T}, r::N, theta::N) where {T,N<:Real} = eprstate(T, T, r, theta)
 function eprstate(r::N, theta::N) where {N<:Real}
     mean = zeros(4)
-    v1 = (1/2) * cosh(2*r) * Matrix{Float64}(I, 2, 2)
-    v2 = (1/2) * sinh(2*r) * [cos(theta) sin(theta); sin(theta) -cos(theta)]
-    covar = [v1 v2; v2 v1]
+    cr, sr = (1/2)*cosh(2*r), (1/2)*sinh(2*r)
+    ct, st = cos(theta), sin(theta)
+    covar = [cr 0.0 sr*ct sr*st; 0.0 cr sr*st -sr*ct; sr*ct sr*st cr 0.0; sr*st -sr*ct 0.0 cr]
     return GaussianState(mean, covar, 2)
 end
 

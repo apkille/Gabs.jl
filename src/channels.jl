@@ -31,17 +31,17 @@ end
 
 function twosqueeze(::Type{Td}, ::Type{Tt}, r::R, theta::R, noise::N) where {Td,Tt,R<:Real,N}
     disp = Td(zeros(4))
-    v1 = cosh(r) * Matrix{Float64}(I, 2, 2)
-    v2 = sinh(r) * [cos(theta) sin(theta); sin(theta) -cos(theta)]
-    transform = Tt([v1 -v2; -v2 v1])
+    cr, sr = cosh(r), sinh(r)
+    ct, st = cos(theta), sin(theta)
+    transform = Tt([cr 0.0 -sr*ct -sr*st; 0.0 cr -sr*st sr*ct; -sr*ct -sr*st cr 0.0; -sr*st sr*ct 0.0 cr])
     return GaussianChannel(disp, transform, Tt(noise), 2)
 end
 twosqueeze(::Type{T}, r::R, theta::R, noise::N) where {T,R<:Real,N} = twosqueeze(T, T, r, theta, noise)
 function twosqueeze(r::R, theta::R, noise::N) where {R<:Real,N}
     disp = zeros(4)
-    v1 = cosh(r) * Matrix{Float64}(I, 2, 2)
-    v2 = sinh(r) * [cos(theta) sin(theta); sin(theta) -cos(theta)]
-    transform = [v1 -v2; -v2 v1]
+    cr, sr = cosh(r), sinh(r)
+    ct, st = cos(theta), sin(theta)
+    transform = [cr 0.0 -sr*ct -sr*st; 0.0 cr -sr*st sr*ct; -sr*ct -sr*st cr 0.0; -sr*st sr*ct 0.0 cr]
     return GaussianChannel(disp, transform, noise, 2)
 end
 
@@ -59,17 +59,15 @@ end
 
 function beamsplitter(::Type{Td}, ::Type{Tt}, transmit::R, noise::N) where {Td,Tt,R<:Real,N}
     disp = Td(zeros(4))
-    I2 = Matrix{Float64}(I, 2, 2)
     a1, a2 = sqrt(transmit), sqrt(1 - transmit)
-    transform = Tt([a1*I2 a2*I2; -a2*I2 a1*I2])
+    transform = Tt([a1 0.0 a2 0.0; 0.0 a1 0.0 a2; -a2 0.0 a1 0.0; 0.0 -a2 0.0 a1])
     return GaussianChannel(disp, transform, Tt(noise), 2)
 end
 beamsplitter(::Type{T}, transmit::R, noise::N) where {T,R<:Real,N} = beamsplitter(T, T, transmit, noise)
 function beamsplitter(transmit::R, noise::N) where {R<:Real,N}
     disp = zeros(4)
-    I2 = Matrix{Float64}(I, 2, 2)
     a1, a2 = sqrt(transmit), sqrt(1 - transmit)
-    transform = [a1*I2 a2*I2; -a2*I2 a1*I2]
+    transform = [a1 0.0 a2 0.0; 0.0 a1 0.0 a2; -a2 0.0 a1 0.0; 0.0 -a2 0.0 a1]
     return GaussianChannel(disp, transform, noise, 2)
 end
 
