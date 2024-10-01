@@ -34,6 +34,8 @@ include("unitaries.jl")
 
 include("channels.jl")
 
+include("measurements.jl")
+
 include("wigner.jl")
 
 end
