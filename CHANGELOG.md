@@ -1,5 +1,9 @@
 # News
 
+## v1.0.1 - dev
+
+- Add Makie attributes for `heatmap`.
+
 ## v1.0.0 - 2024-09-24
 
 - First release.
