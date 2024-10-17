@@ -163,7 +163,7 @@ function amplifier(::Type{Td}, ::Type{Tt}, r::R, n::N) where {Td,Tt,R<:Real,N<:I
     noise = (sinh(r))^2 * n * Matrix{Float64}(I, 2, 2)
     return GaussianChannel(Td(disp), Tt(transform), Tt(noise), 1)
 end
-amplifier(::Type{T}, r::R, n::N) where {T,R<:Real,N<:Int} = amplifier(T, T, theta, n)
+amplifier(::Type{T}, r::R, n::N) where {T,R<:Real,N<:Int} = amplifier(T, T, r, n)
 function amplifier(r::R, n::N) where {R<:Real,N<:Int}
     disp = zeros(2)
     transform = cosh(r) * Matrix{Float64}(I, 2, 2)
