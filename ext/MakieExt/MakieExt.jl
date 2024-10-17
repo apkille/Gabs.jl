@@ -7,7 +7,7 @@ Makie.used_attributes(::Type{<:Makie.Heatmap}, ::Any, ::Any, x::GaussianState) =
 
 # Directly use heatmap to create wigner distribution
 function Makie.convert_arguments(P::Type{<:Makie.Heatmap}, q, p, state::GaussianState; dist = :wigner)
-    isequal(length(state.mean),2) || throw(ArgumentError(Gabs.MAKIE_ERROR))
+    isequal(length(state.mean),2) || throw(ArgumentError(Gabs.HEATMAP_ERROR))
     if isequal(dist, :wigner)
         data = [wigner(state, [i,j]) for i in q, j in p]
     elseif isequal(dist, :wignerchar)

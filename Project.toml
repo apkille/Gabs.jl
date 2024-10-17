@@ -6,7 +6,6 @@ version = "1.0.0"
 [compat]
 julia = "1.6.7"
 LinearAlgebra = "1.9"
-Makie = "0.21.9"
 QuantumInterface = "0.3.4"
 StaticArrays = "1.9.7"
 

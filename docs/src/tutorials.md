@@ -2,7 +2,10 @@
 
 ## Visualizations
 
-Quasiprobability distributions of Gaussian states can be visualized with [Makie.jl](https://github.com/MakieOrg/Makie.jl):
+Quasiprobability distributions of Gaussian states can be visualized with [Makie.jl](https://github.com/MakieOrg/Makie.jl). Gabs.jl
+currently has support for the following distributions, which can be called with the keyword argument `dist`:
+- [`wigner`](@ref)
+- [`wignerchar`](@ref)
 
 ```@example
 using Gabs, CairoMakie
