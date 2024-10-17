@@ -1,6 +1,6 @@
 # News
 
-## v1.0.1 - dev
+## v1.0.1 - 2024-10-16
 
 - Add Makie attributes for `heatmap`.
 
