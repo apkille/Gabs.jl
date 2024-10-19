@@ -3,7 +3,7 @@
 ##
 
 function displace(::Type{Td}, ::Type{Tt}, alpha::A, noise::N) where {Td,Tt,A<:Number,N}
-    disp = sqrt(2) * Td([real(alpha), imag(alpha)])
+    disp =  Td(sqrt(2) * [real(alpha), imag(alpha)])
     transform = Tt(Matrix{Float64}(I, 2, 2))
     return GaussianChannel(disp, transform, Tt(noise), 1)
 end

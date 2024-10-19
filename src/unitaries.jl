@@ -37,7 +37,7 @@ symplectic: 2×2 Matrix{Float64}:
 ```
 """
 function displace(::Type{Td}, ::Type{Ts}, alpha::N) where {Td,Ts,N<:Number}
-    disp = sqrt(2) * Td([real(alpha), imag(alpha)])
+    disp = Td(sqrt(2) * [real(alpha), imag(alpha)])
     symplectic = Ts(Matrix{Float64}(I, 2, 2))
     return GaussianUnitary(disp, symplectic, 1)
 end
