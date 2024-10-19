@@ -1,5 +1,9 @@
 # News
 
+## v1.0.2 - dev
+
+- Remove StaticArrays as a dependency and add as an extension.
+
 ## v1.0.1 - 2024-10-16
 
 - Add Makie attributes for `heatmap`.

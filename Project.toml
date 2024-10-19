@@ -1,18 +1,19 @@
 name = "Gabs"
 uuid = "0eb812ee-a11f-4f5e-b8d4-bb8a44f06f50"
 authors = ["Andrew Kille"]
-version = "1.0.1"
+version = "1.0.1-dev"
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 QuantumInterface = "5717a53b-5d69-4fa3-b976-0bf2f97ca1e5"
-StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [weakdeps]
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [extensions]
 MakieExt = "Makie"
+StaticArraysExt = "StaticArrays"
 
 [compat]
 LinearAlgebra = "1.9"
@@ -25,4 +26,4 @@ julia = "1.6.7"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "Makie"]
+test = ["Test", "Makie", "StaticArrays"]
