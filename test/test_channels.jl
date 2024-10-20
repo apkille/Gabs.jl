@@ -10,30 +10,35 @@
         alpha = rand(ComplexF64)
         @test displace(alpha, noise2) isa GaussianChannel
         @test displace(SVector{2}, SMatrix{2,2}, alpha, noise2) isa GaussianChannel
+        @test displace(Array, alpha, noise2) isa GaussianChannel
     end
 
     @testset "squeeze operator" begin
         r, theta = rand(Float64), rand(Float64)
         @test squeeze(r, theta, noise2) isa GaussianChannel
         @test squeeze(SVector{2}, SMatrix{2,2}, r, theta, noise2) isa GaussianChannel
+        @test squeeze(Array, r, theta, noise2) isa GaussianChannel
     end
 
     @testset "two-mode squeeze operator" begin
         r, theta = rand(Float64), rand(Float64)
         @test twosqueeze(r, theta, noise4) isa GaussianChannel
         @test twosqueeze(SVector{4}, SMatrix{4,4}, r, theta, noise4) isa GaussianChannel
+        @test twosqueeze(Array, r, theta, noise4) isa GaussianChannel
     end
 
     @testset "phase-shift operator" begin
         theta = rand(Float64)
         @test phaseshift(theta, noise2) isa GaussianChannel
         @test phaseshift(SVector{2}, SMatrix{2,2}, theta, noise2) isa GaussianChannel
+        @test phaseshift(Array, theta, noise2) isa GaussianChannel
     end
 
     @testset "beamsplitter operator" begin
         theta = rand(Float64)
         @test beamsplitter(theta, noise4) isa GaussianChannel
         @test beamsplitter(SVector{4}, SMatrix{4,4}, theta, noise4) isa GaussianChannel
+        @test beamsplitter(Array, theta, noise4) isa GaussianChannel
     end
 
     @testset "attenuator channel" begin
@@ -41,13 +46,15 @@
         n = rand(Int64)
         @test attenuator(theta, n) isa GaussianChannel
         @test attenuator(SVector{2}, SMatrix{2,2}, theta, n) isa GaussianChannel
+        @test attenuator(Array, theta, n) isa GaussianChannel
     end
 
-    @testset "attenuator channel" begin
-        theta = rand(Float64)
+    @testset "amplifier channel" begin
+        r = rand(Float64)
         n = rand(Int64)
-        @test attenuator(theta, n) isa GaussianChannel
-        @test attenuator(SVector{2}, SMatrix{2,2}, theta, n) isa GaussianChannel
+        @test amplifier(r, n) isa GaussianChannel
+        @test amplifier(SVector{2}, SMatrix{2,2}, r, n) isa GaussianChannel
+        @test amplifier(Array, r, n) isa GaussianChannel
     end
     
     @testset "tensor products" begin
