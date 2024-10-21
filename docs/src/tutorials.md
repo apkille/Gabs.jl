@@ -93,8 +93,8 @@ covariance: 2×2 SparseMatrixCSC{Float64, Int64} with 2 stored entries:
 Importantly, methods that create or manipulate a Gaussian state, such as [`tensor`](@ref) and [`ptrace`](@ref), preserve array types, but can also opt for a different array type.
 
 !!! note
-    If we have an array wrapper that initializes both vectors
-    and matrices, then we can specifiy the array type with a single argument. For instance, to initialize a state that contains `Array`s holding numbers of type `Float32` rather
+    If you have an array wrapper that initializes both vectors
+    and matrices, then you can specifiy the array type with a single argument. For instance, to initialize a state that contains `Array`s holding numbers of type `Float32` rather
     than `Float64`, simply pass `Array{Float32}` to any relevant Gabs.jl method:
     ```jldoctest
     julia> state = displace(Array{Float32}, 1.0-im)
