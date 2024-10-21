@@ -100,7 +100,7 @@ covariance: 4×4 Matrix{Float64}:
  <summaryClick me! ></summary>
 <p>
 
-Gabs.jl contains many predefined methods to create instances [`GaussianUnitary`](https://apkille.github.io/Gabs.jl/dev/API/#Gabs.GaussianUnitary) and [`GaussianChannel`](https://apkille.github.io/Gabs.jl/dev/API/#Gabs.GaussianChannel) types. For a full description of the API for Gaussian operators, see the [Operator Zoo section](https://apkille.github.io/Gabs.jl/dev/zoos/#Operator-Zoo) of the documentation. Let's see a few well-known examples:
+Gabs.jl contains many predefined methods to create instances of [`GaussianUnitary`](https://apkille.github.io/Gabs.jl/dev/API/#Gabs.GaussianUnitary) and [`GaussianChannel`](https://apkille.github.io/Gabs.jl/dev/API/#Gabs.GaussianChannel) types. For a full description of the API for Gaussian operators, see the [Operator Zoo section](https://apkille.github.io/Gabs.jl/dev/zoos/#Operator-Zoo) of the documentation. Let's see a few well-known examples:
 
 ```julia
 julia> using Gabs
