@@ -5,73 +5,46 @@ struct Generaldyne{I} <: AbstractGeneralDyne
     conditional::GaussianState
     indices::I
     function Generaldyne(sys::GaussianState, cond::GaussianState, ind::I) where {I}
-        length(ind) == 2*(cond.nmodes) || throw(DimensionMismatch(GENERALDYNE_ERROR))
-        return new{I}(sys, ind, cond)
+        length(ind) == cond.nmodes || throw(DimensionMismatch(GENERALDYNE_ERROR))
+        return new{I}(sys, cond, ind)
     end
 end
 function probability(meas::Generaldyne)
-    pure_mean, pure_covar = conditional.mean, conditional.covar
-end
 
+end
 function outcome(meas::Generaldyne)
-    sys_mean, sys_covar, sys_nmodes = system.mean, system.covar, system.nmodes
-    cond_mean, cond_covar, cond_nmodes = conditional.mean, conditional.covar, conditional.nmodes
-    nmodes′ = sys_nmodes - cond_nmodes
-    ind = meas.indices
-
+    sys, cond, ind = meas.system, meas.conditional, meas.indices
+    meanA, meanB = _part_mean(sys, ind)
+    meanbuf1, meanbuf2 = zeros(2*cond.nmodes), zeros(2*(sys.nmodes - cond.nmodes))
+    covarA, covarB, covarAB = _part_covar(sys, cond, ind)
+    meanA .= meanA .- mul!(meanbuf2, covarAB, (mul!(meanbuf1, inv(covarB .+ cond.covar), cond.mean .- meanB)))
+    covarA .= covarA .- covarAB * ((covarB .+ cond.covar) \ transpose(covarAB))
+    meanA′ = _promote_output_vector(typeof(cond.mean), meanA, 2*(sys.nmodes - cond.nmodes))
+    covarA′ = _promote_output_matrix(typeof(cond.covar), covarA, 2*(sys.nmodes - cond.nmodes))
+    return GaussianState(meanA′, covarA′, sys.nmodes - cond.nmodes)
 end
 
-function _part_mean(sys::M, cond::C, ind::I) where {M,I}
-    # initialize mean vectors of subsystems A and B
-    sys_nmodes, nmodesB = sys.nmodes, cond.nmodes
-    sys_covar = sys.covar
-    nmodesA = sys_nmodes - nmodesB
-    meanA, meanB = zeros(2*nmodesA), zeros(2*nmodesB)
+function _part_mean(sys::M, ind::I) where {M,I}
+    # block mean into its modes
+    mean′ = BlockedArray(sys.mean, 2*ones(Int,sys.nmodes))
+    meanA = mortar([view(mean′, Block(i)) for i in Base.OneTo(sys.nmodes) if !(i in ind)])
+    meanB = mortar([view(mean′, Block(i)) for i in ind])
+    return meanA, meanB
+end
+function _part_covar(sys::M, cond::C, ind::I) where {M,C,I}
+    sizeA, sizeB = (sys.nmodes-cond.nmodes, sys.nmodes-cond.nmodes), (cond.nmodes, cond.nmodes)
+    sizeAB = (sys.nmodes-cond.nmodes, cond.nmodes)
     # loop through entire Gaussian system, writing quadratures to B if
     # index is specified in `ind` argument
-    idxA, idxB = 1, 1
-    @inbounds for i in Base.OneTo(2*sys_nmodes)
-        if i in ind
-            covarB[2*idxB-1:2*idxB, 2*idxB-1:2*idxB] = @view(sys_covar[2*i-1:2*i, 2*i-1:2*i])
-            idxB += 1
-        else
-            covarA[2*idxA-1:2*idxA, 2*idxA-1:2*idxA] = @view(sys_covar[2*i-1:2*i, 2*i-1:2*i])
-            idxA += 1
-        end
-    end
-    return meanA, meanB
-end
-function _part_covar(sys::M, cond::C, ind::I) where {M,I}
-    # initialize mean vectors of subsystems A and B
-    sys_nmodes, nmodesB = sys.nmodes, cond.nmodes
-    sys_covar = sys.covar
-    nmodesA = sys_nmodes - nmodesB
-    covarA, covarB = zeros(2*nmodesA, 2*nmodesA), zeros(2*nmodesB, 2*nmodesB)
-    covarAB = zeros(2*nmodesA, 2*nmodesB)
-    # loop through entire Gaussian system, writing quadratures to B if
-    # index is specified in `ind` argument; if not, write to A
-    idxA, idxB = 1, 1
-    @inbounds for i in Base.OneTo(sys_nmodes)
-        if i in ind
-            meanB[2*idxB-1:2*idxB] = @view(sys_mean[2*i-1:2*i])
-            idxB += 1
-        else
-            meanA[2*idxA-1:2*idxA] = @view(sys_mean[2*i-1:2*i])
-            idxA += 1
-        end
-    end
-    return meanA, meanB
-end
-
-struct Homodyne{I,A<:Real} <: AbstractGeneralDyne
-    system::GaussianState
-    indices::I
-    angle::A
-end
-Homodyne(sys::GaussianState, ind::I) where {I} = Homodyne(sys, ind, 0.0)
-
-struct Heterodyne{I,A<:Number} <: AbstractGeneralDyne
-    system::GaussianState
-    indices::I
-    alpha::A
+    # write diagonal elements to subsystems
+    covar′ = BlockedArray(sys.covar, 2*ones(Int,sys.nmodes), 2*ones(Int,sys.nmodes))
+    covarA = mortar(reshape([view(covar′, Block(i,j))
+            for i in Base.OneTo(sys.nmodes), j in Base.OneTo(sys.nmodes)
+                if !(i in ind) && !(j in ind)], sizeA))
+    covarB = mortar(reshape([view(covar′, Block(i,j))
+            for i in Base.OneTo(sys.nmodes), j in Base.OneTo(sys.nmodes)
+                if i in ind && j in ind], sizeB))
+    covarAB = mortar(reshape([view(covar′, Block(j, i))
+            for i in 1:sys.nmodes for j in 1:i if (i in ind && !(j in ind)) || (!(i in ind) && j in ind)], sizeAB))
+    return covarA, covarB, covarAB
 end

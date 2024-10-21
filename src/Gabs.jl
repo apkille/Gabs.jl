@@ -1,15 +1,17 @@
 module Gabs
 
+using BlockArrays: BlockedArray, BlockArray, Block, mortar
+
 import LinearAlgebra
-using LinearAlgebra: I, det
+using LinearAlgebra: I, det, mul!
 
 import QuantumInterface: StateVector, AbstractOperator, apply!, tensor, ⊗
 
 export 
     # types
-    GaussianState, GaussianUnitary, GaussianChannel,
+    GaussianState, GaussianUnitary, GaussianChannel, Generaldyne,
     # operations
-    tensor, ⊗, apply!, ptrace,
+    tensor, ⊗, apply!, ptrace, outcome,
     # predefined Gaussian states
     vacuumstate, thermalstate, coherentstate, squeezedstate, eprstate,
     # predefined Gaussian channels
