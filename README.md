@@ -91,6 +91,8 @@ covariance: 4×4 Matrix{Float64}:
  0.0  0.0  0.414711   0.0537585
  0.0  0.0  0.0537585  0.609798
 ```
+</p>
+</details>
 
 ### Gaussian Operators
 
@@ -156,3 +158,5 @@ covariance: 6×6 Matrix{Float64}:
  0.0         0.0         0.0         0.0         1.03156e19  0.0
  0.0         0.0         0.0         0.0         0.0         1.03156e19
 ```
+</p>
+</details>
