@@ -94,7 +94,7 @@ Importantly, methods that create or manipulate a Gaussian state, such as [`tenso
 
 !!! note
     If you have an array wrapper that initializes both vectors
-    and matrices, then you can specifiy the array type with a single argument. For instance, to initialize a state that contains `Array`s holding numbers of type `Float32` rather
+    and matrices, then you can specify the array type with a single argument. For instance, to initialize a state that contains `Array`s holding numbers of type `Float32` rather
     than `Float64`, simply pass `Array{Float32}` to any relevant Gabs.jl method:
     ```jldoctest
     julia> state = displace(Array{Float32}, 1.0-im)
