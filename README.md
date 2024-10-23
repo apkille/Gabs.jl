@@ -14,6 +14,23 @@ characterized by low-dimensional matrices in the phase space representation.
 Thus, a large class of continuous variable quantum information can be efficiently
 simulated on a classical computer, lending to applications in quantum cryptography, quantum machine learning, integrated quantum photonics, and more. Gabs.jl provides a high-level [Julia](https://julialang.org) interface for straightforward and high performance implementations of Gaussian quantum systems.
 
+## Installation
+
+To install Gabs.jl, start Julia and run the following command:
+
+```julia
+using Pkg
+Pkg.add("Gabs")
+```
+To use the package, run the command
+
+```julia
+using Gabs
+```
+
+Now, the entire library is loaded into the current workspace, with access to its
+high-level interface and predefined objects.
+
 ## Examples
 ### Gaussian States
 
@@ -21,7 +38,7 @@ simulated on a classical computer, lending to applications in quantum cryptograp
  <summaryClick me! ></summary>
 <p>
 
-A wide variety of predefined methods to create a specific instance of the [`GaussianState`](https://apkille.github.io/Gabs.jl/dev/API/#Gabs.GaussianState) type are available. For a full description of the API for Gaussian states, see the [State Zoo section](https://apkille.github.io/Gabs.jl/dev/zoos/#State-Zoo) of the documentation. Let's see a few well-known examples:
+A wide variety of predefined methods to create a specific instance of the [`GaussianState`](https://apkille.github.io/Gabs.jl/dev/API/#Gabs.GaussianState) type are available. For a full description of the API for Gaussian states, see the [State Zoo section](https://apkille.github.io/Gabs.jl/dev/zoos/#State-Zoo) of the documentation. Let's examine a few well-known examples with the Julia REPL:
 
 ```julia
 julia> using Gabs
