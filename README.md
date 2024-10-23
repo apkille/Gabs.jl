@@ -14,6 +14,8 @@ characterized by low-dimensional matrices in the phase space representation.
 Thus, a large class of continuous variable quantum information can be efficiently
 simulated on a classical computer, lending to applications in quantum cryptography, quantum machine learning, integrated quantum photonics, and more. Gabs.jl provides a high-level [Julia](https://julialang.org) interface for straightforward and high performance implementations of Gaussian quantum systems.
 
+See the detailed [suggested readings & references page](https://apkille.github.io/Gabs.jl/dev/bibliography/) for a background on quantum information with Gaussian states.
+
 ## Installation
 
 To install Gabs.jl, start Julia and run the following command:
