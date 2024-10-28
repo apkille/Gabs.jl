@@ -20,7 +20,7 @@ LinearAlgebra = "1.9"
 Makie = "0.21"
 QuantumInterface = "0.3.4"
 StaticArrays = "1.9.7"
-julia = "1.6.7"
+julia = "1.10.0"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
