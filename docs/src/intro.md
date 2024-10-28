@@ -1,4 +1,4 @@
-# Getting Started with Gabs
+# [Getting Started with Gabs](@id intro)
 
 Gabs.jl is a numerical tooling package for simulating Gaussian quantum information.
 Gaussian states and operators have the convenient property that they can be
@@ -17,6 +17,11 @@ In the sections below, a getting started tutorial is provided to introduce the c
 !!! note
     This documentation assumes familiarity with linear algebra and quantum information.
     Introductory books and tutorials for these topics are provided in the [Suggested Readings and References page](@ref References).
+
+!!! tip "Contributing"
+    Any contribution to Gabs.jl is welcome! Feature suggestions, pull requests, and bug reports
+    can be submitted on [Github](https://github.com/apkille/Gabs.jl). The maintainers of Gabs.jl
+    subscribe to the [Julia Community Standards](https://julialang.org/community/standards/).
 
 ## Installation
 
