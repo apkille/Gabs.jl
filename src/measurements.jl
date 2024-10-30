@@ -32,7 +32,7 @@ function _generaldyne_map(meanA, meanB, covarA, covarB, covarAB, sys, cond)
     meanbuf1, meanbuf2 = zeros(2*cond.nmodes), zeros(2*(sys.nmodes - cond.nmodes))
     covarbuf = zeros(2*(sys.nmodes - cond.nmodes), 2*(sys.nmodes - cond.nmodes))
     # maps subsystem A, which is not measured
-    meanA .= meanA .- mul!(meanbuf2, covarAB, (mul!(meanbuf1, inv(covarB .+ cond.covar), cond.mean .- meanB)))
+    meanA .= meanA .+ mul!(meanbuf2, covarAB, (mul!(meanbuf1, inv(covarB .+ cond.covar), cond.mean .- meanB)))
     covarA .= covarA .- mul!(covarbuf, covarAB, (covarB .+ cond.covar) \ transpose(covarAB))
     return meanA, covarA
 end
