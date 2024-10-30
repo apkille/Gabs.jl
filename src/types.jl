@@ -39,6 +39,7 @@ end
 GaussianState(mean::M, covar::V) where {M,V} = GaussianState(mean, covar, Int(length(mean)/2))
 
 Base.:(==)(x::GaussianState, y::GaussianState) = x.mean == y.mean && x.covar == y.covar
+Base.isapprox(x::GaussianState, y::GaussianState) = isapprox(x.mean,y.mean) && isapprox(x.covar,y.covar)
 function Base.show(io::IO, mime::MIME"text/plain", x::GaussianState)
     Base.summary(io, x)
     print(io, "\nmean: ")
