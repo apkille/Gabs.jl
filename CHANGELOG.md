@@ -3,6 +3,7 @@
 ## v1.0.2 - dev
 
 - Remove StaticArrays as a dependency and add as an extension.
+- Add `Generaldyne` type with corresponding `outcome` function.
 
 ## v1.0.1 - 2024-10-16
 
