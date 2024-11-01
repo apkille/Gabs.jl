@@ -9,7 +9,7 @@ struct Generaldyne{I} <: AbstractGeneralDyne
         return new{I}(sys, cond, ind)
     end
 end
-function outcome(meas::Generaldyne)
+function output(meas::Generaldyne)
     sys, cond, ind = meas.system, meas.conditional, meas.indices
     # partition mean and covar into subsystems A and B
     meanA, meanB = _part_mean(sys, ind)
