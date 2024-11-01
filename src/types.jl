@@ -97,6 +97,7 @@ end
 GaussianUnitary(disp::D, symplectic::S) where {D,S} = GaussianUnitary(disp, symplectic, Int(length(disp)/2))
 
 Base.:(==)(x::GaussianUnitary, y::GaussianUnitary) = x.disp == y.disp && x.symplectic == y.symplectic
+Base.isapprox(x::GaussianUnitary, y::GaussianUnitary) = isapprox(x.disp, y.disp) && isapprox(x.symplectic, y.symplectic)
 function Base.show(io::IO, mime::MIME"text/plain", x::GaussianUnitary)
     Base.summary(io, x)
     print(io, "\ndisplacement: ")
@@ -175,6 +176,7 @@ end
 GaussianChannel(disp::D, transform::T, noise::T) where {D,T} = GaussianChannel(disp, transform, noise, Int(length(disp)/2))
 
 Base.:(==)(x::GaussianChannel, y::GaussianChannel) = x.disp == y.disp && x.transform == y.transform && x.noise == y.noise
+Base.isapprox(x::GaussianChannel, y::GaussianChannel) = isapprox(x.disp, y.disp) && isapprox(x.transform, y.transform) && isapprox(x.noise, y.noise)
 function Base.show(io::IO, mime::MIME"text/plain", x::GaussianChannel)
     Base.summary(io, x)
     print(io, "\ndisplacement: ")

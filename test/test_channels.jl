@@ -88,6 +88,7 @@
         v = vacuumstate()
         c = coherentstate(alpha)
         @test d * v == c
+        @test isapprox(d * v, c)
         @test apply!(v, d) == c
 
         v1, v2 = vacuumstate(), vacuumstate()

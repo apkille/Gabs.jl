@@ -38,6 +38,7 @@
         ds = tensor(d1, d2)
         @test ds isa GaussianUnitary
         @test ds == d1 ⊗ d2
+        @test isapprox(ds, d1 ⊗ d2)
         @test tensor(SVector{4}, SMatrix{4,4}, d1, d2) isa GaussianUnitary
 
         r, theta = rand(Float64), rand(Float64)

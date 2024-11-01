@@ -37,6 +37,7 @@
         @test vs isa GaussianState
         @test tensor(SVector{4}, SMatrix{4,4}, v, v) isa GaussianState
         @test vs == v ⊗ v
+        @test isapprox(vs, v ⊗ v)
 
         alpha = rand(ComplexF64)
         c = coherentstate(alpha)
