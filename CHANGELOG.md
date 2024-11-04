@@ -4,6 +4,7 @@
 
 - Remove StaticArrays as a dependency and add as an extension.
 - Add `Generaldyne` type with corresponding `output` function.
+- Add `randstate` and `randchannel` to calculate random instances of Gabs types.
 
 ## v1.0.1 - 2024-10-16
 
