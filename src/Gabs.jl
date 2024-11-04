@@ -13,10 +13,10 @@ export
     # operations
     tensor, ⊗, apply!, ptrace, output,
     # predefined Gaussian states
-    vacuumstate, thermalstate, coherentstate, squeezedstate, eprstate,
+    vacuumstate, thermalstate, coherentstate, squeezedstate, eprstate, randstate,
     # predefined Gaussian channels
     displace, squeeze, twosqueeze, phaseshift, beamsplitter,
-    attenuator, amplifier,
+    attenuator, amplifier, randchannel,
     # wigner functions
     wigner, wignerchar,
     # symplectic form
@@ -33,6 +33,8 @@ include("states.jl")
 include("unitaries.jl")
 
 include("channels.jl")
+
+include("randoms.jl")
 
 include("measurements.jl")
 
