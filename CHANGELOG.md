@@ -1,6 +1,6 @@
 # News
 
-## v1.0.2 - dev
+## v1.0.2 - 2024-11-03
 
 - Remove StaticArrays as a dependency and add as an extension.
 - Add `Generaldyne` type with corresponding `output` function.
