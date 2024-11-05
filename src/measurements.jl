@@ -1,62 +1,271 @@
 abstract type AbstractGeneraldyne end
 
+"""Defines a partial general-dyne measurement of a Gaussian system.
+
+## Fields
+
+- `system`: Initial Gaussian state.
+- `outcome`: Measurement outcome Gaussian state.
+- `indices`: Specific indices of `system` that are projected onto `outcome`.
+
+## Mathematical description of a general-dyne measurement
+
+A partial general-dyne measurement on a Gaussian state ``\\hat{\\rho}(\\mathbf{\\bar{x}}, \\mathbf{V})`` of a system partitioned
+into subsystems ``A`` and ``B`` is a projection of subsystem ``B`` onto
+a measurement outcome Gaussian state ``\\hat{\\rho}(\\mathbf{\\bar{x}}_{m}, \\mathbf{V}_{m})``.
+
+## Example
+
+```jldoctest
+julia> vac = vacuumstate(); coh = coherentstate(1.0-im);
+
+julia> state = vac ⊗ coh ⊗ vac ⊗ coh
+GaussianState for 4 modes.
+mean: 8-element Vector{Float64}:
+  0.0
+  0.0
+  1.4142135623730951
+ -1.4142135623730951
+  0.0
+  0.0
+  1.4142135623730951
+ -1.4142135623730951
+covariance: 8×8 Matrix{Float64}:
+ 1.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0
+
+julia> Generaldyne(state, coh ⊗ vac ⊗ coh, [1, 3, 4])
+Generaldyne on indices [1, 3, 4]
+system: GaussianState for 4 modes.
+ (xType: Vector{Float64} | vType: Matrix{Float64})
+outcome: GaussianState for 3 modes.
+ (xType: Vector{Float64} | vType: Matrix{Float64})
+```
+"""
 struct Generaldyne{I} <: AbstractGeneraldyne
     system::GaussianState
-    conditional::GaussianState
+    outcome::GaussianState
     indices::I
-    function Generaldyne(sys::GaussianState, cond::GaussianState, ind::I) where {I}
-        length(ind) == cond.nmodes || throw(DimensionMismatch(GENERALDYNE_ERROR))
-        return new{I}(sys, cond, ind)
+    function Generaldyne(sys::GaussianState, outcome::GaussianState, ind::I) where {I}
+        length(ind) == outcome.nmodes || throw(DimensionMismatch(GENERALDYNE_ERROR))
+        return new{I}(sys, outcome, ind)
     end
 end
+
+"""
+    output(meas::Generaldyne)
+
+Conditional mapping of the subsystem for the initial Gaussian system that is not measured 
+in a `Generaldyne` object.
+
+## Mathematical description of conditional evolution of a Gaussian system
+
+Let ``\\hat{\\rho}(\\mathbf{\\bar{x}}, \\mathbf{V})`` be a Gaussian state of a system partitioned
+into subsystems ``A`` and ``B``, such that
+```math
+\\mathbf{\\bar{x}} = \\begin{pmatrix} 
+                        \\mathbf{\\bar{x}}_{\\text{A}} & \\mathbf{\\bar{x}}_{\\text{A}} 
+                    \\end{pmatrix}^{\\text{T}},
+\\quad \\mathbf{V} = \\begin{pmatrix} 
+                        \\mathbf{V}_{\\text{A}} & \\mathbf{V}_{\\text{AB}} \\\\
+                        \\mathbf{V}_{\\text{AB}}^{\\text{T}} & \\mathbf{V}_{\\text{B}}
+                    \\end{pmatrix},
+```
+where ``(\\mathbf{\\bar{x}}_{\\text{A}}, \\mathbf{V}_{\\text{A}})`` and 
+``(\\mathbf{\\bar{x}}_{\\text{B}}, \\mathbf{V}_{\\text{B}})`` are the mean and covariance matrices
+of subsystems ``A`` and ``B``, respectively. Here ``\\mathbf{V}_{\\text{AB}}`` is a covariance matrix
+representing the correlations between ``A`` and ``B``. If we project subsystem ``B`` onto
+a measurement outcome ``\\hat{\\rho}(\\mathbf{\\bar{x}}_{m}, \\mathbf{V}_{m})``, then
+subsystem ``A`` conditionally maps as follows:
+```math
+\\mathbf{\\bar{x}}_{\\text{A}} \\to \\mathbf{\\bar{x}}_{\\text{A}} + 
+    \\frac{\\mathbf{V}_{\\text{AB}}}{\\mathbf{V}_{\\text{B}} + \\mathbf{V}_{m}}(\\mathbf{\\bar{x}}_{m} - \\mathbf{\\bar{x}}_{\\text{B}})^{\\text{T}},
+\\quad\\mathbf{V}_{\\text{A}} \\to \\mathbf{V}_{\\text{A}} - 
+    \\frac{\\mathbf{V}_{\\text{AB}}}{\\mathbf{V}_{\\text{B}} + \\mathbf{V}_{m}} \\mathbf{V}_{\\text{AB}}^{\\text{T}}.
+```
+
+## Example
+
+```jldoctest
+julia> vac = vacuumstate(); coh = coherentstate(1.0-im);
+
+julia> state = vac ⊗ coh ⊗ vac ⊗ coh
+GaussianState for 4 modes.
+mean: 8-element Vector{Float64}:
+  0.0
+  0.0
+  1.4142135623730951
+ -1.4142135623730951
+  0.0
+  0.0
+  1.4142135623730951
+ -1.4142135623730951
+covariance: 8×8 Matrix{Float64}:
+ 1.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0
+
+julia> gd = Generaldyne(state, coh ⊗ vac ⊗ coh, [1, 3, 4])
+Generaldyne on indices [1, 3, 4]
+system: GaussianState for 4 modes.
+ (xType: Vector{Float64} | vType: Matrix{Float64})
+outcome: GaussianState for 3 modes.
+ (xType: Vector{Float64} | vType: Matrix{Float64})
+
+julia> output(gd)
+GaussianState for 1 mode.
+mean: 2-element Vector{Float64}:
+  1.4142135623730951
+ -1.4142135623730951
+covariance: 2×2 Matrix{Float64}:
+ 1.0  0.0
+ 0.0  1.0
+```
+"""
 function output(meas::Generaldyne)
-    sys, cond, ind = meas.system, meas.conditional, meas.indices
+    sys, outcome, ind = meas.system, meas.outcome, meas.indices
     # partition mean and covar into subsystems A and B
     meanA, meanB = _part_mean(sys, ind)
-    covarA, covarB, covarAB = _part_covar(sys, cond, ind)
+    covarA, covarB, covarAB = _part_covar(sys, outcome, ind)
     # Block array matmul and broadcasting is incredibly
     # slow, so convert types back to promoted `sys`` and `cond`` types
     meanA′, meanB′ = sys.mean isa Vector{Float64} ? Vector{Float64}.((meanA, meanB)) :
-        (_promote_output_vector(typeof(cond.mean), meanA, 2*(sys.nmodes - cond.nmodes)), _promote_output_vector(typeof(cond.mean), meanB, 2*cond.nmodes))
+        (_promote_output_vector(typeof(outcome.mean), meanA, 2*(sys.nmodes - outcome.nmodes)), _promote_output_vector(typeof(outcome.mean), meanB, 2*outcome.nmodes))
     covarA′, covarB′, covarAB′ = sys.covar isa Matrix{Float64} ? Matrix{Float64}.((covarA, covarB, covarAB)) :
-        (_promote_output_matrix(typeof(cond.covar), covarA, (2*(sys.nmodes - cond.nmodes), 2*(sys.nmodes - cond.nmodes))),
-        _promote_output_matrix(typeof(cond.covar), covarB, (2*cond.nmodes, 2*cond.nmodes)),
-        _promote_output_matrix(typeof(cond.covar), covarAB, (2*(sys.nmodes - cond.nmodes), 2*cond.nmodes)))
+        (_promote_output_matrix(typeof(outcome.covar), covarA, (2*(sys.nmodes - outcome.nmodes), 2*(sys.nmodes - outcome.nmodes))),
+        _promote_output_matrix(typeof(outcome.covar), covarB, (2*outcome.nmodes, 2*outcome.nmodes)),
+        _promote_output_matrix(typeof(outcome.covar), covarAB, (2*(sys.nmodes - outcome.nmodes), 2*outcome.nmodes)))
     # map subsystem A
-    meanA′, covarA′ = _generaldyne_map(meanA′, meanB′, covarA′, covarB′, covarAB′, sys, cond)
-    return GaussianState(meanA′, covarA′, sys.nmodes - cond.nmodes)
+    meanA′, covarA′ = _generaldyne_map(meanA′, meanB′, covarA′, covarB′, covarAB′, sys, outcome)
+    return GaussianState(meanA′, covarA′, sys.nmodes - outcome.nmodes)
 end
+
+"""
+    prob(meas::Generaldyne)
+
+Calculate the probability density of a general-dyne measurement.
+
+## Mathematical description of probability density of a general-dyne measurement
+
+Let ``\\hat{\\rho}(\\mathbf{\\bar{x}}, \\mathbf{V})`` be a Gaussian state of a system partitioned
+into subsystems ``A`` and ``B``, such that
+```math
+\\mathbf{\\bar{x}} = \\begin{pmatrix} 
+                        \\mathbf{\\bar{x}}_{\\text{A}} & \\mathbf{\\bar{x}}_{\\text{A}} 
+                    \\end{pmatrix}^{\\text{T}},
+\\quad \\mathbf{V} = \\begin{pmatrix} 
+                        \\mathbf{V}_{\\text{A}} & \\mathbf{V}_{\\text{AB}} \\\\
+                        \\mathbf{V}_{\\text{AB}}^{\\text{T}} & \\mathbf{V}_{\\text{B}}
+                    \\end{pmatrix},
+```
+where ``(\\mathbf{\\bar{x}}_{\\text{A}}, \\mathbf{V}_{\\text{A}})`` and 
+``(\\mathbf{\\bar{x}}_{\\text{B}}, \\mathbf{V}_{\\text{B}})`` are the mean and covariance matrices
+of subsystems ``A`` and ``B``, respectively. Here ``\\mathbf{V}_{\\text{AB}}`` is a covariance matrix
+representing the correlations between ``A`` and ``B``. If we project subsystem ``B`` onto
+a measurement outcome ``\\hat{\\rho}(\\mathbf{\\bar{x}}_{m}, \\mathbf{V}_{m})``, then
+the probability density in ``d\\mathbf{\\hat{x}}_{m}`` is
+
+```math
+p(\\mathbf{\\bar{x}}_{m}) = \\frac{e^{(\\mathbf{\\bar{x}}_{m} - \\mathbf{\\bar{x}}_{\\text{B}})^{\\text{T}} 
+    \\frac{1}{\\mathbf{V}_{\\text{B}} + \\mathbf{V}_{m}} (\\mathbf{\\bar{x}}_{m} - \\mathbf{\\bar{x}}_{\\text{B}})}}{\\pi^{m} 
+    \\sqrt{\\det(\\mathbf{V}_{\\text{B}} + \\mathbf{V}_{m})}},
+```
+where ``m`` is the number of modes in subsystem ``B``.
+
+## Example
+
+```jldoctest
+julia> vac = vacuumstate(); coh = coherentstate(1.0-im);
+
+julia> state = vac ⊗ coh ⊗ vac ⊗ coh
+GaussianState for 4 modes.
+mean: 8-element Vector{Float64}:
+  0.0
+  0.0
+  1.4142135623730951
+ -1.4142135623730951
+  0.0
+  0.0
+  1.4142135623730951
+ -1.4142135623730951
+covariance: 8×8 Matrix{Float64}:
+ 1.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0
+
+julia> gd = Generaldyne(state, coh ⊗ vac ⊗ coh, [1, 3, 4])
+Generaldyne on indices [1, 3, 4]
+system: GaussianState for 4 modes.
+ (xType: Vector{Float64} | vType: Matrix{Float64})
+outcome: GaussianState for 3 modes.
+ (xType: Vector{Float64} | vType: Matrix{Float64})
+
+julia> prob(gd)
+0.029788549650438086
+```
+"""
 function prob(meas::Generaldyne)
-    sys, cond, ind = meas.system, meas.conditional, meas.indices
+    sys, outcome, ind = meas.system, meas.outcome, meas.indices
     # partition mean and covar into subsystems
     mean′ = BlockedArray(sys.mean, 2*ones(Int,sys.nmodes))
     meanB = _part_meanB(mean′, ind)
-    sizeB = (cond.nmodes, cond.nmodes)
+    sizeB = (outcome.nmodes, outcome.nmodes)
     covar′ = BlockedArray(sys.covar, 2*ones(Int,sys.nmodes), 2*ones(Int,sys.nmodes))
     covarB = _part_covarB(covar′, sys.nmodes, ind, sizeB)
     # Block array matmul and broadcasting is incredibly
     # slow, so convert types back to promoted `sys`` and `cond`` types
     meanB′ = sys.mean isa Vector{Float64} ? Vector{Float64}(meanB) :
-        _promote_output_vector(typeof(cond.mean), meanB, 2*cond.nmodes)
+        _promote_output_vector(typeof(outcome.mean), meanB, 2*outcome.nmodes)
     covarB′ = sys.covar isa Matrix{Float64} ? Matrix{Float64}(covarB) :
-        _promote_output_matrix(typeof(cond.covar), covarB, sizeB)
-    return _prob_formula(meanB′, covarB′, cond)
+        _promote_output_matrix(typeof(outcome.covar), covarB, sizeB)
+    return _prob_formula(meanB′, covarB′, outcome)
 end
 
-function _prob_formula(mean, covar, cond)
-    # create alloc buffers for matrix multiplication
-    buf = zeros(2*cond.nmodes)
-    meandiff = cond.mean .- mean
-    norm = pi^(cond.nmodes)*sqrt(det(covar .+ cond.covar))
-    return exp(transpose(meandiff) * mul!(buf, inv(covar .+ cond.covar), meandiff))/norm
+function Base.show(io::IO, mime::MIME"text/plain", x::Generaldyne)
+    Base.summary(io, x)
+    sys, outcome = x.system, x.outcome
+    print(io, "\nsystem: ")
+    Base.summary(io, sys)
+    print(io, "\n (xType: $(typeof(sys.mean)) | vType: $(typeof(sys.covar)))") 
+    print(io, "\noutcome: ")
+    Base.summary(io, x.outcome)
+    print(io, "\n (xType: $(typeof(outcome.mean)) | vType: $(typeof(outcome.covar)))")
 end
-function _generaldyne_map(meanA, meanB, covarA, covarB, covarAB, sys, cond)
+function Base.summary(io::IO, x::Generaldyne)
+    printstyled(io, :Generaldyne; color=:light_cyan)
+    print(io, " on indices $(x.indices)")
+end
+
+function _prob_formula(mean, covar, outcome)
     # create alloc buffers for matrix multiplication
-    meanbuf1, meanbuf2 = zeros(2*cond.nmodes), zeros(2*(sys.nmodes - cond.nmodes))
-    covarbuf = zeros(2*(sys.nmodes - cond.nmodes), 2*(sys.nmodes - cond.nmodes))
+    buf = zeros(2*outcome.nmodes)
+    meandiff = outcome.mean .- mean
+    norm = pi^(outcome.nmodes)*sqrt(det(covar .+ outcome.covar))
+    return exp(transpose(meandiff) * mul!(buf, inv(covar .+ outcome.covar), meandiff))/norm
+end
+function _generaldyne_map(meanA, meanB, covarA, covarB, covarAB, sys, outcome)
+    # create alloc buffers for matrix multiplication
+    meanbuf1, meanbuf2 = zeros(2*outcome.nmodes), zeros(2*(sys.nmodes - outcome.nmodes))
+    covarbuf = zeros(2*(sys.nmodes - outcome.nmodes), 2*(sys.nmodes - outcome.nmodes))
     # maps subsystem A, which is not measured
-    meanA .= meanA .+ mul!(meanbuf2, covarAB, (mul!(meanbuf1, inv(covarB .+ cond.covar), cond.mean .- meanB)))
-    covarA .= covarA .- mul!(covarbuf, covarAB, (covarB .+ cond.covar) \ transpose(covarAB))
+    meanA .= meanA .+ mul!(meanbuf2, covarAB, (mul!(meanbuf1, inv(covarB .+ outcome.covar), outcome.mean .- meanB)))
+    covarA .= covarA .- mul!(covarbuf, covarAB, (covarB .+ outcome.covar) \ transpose(covarAB))
     return meanA, covarA
 end
 function _part_mean(sys::M, ind::I) where {M,I}
@@ -68,9 +277,9 @@ function _part_mean(sys::M, ind::I) where {M,I}
 end
 _part_meanA(mean::M, nmodes::N, ind::I) where {M,N,I} = mortar([view(mean, Block(i)) for i in Base.OneTo(nmodes) if !(i in ind)])
 _part_meanB(mean::M, ind::I) where {M,I} = mortar([view(mean, Block(i)) for i in ind])
-function _part_covar(sys::M, cond::C, ind::I) where {M,C,I}
-    sizeA, sizeB = (sys.nmodes-cond.nmodes, sys.nmodes-cond.nmodes), (cond.nmodes, cond.nmodes)
-    sizeAB = (sys.nmodes-cond.nmodes, cond.nmodes)
+function _part_covar(sys::M, outcome::C, ind::I) where {M,C,I}
+    sizeA, sizeB = (sys.nmodes-outcome.nmodes, sys.nmodes-outcome.nmodes), (outcome.nmodes, outcome.nmodes)
+    sizeAB = (sys.nmodes-outcome.nmodes, outcome.nmodes)
     # loop through entire Gaussian system, writing quadratures to B if
     # index is specified in `ind` argument
     covar′ = BlockedArray(sys.covar, 2*ones(Int,sys.nmodes), 2*ones(Int,sys.nmodes))
