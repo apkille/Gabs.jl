@@ -6,7 +6,7 @@ DocTestSetup = quote
 end
 ```
 
-Simply put, Gabs.jl is a package for creating and transforming Gaussian bosonic systems. This section discusses the "lower level" tools for simulating such phenomena, with
+Simply put, Gabs is a package for creating and transforming Gaussian bosonic systems. This section discusses the "lower level" tools for simulating such phenomena, with
 mathematical explanations when appropriate. For comprehensive reviews of Gaussian
 quantum information, see the [suggested readings page](@ref References).
 
@@ -95,7 +95,7 @@ Noisy bosonic channels are an important model for describing the interaction bet
 GaussianChannel
 ```
 
-Listed below are a list of predefined Gaussian channels supported by Gabs.jl:
+Listed below are a list of predefined Gaussian channels supported by Gabs:
 
 - [`attenuator`](@ref)
 - [`amplifier`](@ref)

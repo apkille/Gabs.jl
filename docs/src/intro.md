@@ -1,12 +1,12 @@
 # [Getting Started with Gabs](@id intro)
 
-Gabs.jl is a numerical tooling package for simulating Gaussian quantum information.
+Gabs is a numerical tooling package for simulating Gaussian quantum information.
 Gaussian states and operators have the convenient property that they can be
 characterized by low-dimensional matrices in the phase space representation.
 Thus, a large class of continuous variable quantum information can be efficiently
-simulated on a classical computer, lending to applications in quantum cryptography, quantum machine learning, integrated quantum photonics, and more. Gabs.jl provides a high-level [Julia](https://julialang.org) interface for performing such efficient simulations in a straightforward manner.
+simulated on a classical computer, lending to applications in quantum cryptography, quantum machine learning, integrated quantum photonics, and more. Gabs provides a high-level [Julia](https://julialang.org) interface for performing such efficient simulations in a straightforward manner.
 
-In the sections below, a getting started tutorial is provided to introduce the capabilities of Gabs.jl. The rest of the documentation is structured as follows:
+In the sections below, a getting started tutorial is provided to introduce the capabilities of Gabs. The rest of the documentation is structured as follows:
 
 - [Manual](@ref) - an overview of the package types and inner-workings,
 - [Tutorials](@ref) - explanations for using particular features of the library,
@@ -19,8 +19,8 @@ In the sections below, a getting started tutorial is provided to introduce the c
     Introductory books and tutorials for these topics are provided in the [Suggested Readings and References page](@ref References).
 
 !!! tip "Contributing"
-    Any contribution to Gabs.jl is welcome! Feature suggestions, pull requests, and bug reports
-    can be submitted on [Github](https://github.com/apkille/Gabs.jl). The maintainers of Gabs.jl
+    Any contribution to Gabs is welcome! Feature suggestions, pull requests, and bug reports
+    can be submitted on [Github](https://github.com/apkille/Gabs.jl). The maintainers of Gabs
     subscribe to the [Julia Community Standards](https://julialang.org/community/standards/).
 
 ## Installation
