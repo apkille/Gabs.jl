@@ -141,7 +141,7 @@ channel action on a Gaussian state ``\\hat{\\rho}(\\mathbf{\\bar{x}}, \\mathbf{V
 described by its maps on the statistical moments of the Gaussian state:
 
 ```math
-\\mathbf{\\bar{x}} \\to \\mathbf{S} \\mathbf{\\bar{x}} + \\mathbf{d}, \\quad
+\\mathbf{\\bar{x}} \\to \\mathbf{T} \\mathbf{\\bar{x}} + \\mathbf{d}, \\quad
 \\mathbf{V} \\to \\mathbf{T} \\mathbf{V} \\mathbf{T}^{\\text{T}} + \\mathbf{N}.
 ```
 
