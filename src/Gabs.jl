@@ -11,7 +11,7 @@ export
     # types
     GaussianState, GaussianUnitary, GaussianChannel, Generaldyne,
     # operations
-    tensor, ⊗, apply!, ptrace, output,
+    tensor, ⊗, apply!, ptrace, output, prob,
     # predefined Gaussian states
     vacuumstate, thermalstate, coherentstate, squeezedstate, eprstate, randstate,
     # predefined Gaussian channels
