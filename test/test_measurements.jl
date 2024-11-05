@@ -1,6 +1,7 @@
 @testitem "Measurements" begin
     using Gabs
     using StaticArrays
+    using LinearAlgebra: det
 
     @testset "generaldyne" begin    
         vac = vacuumstate()
@@ -15,6 +16,8 @@
         gd2 = Generaldyne(cohs, epr, [1, 4])
         out2 = output(gd2)
         @test isequal(out2, vac ⊗ coh)
+        out2_prob = exp(transpose(epr.mean .- (coh ⊗ vac).mean) * (inv(epr.covar .+ (coh ⊗ vac).covar) * (epr.mean .- (coh ⊗ vac).mean)))/(pi^2 * sqrt(det(epr.covar .+ (coh ⊗ vac).covar)))
+        @test isapprox(prob(gd2), out2_prob)
 
         state = GaussianState(Vector{Float64}(collect(1:4)), Matrix{Float64}(reshape(collect(1:16), (4,4))))
         meas = GaussianState(Vector{Float64}(collect(1:2)), Matrix{Float64}(reshape(collect(1:4), (2,2))))
