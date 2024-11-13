@@ -66,17 +66,16 @@ function randchannel(nmodes::N) where {N<:Int}
 end
 function _randchannel(nmodes::N) where {N<:Int}
     disp = randn(2*nmodes)
-    # generate symplectic matrix describing the evolution of the system 
-    # and environment
-    m = rand(1:nmodes) # number of modes in environment
+    # generate symplectic matrix describing the evolution of the system with N modes
+    # and environment with 2N modes
+    m = 2*nmodes # number of modes in environment
     symp = randsymplectic(nmodes + m)
-    transform, B = symp[1:2*nmodes, 1:2*nmodes], @view(symp[1:2*nmodes, 2*nmodes+1:2*(nmodes+m)])
+    transform, B = symp[1:2*nmodes, 1:2*nmodes], @view(symp[1:2*nmodes, 2*nmodes+1:2*(nmodes + m)])
     # generate random covariance matrix of environment
-    envcovar = zeros(2*m, 2*m)
     envsymp = randsymplectic(m)
-    # create buffers for matrix multiplication
-    buf1, buf2 = zeros(2*m, 2*m), zeros(2*m, 2*nmodes)
-    # William decomposition for mixed Gaussian states
+    # create buffer for matrix multiplication
+    buf = zeros(2*m, 2*m)
+    # William decomposition for Gaussian states
     sympeigs = abs.(rand(m)) .+ 1.0
     will = diagm(repeat(sympeigs, inner = 2))
     mul!(envcovar, envsymp, mul!(buf1, will, envsymp'))
