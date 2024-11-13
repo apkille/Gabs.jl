@@ -73,15 +73,12 @@ function _randchannel(nmodes::N) where {N<:Int}
     transform, B = symp[1:2*nmodes, 1:2*nmodes], @view(symp[1:2*nmodes, 2*nmodes+1:2*(nmodes + m)])
     # generate random covariance matrix of environment
     envsymp = randsymplectic(m)
-    # create buffer for matrix multiplication
-    buf = zeros(2*m, 2*m)
-    # William decomposition for Gaussian states
-    sympeigs = abs.(rand(m)) .+ 1.0
-    will = diagm(repeat(sympeigs, inner = 2))
-    mul!(envcovar, envsymp, mul!(buf1, will, envsymp'))
+    envcovar = envsymp * envsymp'
+    # create buffers for matrix multiplication
+    buf = zeros(2*m, 2*nmodes)
     # generate noise matrix from evolution of environment
     noise = zeros(2*nmodes, 2*nmodes)
-    mul!(noise, B, mul!(buf2, envcovar, B'))
+    mul!(noise, B, mul!(buf, envcovar, B'))
     return disp, transform, noise
 end
 
