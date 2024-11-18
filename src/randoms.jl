@@ -68,17 +68,11 @@ function _randchannel(nmodes::N) where {N<:Int}
     disp = randn(2*nmodes)
     # generate symplectic matrix describing the evolution of the system with N modes
     # and environment with 2N modes
-    m = 2*nmodes # number of modes in environment
-    symp = randsymplectic(nmodes + m)
-    transform, B = symp[1:2*nmodes, 1:2*nmodes], @view(symp[1:2*nmodes, 2*nmodes+1:2*(nmodes + m)])
-    # generate random covariance matrix of environment
-    envsymp = randsymplectic(m)
-    envcovar = envsymp * envsymp'
-    # create buffers for matrix multiplication
-    buf = zeros(2*m, 2*nmodes)
+    symp = randsymplectic(3*nmodes)
+    transform, B = symp[1:2*nmodes, 1:2*nmodes], @view(symp[1:2*nmodes, 2*nmodes+1:6*nmodes])
     # generate noise matrix from evolution of environment
     noise = zeros(2*nmodes, 2*nmodes)
-    mul!(noise, B, mul!(buf, envcovar, B'))
+    mul!(noise, B, B')
     return disp, transform, noise
 end
 
@@ -97,7 +91,12 @@ function randsymplectic(nmodes::N; passive = false) where {N<:Int}
     O′ = _rand_orthogonal_symplectic(nmodes)
     # direct sum of symplectic matrices for single-mode squeeze transformations
     rs = rand(nmodes)
-    squeezes = diagm(vcat(exp.(-rs), exp.(rs)))
+    squeezes = zeros(2*nmodes, 2*nmodes)
+    @inbounds for i in Base.OneTo(nmodes)
+        val = rs[i]
+        squeezes[2*i-1, 2*i-1] = val
+        squeezes[2*i, 2*i] = 1/val
+    end
     return O * squeezes * O′
 end
 function randsymplectic(::Type{T}, nmodes::N; passive = false) where {T, N<:Int} 
@@ -105,15 +104,6 @@ function randsymplectic(::Type{T}, nmodes::N; passive = false) where {T, N<:Int}
     return T(symp)
 end
 
-# Generates unitary matrix randomly distributed over Haar measure;
-# see https://arxiv.org/abs/math-ph/0609050 for algorithm.
-# This approach is much faster than using rand(Haar(2), nmodes) from RandomMatrices.jl
-function _rand_unitary(nmodes::N) where {N<:Int}
-    M = rand(ComplexF64, nmodes, nmodes) ./ sqrt(2.0)
-    q, r = qr(M)
-    d = diagm([r[i, i] / abs(r[i, i]) for i in Base.OneTo(nmodes)])
-    return q * d
-end
 # Generates random orthogonal symplectic matrix by blocking real
 # and imaginary parts of a random unitary matrix
 function _rand_orthogonal_symplectic(nmodes::N) where {N<:Int}
@@ -121,10 +111,19 @@ function _rand_orthogonal_symplectic(nmodes::N) where {N<:Int}
     O = zeros(2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes), j in Base.OneTo(nmodes)
         val = U[i,j]
-        O[i,j] = real(val)
-        O[i+nmodes, j] = imag(val)
-        O[i, j+nmodes] = -imag(val)
-        O[i+nmodes, j+nmodes] = real(val)
+        O[2*i-1,2*j-1] = real(val)
+        O[2*i, 2*j-1] = -imag(val)
+        O[2*i-1, 2*j] = imag(val)
+        O[2*i, 2*j] = real(val)
     end
     return O
+end
+# Generates unitary matrix randomly distributed over Haar measure;
+# see https://arxiv.org/abs/math-ph/0609050 for algorithm.
+# This approach is faster and creates less allocations than rand(Haar(2), size) from RandomMatrices.jl
+function _rand_unitary(size::N) where {N<:Int}
+    M = rand(ComplexF64, size, size) ./ sqrt(2.0)
+    q, r = qr(M)
+    d = diagm([r[i, i] / abs(r[i, i]) for i in Base.OneTo(size)])
+    return q * d
 end

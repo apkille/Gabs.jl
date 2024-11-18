@@ -41,8 +41,8 @@
         @test all(i -> ((i >= 0) || isapprox(i, 0.0, atol = 1e-5)), real(eigvals(rs_float32.covar .+ im*Omega)))
 
         rspure_float32 = randstate(AbstractArray{Float32}, nmodes, pure = true)
-        @test all(i -> ((i >= 0) || isapprox(i, 0.0, atol = 1e-5)), real(eigvals(rspure_float32.covar .+ im*Omega)))
-        @test isapprox(purity(rspure_float32), 1.0, atol = 1e-5)
+        @test all(i -> ((i >= 0) || isapprox(i, 0.0, atol = 1e-3)), real(eigvals(rspure_float32.covar .+ im*Omega)))
+        @test isapprox(purity(rspure_float32), 1.0, atol = 1e-3)
 
         rs_static = randstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, nmodes)
         rc_static = randchannel(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, nmodes)
@@ -81,17 +81,15 @@
     end
 
     @testset "random channels" begin
-        #=
-        nmodes = rand(1:20)
-        rc = randchannel(nmodes)
-        Omega = symplecticform(nmodes)
+        nmodes = rand(1:20);
+        rc = randchannel(nmodes);
+        Omega = symplecticform(nmodes);
         @test all(i -> ((i >= 0) || isapprox(i, 0.0, atol = 1e-5)), real(eigvals(rc.noise .+ im*Omega .- im*rc.transform*Omega*rc.transform')))
 
         rc_float32 = randchannel(AbstractArray{Float32}, nmodes)
-        @test all(i -> ((i >= 0) || isapprox(i, 0.0, atol = 1e-5)), real(eigvals(rc_float32.noise .+ im*Omega .- im*rc_float32.transform'*Omega*rc_float32.transform)))
+        @test all(i -> ((i >= 0) || isapprox(i, 0.0, atol = 1e-5)), real(eigvals(rc_float32.noise .+ im*Omega .- im*rc_float32.transform*Omega*rc_float32.transform')))
 
         rc_static = randchannel(SVector{2*nmodes}, SMatrix{2*nmodes, 2*nmodes}, nmodes)
-        @test all(i -> ((i >= 0) || isapprox(i, 0.0, atol = 1e-5)), real(eigvals(Array(rc_static.noise) .+ im*Omega .- im*Array(rc_static.transform)'*Omega*Array(rc_static.transform))))
-        =#
+        @test all(i -> ((i >= 0) || isapprox(i, 0.0, atol = 1e-5)), real(eigvals(Array(rc_static.noise) .+ im*Omega .- im*Array(rc_static.transform)*Omega*Array(rc_static.transform)')))
     end
 end

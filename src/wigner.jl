@@ -1,19 +1,13 @@
 """
-    symplecticform([T = Matrix{Float64},] modes<:Int)
+    symplecticform([T = Matrix{Float64},] nmodes<:Int)
 
-Compute the symplectic form matrix of size 2N x 2N, where N is given by `modes`.
+Compute the symplectic form matrix of size 2N x 2N, where N is given by `nmodes`.
 """
-function symplecticform(modes::N) where {N<:Int}
-    Omega = zeros(2modes, 2modes)
-    @inbounds for i in 1:modes, j in modes:2modes
-        if isequal(i, j-modes)
-            Omega[i,j] = 1.0
-        end
-    end
-    @inbounds for i in modes:2modes, j in 1:modes
-        if isequal(i-modes,j)
-            Omega[i, j] = -1.0
-        end
+function symplecticform(nmodes::N) where {N<:Int}
+    Omega = zeros(2*nmodes, 2*nmodes)
+    @inbounds for i in Base.OneTo(nmodes)
+        Omega[2*i-1, 2*i] = 1.0
+        Omega[2*i, 2*i-1] = -1.0
     end
     return Omega
 end

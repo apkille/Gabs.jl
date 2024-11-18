@@ -5,10 +5,10 @@
     @testset "symplectic form" begin
         Omega = symplecticform(2)
         Omega_static = symplecticform(SMatrix{4, 4}, 2)
-        test_Omega = [0.0 0.0 1.0 0.0;
+        test_Omega = [0.0 1.0 0.0 0.0;
+                      -1.0 0.0 0.0 0.0;
                       0.0 0.0 0.0 1.0;
-                     -1.0 0.0 0.0 0.0;
-                      0.0 -1.0 0.0 0.0]
+                      0.0 0.0 -1.0 0.0]
         @test isequal(Omega, test_Omega)
         @test Omega_static isa SMatrix
     end
