@@ -20,8 +20,8 @@
         S = randsymplectic(nmodes)
         @test isapprox(S' * Omega * S, Omega, atol = 1e-5)
 
-        S_float32 = randsymplectic(Array{Float32}, nmodes)
-        @test isapprox(S' * Omega * S, Omega, atol = 1e-5)
+        S_array = randsymplectic(Array, nmodes)
+        @test isapprox(S_array' * Omega * S_array, Omega, atol = 1e-5)
     end
 
     @testset "random states" begin
@@ -37,15 +37,15 @@
         @test all(i -> ((i >= 0) || isapprox(i, 0.0, atol = 1e-5)), real(eigvals(rspure.covar .+ im*Omega)))
         @test isapprox(purity(rspure), 1.0, atol = 1e-5)
 
-        rs_float32 = randstate(AbstractArray{Float32}, nmodes)
-        rc_float32 = randchannel(AbstractArray{Float32}, nmodes)
-        @test rc_float32 isa GaussianChannel
-        @test rc_float32 * rs_float32 isa GaussianState
-        @test all(i -> ((i >= 0) || isapprox(i, 0.0, atol = 1e-5)), real(eigvals(rs_float32.covar .+ im*Omega)))
+        rs_array = randstate(Array, nmodes)
+        rc_array = randchannel(Array, nmodes)
+        @test rc_array isa GaussianChannel
+        @test rc_array * rs_array isa GaussianState
+        @test all(i -> ((i >= 0) || isapprox(i, 0.0, atol = 1e-5)), real(eigvals(rs_array.covar .+ im*Omega)))
 
-        rspure_float32 = randstate(AbstractArray{Float32}, nmodes, pure = true)
-        @test all(i -> ((i >= 0) || isapprox(i, 0.0, atol = 1e-3)), real(eigvals(rspure_float32.covar .+ im*Omega)))
-        @test isapprox(Float64(purity(rspure_float32)), 1.0, atol = 1e-3)
+        rspure_array = randstate(Array, nmodes, pure = true)
+        @test all(i -> ((i >= 0) || isapprox(i, 0.0, atol = 1e-3)), real(eigvals(rspure_array.covar .+ im*Omega)))
+        @test isapprox(purity(rspure_array), 1.0, atol = 1e-3)
 
         rs_static = randstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, nmodes)
         rc_static = randchannel(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, nmodes)
@@ -55,7 +55,7 @@
 
         rspure_static = randstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, nmodes, pure = true)
         @test all(i -> ((i >= 0) || isapprox(i, 0.0, atol = 1e-5)), real(eigvals(Array(rspure_static.covar) .+ im*Omega)))
-        @test isapprox(purity(rspure_float32), 1.0, atol = 1e-5)
+        @test isapprox(purity(rspure_static), 1.0, atol = 1e-5)
     end
 
     @testset "random unitaries" begin
@@ -68,12 +68,12 @@
         @test isapprox(rupassive.symplectic', inv(rupassive.symplectic), atol = 1e-5)
         @test isapprox(rupassive.symplectic' * Omega * rupassive.symplectic, Omega, atol = 1e-5)
 
-        ru_float32 = randunitary(AbstractArray{Float32}, nmodes)
-        @test isapprox(ru_float32.symplectic' * Omega * ru_float32.symplectic, Omega, atol = 1e-5)
+        ru_array = randunitary(Array, nmodes)
+        @test isapprox(ru_array.symplectic' * Omega * ru_array.symplectic, Omega, atol = 1e-5)
 
-        rupassive_float32 = randunitary(nmodes, passive = true)
-        @test isapprox(rupassive_float32.symplectic', inv(rupassive_float32.symplectic), atol = 1e-5)
-        @test isapprox(rupassive_float32.symplectic' * Omega * rupassive_float32.symplectic, Omega, atol = 1e-5)
+        rupassive_array = randunitary(nmodes, passive = true)
+        @test isapprox(rupassive_array.symplectic', inv(rupassive_array.symplectic), atol = 1e-5)
+        @test isapprox(rupassive_array.symplectic' * Omega * rupassive_array.symplectic, Omega, atol = 1e-5)
 
         ru_static = randunitary(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, nmodes)
         @test isapprox(ru_static.symplectic' * Omega * ru_static.symplectic, Omega, atol = 1e-5)
@@ -89,8 +89,8 @@
         Omega = symplecticform(nmodes);
         @test all(i -> ((i >= 0) || isapprox(i, 0.0, atol = 1e-5)), real(eigvals(rc.noise .+ im*Omega .- im*rc.transform*Omega*rc.transform')))
 
-        rc_float32 = randchannel(AbstractArray{Float32}, nmodes)
-        @test all(i -> ((i >= 0) || isapprox(i, 0.0, atol = 1e-5)), real(eigvals(rc_float32.noise .+ im*Omega .- im*rc_float32.transform*Omega*rc_float32.transform')))
+        rc_array = randchannel(Array, nmodes)
+        @test all(i -> ((i >= 0) || isapprox(i, 0.0, atol = 1e-5)), real(eigvals(rc_array.noise .+ im*Omega .- im*rc_array.transform*Omega*rc_array.transform')))
 
         rc_static = randchannel(SVector{2*nmodes}, SMatrix{2*nmodes, 2*nmodes}, nmodes)
         @test all(i -> ((i >= 0) || isapprox(i, 0.0, atol = 1e-5)), real(eigvals(Array(rc_static.noise) .+ im*Omega .- im*Array(rc_static.transform)*Omega*Array(rc_static.transform)')))
