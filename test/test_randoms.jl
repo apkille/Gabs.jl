@@ -19,6 +19,9 @@
 
         S = randsymplectic(nmodes)
         @test isapprox(S' * Omega * S, Omega, atol = 1e-5)
+
+        S_float32 = randsymplectic(Array{Float32}, nmodes)
+        @test isapprox(S' * Omega * S, Omega, atol = 1e-5)
     end
 
     @testset "random states" begin

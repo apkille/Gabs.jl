@@ -100,7 +100,7 @@ function randsymplectic(nmodes::N; passive = false) where {N<:Int}
     return O * squeezes * O′
 end
 function randsymplectic(::Type{T}, nmodes::N; passive = false) where {T, N<:Int} 
-    symp = randsymplectic(nmodes, passive)
+    symp = randsymplectic(nmodes, passive = passive)
     return T(symp)
 end
 
