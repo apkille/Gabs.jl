@@ -19,7 +19,7 @@ ACTION_ERROR = lazy"The number of modes for the Gaussian operator
     does not match the number of modes for the Gaussian state."
 
 GENERALDYNE_ERROR = lazy"The number of modes for the measurement state
-    does not match the number of modes for the projected subsytem."
+    does not match the number of modes for the projected subsystem."
 
 WIGNER_ERROR = lazy"The length of your input array does not match the
     number of modes for the Gaussian state."
