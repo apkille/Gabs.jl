@@ -296,7 +296,7 @@ end
     ptrace([Tm=Vector{Float64}, Tc=Matrix{Float64},] state::GaussianState, idx<:Int)
     ptrace([Tm=Vector{Float64}, Tc=Matrix{Float64},] state::GaussianState, indices<:AbstractVector)
 
-Partial trace of a Gaussian state over a subsytem indicated by `idx`, or multiple subsystems
+Partial trace of a Gaussian state over a subsystem indicated by `idx`, or multiple subsystems
 indicated by `indices`.
 
 ## Example
