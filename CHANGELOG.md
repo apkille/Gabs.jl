@@ -1,6 +1,10 @@
 # News
 
-## v1.0.3 - dev
+## v1.1.1 - dev
+
+- Add a benchmark suite as a part of the Github workflows.
+
+## v1.1.0 - 2024-11-18
 
 - Add `prob` function for `Generaldyne` type.
 - Add features for random generation of Gaussian states, unitaries, and channels.
