@@ -2,73 +2,54 @@
 # Predefined Gaussian channels
 ##
 
-function displace(::Type{Td}, ::Type{Tt}, alpha::A, noise::N) where {Td,Tt,A<:Number,N}
-    disp =  Td(sqrt(2) * [real(alpha), imag(alpha)])
-    transform = Tt(Matrix{Float64}(I, 2, 2))
-    return GaussianChannel(disp, transform, Tt(noise), 1)
+function displace(::Type{Td}, ::Type{Tt}, repr::SymplecticRepr{N}, alpha::A, noise::M) where {Td,Tt,N<:Int,A,M}
+    disp, transform = _displace(repr, alpha)
+    return GaussianChannel(repr, Td(disp), Tt(transform), Tt(noise))
 end
-displace(::Type{T}, alpha::A, noise::N) where {T,A<:Number,N} = displace(T, T, alpha, noise)
-function displace(alpha::A, noise::N) where {A<:Number,N}
-    disp = sqrt(2) * [real(alpha), imag(alpha)]
-    transform = Matrix{Float64}(I, 2, 2)
-    return GaussianChannel(disp, transform, noise, 1)
+displace(::Type{T}, repr::SymplecticRepr{N}, alpha::A, noise::M) where {T,N<:Int,A,M} = displace(T, T, repr, alpha, noise)
+function displace(repr::SymplecticRepr{N}, alpha::A, noise::M) where {N<:Int,A,M}
+    disp, transform = _displace(repr, alpha)
+    return GaussianChannel(repr, disp, transform, noise)
 end
 
-function squeeze(::Type{Td}, ::Type{Tt}, r::R, theta::R, noise::N) where {Td,Tt,R<:Real,N}
-    disp = Td(zeros(2))
-    cr, sr = cosh(r), sinh(r)
-    t = sinh(r) * [cr-sr*cos(theta) sr*sin(theta); sr*sin(theta) cr+sr*cos(theta)]
-    transform = Tt(t)
-    return GaussianChannel(disp, transform, Tt(noise), 1)
+function squeeze(::Type{Td}, ::Type{Tt}, repr::SymplecticRepr{N}, r::R, theta::R, noise::M) where {Td,Tt,N<:Int,R,M}
+    disp, transform = _squeeze(repr, r, theta)
+    return GaussianChannel(repr, Td(disp), Tt(transform), Tt(noise))
 end
-squeeze(::Type{T}, r::R, theta::R, noise::N) where {T,R<:Real,N} = squeeze(T, T, r, theta, noise)
-function squeeze(r::R, theta::R, noise::N) where {R<:Real,N}
-    disp = zeros(2)
-    cr, sr = cosh(r), sinh(r)
-    transform = sinh(r) * [cr-sr*cos(theta) sr*sin(theta); sr*sin(theta) cr+sr*cos(theta)]
-    return GaussianChannel(disp, transform, noise, 1)
+squeeze(::Type{T}, repr::SymplecticRepr{N}, r::R, theta::R, noise::M) where {T,N<:Int,R,M} = squeeze(T, T, repr, r, theta, noise)
+function squeeze(repr::SymplecticRepr{N}, r::R, theta::R, noise::M) where {N<:Int,R,M}
+    disp, transform = _squeeze(repr, r, theta)
+    return GaussianChannel(repr, disp, transform, noise)
 end
 
-function twosqueeze(::Type{Td}, ::Type{Tt}, r::R, theta::R, noise::N) where {Td,Tt,R<:Real,N}
-    disp = Td(zeros(4))
-    cr, sr = cosh(r), sinh(r)
-    ct, st = cos(theta), sin(theta)
-    transform = Tt([cr 0.0 -sr*ct -sr*st; 0.0 cr -sr*st sr*ct; -sr*ct -sr*st cr 0.0; -sr*st sr*ct 0.0 cr])
-    return GaussianChannel(disp, transform, Tt(noise), 2)
+function twosqueeze(::Type{Td}, ::Type{Tt}, repr::SymplecticRepr{N}, r::R, theta::R, noise::M) where {Td,Tt,N<:Int,R,M}
+    disp, transform = _twosqueeze(repr, r, theta)
+    return GaussianChannel(repr, Td(disp), Tt(transform), Tt(noise))
 end
-twosqueeze(::Type{T}, r::R, theta::R, noise::N) where {T,R<:Real,N} = twosqueeze(T, T, r, theta, noise)
-function twosqueeze(r::R, theta::R, noise::N) where {R<:Real,N}
-    disp = zeros(4)
-    cr, sr = cosh(r), sinh(r)
-    ct, st = cos(theta), sin(theta)
-    transform = [cr 0.0 -sr*ct -sr*st; 0.0 cr -sr*st sr*ct; -sr*ct -sr*st cr 0.0; -sr*st sr*ct 0.0 cr]
-    return GaussianChannel(disp, transform, noise, 2)
+twosqueeze(::Type{T}, repr::SymplecticRepr{N}, r::R, theta::R, noise::M) where {T,N<:Int,R,M} = twosqueeze(T, T, repr, r, theta, noise)
+function twosqueeze(repr::SymplecticRepr{N}, r::R, theta::R, noise::M) where {N<:Int,R,M}
+    disp, transform = _twosqueeze(repr, r, theta)
+    return GaussianChannel(repr, disp, transform, noise)
 end
 
-function phaseshift(::Type{Td}, ::Type{Tt}, theta::R, noise::N) where {Td,Tt,R<:Real,N}
-    disp = Td(zeros(2))
-    transform = Tt([cos(theta) sin(theta); -sin(theta) cos(theta)])
-    return GaussianChannel(disp, transform, Tt(noise), 1)
+function phaseshift(::Type{Td}, ::Type{Tt}, repr::SymplecticRepr{N}, theta::R, noise::M) where {Td,Tt,N<:Int,R,M}
+    disp, transform = _phaseshift(repr, theta)
+    return GaussianChannel(repr, Td(disp), Tt(transform), Tt(noise))
 end
-phaseshift(::Type{T}, theta::R, noise::N) where {T,R<:Real,N} = phaseshift(T, T, theta, noise)
-function phaseshift(theta::R, noise::N) where {R<:Real,N}
-    disp = zeros(2)
-    transform = [cos(theta) sin(theta); -sin(theta) cos(theta)]
-    return GaussianChannel(disp, transform, noise, 1)
+phaseshift(::Type{T}, repr::SymplecticRepr{N}, theta::R, noise::M) where {T,N<:Int,R,M} = phaseshift(T, T, repr, theta, noise)
+function phaseshift(repr::SymplecticRepr{N}, theta::R, noise::M) where {N<:Int,R,M}
+    disp, transform = _phaseshift(repr, theta)
+    return GaussianChannel(repr, disp, transform, noise)
 end
 
-function beamsplitter(::Type{Td}, ::Type{Tt}, transmit::R, noise::N) where {Td,Tt,R<:Real,N}
-    disp = Td(zeros(4))
-    a1, a2 = sqrt(transmit), sqrt(1 - transmit)
-    transform = Tt([a1 0.0 a2 0.0; 0.0 a1 0.0 a2; -a2 0.0 a1 0.0; 0.0 -a2 0.0 a1])
-    return GaussianChannel(disp, transform, Tt(noise), 2)
+function beamsplitter(::Type{Td}, ::Type{Tt}, repr::SymplecticRepr{N}, transmit::R, noise::M) where {Td,Tt,N<:Int,R,M}
+    disp, transform = _beamsplitter(repr, transmit)
+    return GaussianChannel(repr, Td(disp), Tt(transform), Tt(noise))
 end
-beamsplitter(::Type{T}, transmit::R, noise::N) where {T,R<:Real,N} = beamsplitter(T, T, transmit, noise)
-function beamsplitter(transmit::R, noise::N) where {R<:Real,N}
-    disp = zeros(4)
-    a1, a2 = sqrt(transmit), sqrt(1 - transmit)
-    transform = [a1 0.0 a2 0.0; 0.0 a1 0.0 a2; -a2 0.0 a1 0.0; 0.0 -a2 0.0 a1]
-    return GaussianChannel(disp, transform, noise, 2)
+beamsplitter(::Type{T}, repr::SymplecticRepr{N}, transmit::R, noise::M) where {T,N<:Int,R,M} = beamsplitter(T, T, repr, transmit, noise)
+function beamsplitter(repr::SymplecticRepr{N}, transmit::R, noise::M) where {N<:Int,R,M}
+    disp, transform = _beamsplitter(repr, transmit)
+    return GaussianChannel(repr, disp, transform, noise)
 end
 
 """
@@ -94,8 +75,8 @@ and noise matrix ``\\mathbf{N}``, expressed respectively as follows:
 ## Example
 
 ```jldoctest
-julia> attenuator(pi/6, 3)
-GaussianChannel for 1 mode.
+julia> attenuator(CanonicalForm(1), pi/6, 3)
+GaussianChannel for 1 mode in CanonicalForm representation.
 displacement: 2-element Vector{Float64}:
  0.0
  0.0
@@ -107,18 +88,38 @@ noise: 2×2 Matrix{Float64}:
  0.0   0.75
 ```
 """
-function attenuator(::Type{Td}, ::Type{Tt}, theta::R, n::N) where {Td,Tt,R<:Real,N<:Int}
-    disp = zeros(2)
-    transform = cos(theta) * Matrix{Float64}(I, 2, 2)
-    noise = (sin(theta))^2 * n * Matrix{Float64}(I, 2, 2)
-    return GaussianChannel(Td(disp), Tt(transform), Tt(noise), 1)
+function attenuator(::Type{Td}, ::Type{Tt}, repr::SymplecticRepr{N}, theta::R, n::M) where {Td,Tt,N<:Int,R,M}
+    disp, transform, noise = _attenuator(repr, theta, n)
+    return GaussianChannel(repr, Td(disp), Tt(transform), Tt(noise))
 end
-attenuator(::Type{T}, theta::R, n::N) where {T,R<:Real,N<:Int} = attenuator(T, T, theta, n)
-function attenuator(theta::R, n::N) where {R<:Real,N<:Int}
-    disp = zeros(2)
-    transform = cos(theta) * Matrix{Float64}(I, 2, 2)
-    noise = (sin(theta))^2 * n * Matrix{Float64}(I, 2, 2)
-    return GaussianChannel(disp, transform, noise, 1)
+attenuator(::Type{T}, repr::SymplecticRepr{N}, theta::R, n::M) where {T,N<:Int,R,M} = attenuator(T, T, repr, theta, n)
+function attenuator(repr::SymplecticRepr{N}, theta::R, n::M) where {N<:Int,R,M}
+    disp, transform, noise = _attenuator(repr, theta, n)
+    return GaussianChannel(repr, disp, transform, noise)
+end
+function _attenuator(repr::CanonicalForm{N}, theta::R, n::M) where {N<:Int,R<:Real,M<:Int}
+    nmodes = repr.nmodes
+    disp = zeros(2*nmodes) 
+    transform = Matrix{Float64}(cos(theta) * I, 2*nmodes, 2*nmodes)
+    noise = Matrix{Float64}((sin(theta))^2 * n * I, 2*nmodes, 2*nmodes)
+    return disp, transform, noise
+end
+function _attenuator(repr::CanonicalForm{N}, theta::R, n::M) where {N<:Int,R<:Vector,M<:Vector}
+    nmodes = repr.nmodes
+    disp = zeros(2*nmodes) 
+    transform = zeros(2*nmodes, 2*nmodes)
+    noise = zeros(2*nmodes, 2*nmodes)
+    @inbounds for i in Base.OneTo(nmodes)
+        ct, st = cos(theta[i]), sin(theta[i])
+        ni = n[i]
+
+        transform[2*i-1, 2*i-1] = ct
+        transform[2*i, 2*i] = ct
+
+        noise[2*i-1, 2*i-1] = st^2 * ni
+        noise[2*i, 2*i] = st^2 * ni
+    end
+    return disp, transform, noise
 end
 
 """
@@ -144,8 +145,8 @@ and noise matrix ``\\mathbf{N}``, expressed respectively as follows:
 ## Example
 
 ```jldoctest
-julia> amplifier(2.0, 3)
-GaussianChannel for 1 mode.
+julia> amplifier(CanonicalForm(1), 2.0, 3)
+GaussianChannel for 1 mode in CanonicalForm representation.
 displacement: 2-element Vector{Float64}:
  0.0
  0.0
@@ -157,18 +158,38 @@ noise: 2×2 Matrix{Float64}:
   0.0     39.4623
 ```
 """
-function amplifier(::Type{Td}, ::Type{Tt}, r::R, n::N) where {Td,Tt,R<:Real,N<:Int}
-    disp = zeros(2)
-    transform = cosh(r) * Matrix{Float64}(I, 2, 2)
-    noise = (sinh(r))^2 * n * Matrix{Float64}(I, 2, 2)
-    return GaussianChannel(Td(disp), Tt(transform), Tt(noise), 1)
+function amplifier(::Type{Td}, ::Type{Tt}, repr::SymplecticRepr{N}, r::R, n::M) where {Td,Tt,N<:Int,R,M}
+    disp, transform, noise = _amplifier(repr, r, n)
+    return GaussianChannel(repr, Td(disp), Tt(transform), Tt(noise))
 end
-amplifier(::Type{T}, r::R, n::N) where {T,R<:Real,N<:Int} = amplifier(T, T, r, n)
-function amplifier(r::R, n::N) where {R<:Real,N<:Int}
-    disp = zeros(2)
-    transform = cosh(r) * Matrix{Float64}(I, 2, 2)
-    noise = (sinh(r))^2 * n * Matrix{Float64}(I, 2, 2)
-    return GaussianChannel(disp, transform, noise, 1)
+amplifier(::Type{T}, repr::SymplecticRepr{N}, r::R, n::M) where {T,N<:Int,R,M} = amplifier(T, T, repr, r, n)
+function amplifier(repr::SymplecticRepr{N}, r::R, n::M) where {N<:Int,R,M}
+    disp, transform, noise = _amplifier(repr, r, n)
+    return GaussianChannel(repr, disp, transform, noise)
+end
+function _amplifier(repr::CanonicalForm{N}, r::R, n::M) where {N<:Int,R<:Real,M<:Int}
+    nmodes = repr.nmodes
+    disp = zeros(2*nmodes) 
+    transform = Matrix{Float64}(cosh(r) * I, 2*nmodes, 2*nmodes)
+    noise = Matrix{Float64}((sinh(r))^2 * n * I, 2*nmodes, 2*nmodes)
+    return disp, transform, noise
+end
+function _amplifier(repr::CanonicalForm{N}, r::R, n::M) where {N<:Int,R<:Vector,M<:Vector}
+    nmodes = repr.nmodes
+    disp = zeros(2*nmodes) 
+    transform = zeros(2*nmodes, 2*nmodes)
+    noise = zeros(2*nmodes, 2*nmodes)
+    @inbounds for i in Base.OneTo(nmodes)
+        cr, sr = cos(r[i]), sin(r[i])
+        ni = n[i]
+
+        transform[2*i-1, 2*i-1] = cr
+        transform[2*i, 2*i] = cr
+
+        noise[2*i-1, 2*i-1] = sr^2 * ni
+        noise[2*i, 2*i] = sr^2 * ni
+    end
+    return disp, transform, noise
 end
 
 ##
@@ -176,17 +197,18 @@ end
 ##
 
 function tensor(::Type{Td}, ::Type{Tt}, op1::GaussianChannel, op2::GaussianChannel) where {Td,Tt}
-    disp′, transform′, noise′ = _tensor_fields(op1, op2)
-    return GaussianChannel(Td(disp′), Tt(transform′), Tt(noise′), op1.nmodes + op2.nmodes)
+    disp, transform, noise = _tensor(op1, op2)
+    return GaussianChannel(op1.repr + op2.repr, Td(disp), Tt(transform), Tt(noise))
 end
 tensor(::Type{T}, op1::GaussianChannel, op2::GaussianChannel) where {T} = tensor(T, T, op1, op2)
 function tensor(op1::GaussianChannel, op2::GaussianChannel)
-    disp′, transform′, noise′ = _tensor_fields(op1, op2)
-    return GaussianChannel(disp′, transform′, noise′, op1.nmodes + op2.nmodes)
+    disp, transform, noise = _tensor(op1, op2)
+    return GaussianChannel(op1.repr + op2.repr, disp, transform, noise)
 end
-function _tensor_fields(op1::GaussianChannel, op2::GaussianChannel)
+function _tensor(op1::GaussianChannel, op2::GaussianChannel)
     disp1, disp2 = op1.disp, op2.disp
-    length1, length2 = 2*op1.nmodes, 2*op2.nmodes
+    repr1, repr2 = op1.repr, op2.repr
+    length1, length2 = 2*repr1.nmodes, 2*repr2.nmodes
     slengths = length1 + length2
     trans1, trans2 = op1.transform, op2.transform
     # initialize direct sum of displacement vectors
