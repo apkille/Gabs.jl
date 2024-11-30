@@ -32,5 +32,20 @@ function symplecticform(repr::CanonicalForm{N}) where {N<:Int}
     end
     return Omega
 end
+function symplecticform(repr::BlockForm{N}) where {N<:Int}
+    nmodes = repr.nmodes
+    Omega = zeros(2*nmodes, 2*nmodes)
+    @inbounds for i in 1:nmodes, j in nmodes:2*nmodes
+        if isequal(i, j-nmodes)
+            Omega[i,j] = 1.0
+        end
+    end
+    @inbounds for i in nmodes:2*nmodes, j in 1:nmodes
+        if isequal(i-nmodes,j)
+            Omega[i, j] = -1.0
+        end
+    end
+    return Omega
+end
 symplecticform(::Type{T}, repr::SymplecticRepr{N}) where {T, N<:Int} = T(symplecticform(repr))
 
