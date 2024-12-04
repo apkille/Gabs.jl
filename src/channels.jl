@@ -53,7 +53,7 @@ function beamsplitter(basis::SymplecticBasis{N}, transmit::R, noise::M) where {N
 end
 
 """
-    attenuator([Td=Vector{Float64}, Tt=Matrix{Float64},] theta<:Real, n<:Int)
+    attenuator([Td=Vector{Float64}, Tt=Matrix{Float64},] basis::SymplecticBasis, theta<:Real, n<:Int)
 
 Gaussian channel describing the coupling of an input
 single mode Gaussian state and its environment via a beam splitter operation. The channel is paramatrized
@@ -123,7 +123,7 @@ function _attenuator(basis::QuadPairBasis{N}, theta::R, n::M) where {N<:Int,R<:V
 end
 
 """
-    amplifier([Td=Vector{Float64}, Tt=Matrix{Float64},] r<:Real, n<:Int)
+    amplifier([Td=Vector{Float64}, Tt=Matrix{Float64},] basis::SymplecticBasis, r<:Real, n<:Int)
 
 Gaussian channel describing the interaction of an input
 single mode Gaussian state and its environment via a two-mode squeezing operation. The channel is paramatrized

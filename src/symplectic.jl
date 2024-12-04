@@ -19,9 +19,9 @@ function Base.:(-)(repr1::R, repr2::R) where {R<:SymplecticBasis}
 end
 
 """
-    symplecticform([T = Matrix{Float64},] nmodes<:Int)
+    symplecticform([T = Matrix{Float64},] basis::SymplecticBasis)
 
-Compute the symplectic form matrix of size 2N x 2N, where N is given by `nmodes`.
+Compute the symplectic form matrix of size 2N x 2N corresponding to `basis`.
 """
 function symplecticform(basis::QuadPairBasis{N}) where {N<:Int}
     nmodes = basis.nmodes

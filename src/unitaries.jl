@@ -3,11 +3,11 @@
 ##
 
 """
-    displace([Tm=Vector{Float64}, Ts=Matrix{Float64}], alpha<:Number)
-    displace([Tm=Vector{Float64}, Ts=Matrix{Float64}], alpha<:Number, noise::Ts)
+    displace([Tm=Vector{Float64}, Ts=Matrix{Float64}], basis::SymplecticBasis, alpha<:Number)
+    displace([Tm=Vector{Float64}, Ts=Matrix{Float64}], basis::SymplecticBasis, alpha<:Number, noise::Ts)
 
 Gaussian operator that displaces the vacuum state into a coherent state, known
-as the displacement operator. The complex amplitude is given by `alpha`. Noise can
+as the displacement operator. The symplectic representation is given by `basis`. The complex amplitude is given by `alpha`. Noise can
 be added to the operation with `noise`.
 
 ## Mathematical description of a displacement operator
@@ -59,11 +59,11 @@ function _displace(basis::QuadPairBasis{N}, alpha::A) where {N<:Int,A<:Vector}
 end
 
 """
-    squeeze([Tm=Vector{Float64}, Ts=Matrix{Float64}], r<:Real, theta<:Real)
-    squeeze([Tm=Vector{Float64}, Ts=Matrix{Float64}], r<:Real, theta<:Real, noise::Ts)
+    squeeze([Tm=Vector{Float64}, Ts=Matrix{Float64}], basis::SymplecticBasis, r<:Real, theta<:Real)
+    squeeze([Tm=Vector{Float64}, Ts=Matrix{Float64}], basis::SymplecticBasis, r<:Real, theta<:Real, noise::Ts)
 
 Gaussian operator that squeezes the vacuum state into a squeezed state, known
-as the squeezing operator. The amplitude and phase squeezing parameters 
+as the squeezing operator. The symplectic representation is given by `basis`. The amplitude and phase squeezing parameters 
 are given by `r` and `theta`, respectively. Noise can be added to the operation
 with `noise`.
 
@@ -135,11 +135,11 @@ function _squeeze(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Vect
 end
 
 """
-    twosqueeze([Tm=Vector{Float64}, Ts=Matrix{Float64}], r<:Real, theta<:Real)
-    twosqueeze([Tm=Vector{Float64}, Ts=Matrix{Float64}], r<:Real, theta<:Real, noise::Ts)
+    twosqueeze([Tm=Vector{Float64}, Ts=Matrix{Float64}], basis::SymplecticBasis, r<:Real, theta<:Real)
+    twosqueeze([Tm=Vector{Float64}, Ts=Matrix{Float64}], basis::SymplecticBasis, r<:Real, theta<:Real, noise::Ts)
 
 Gaussian operator that squeezes a two-mode vacuum state into a two-mode squeezed state,
-known as the two-mode squeezing operator. The amplitude and phase squeezing parameters 
+known as the two-mode squeezing operator. The symplectic representation is given by `basis`. The amplitude and phase squeezing parameters 
 are given by `r` and `theta`, respectively. Noise can be added to the operation
 with `noise`.
 
@@ -241,11 +241,11 @@ function _twosqueeze(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:V
 end
 
 """
-    phaseshift([Tm=Vector{Float64}, Ts=Matrix{Float64}], theta<:Real)
-    phaseshift([Tm=Vector{Float64}, Ts=Matrix{Float64}], theta<:Real, noise::Ts)
+    phaseshift([Tm=Vector{Float64}, Ts=Matrix{Float64}], basis::SymplecticBasis, theta<:Real)
+    phaseshift([Tm=Vector{Float64}, Ts=Matrix{Float64}], basis::SymplecticBasis, theta<:Real, noise::Ts)
 
 Gaussian operator that rotates the phase of a given Gaussian mode by `theta`,
-as the phase shift operator. Noise can be added to the operation
+as the phase shift operator. The symplectic representation is given by `basis`. Noise can be added to the operation
 with `noise`.
 
 ## Mathematical description of a phase shift operator
@@ -316,12 +316,12 @@ function _phaseshift(basis::QuadPairBasis{N}, theta::R) where {N<:Int,R<:Vector}
 end
 
 """
-    beamsplitter([Tm=Vector{Float64}, Ts=Matrix{Float64}], transmit<:Real)
-    beamsplitter([Tm=Vector{Float64}, Ts=Matrix{Float64}], transmit<:Real, noise::Ts)
+    beamsplitter([Tm=Vector{Float64}, Ts=Matrix{Float64}], basis::SymplecticBasis, transmit<:Real)
+    beamsplitter([Tm=Vector{Float64}, Ts=Matrix{Float64}], basis::SymplecticBasis, transmit<:Real, noise::Ts)
 
 Gaussian operator that serves as the beam splitter transformation of a
-two-mode Gaussian state, known as the beam splitter operator. The transmittivity
-of the operator is given by `transmit`. Noise can be added to the operation
+two-mode Gaussian state, known as the beam splitter operator. The symplectic representation is given
+by `basis`. The transmittivity of the operator is given by `transmit`. Noise can be added to the operation
 with `noise`.
 
 ## Mathematical description of a beam splitter operator

@@ -3,9 +3,9 @@
 ##
 
 """
-    vacuumstate([Tm=Vector{Float64}, Tc=Matrix{Float64}])
+    vacuumstate([Tm=Vector{Float64}, Tc=Matrix{Float64}], basis::SymplecticBasis)
 
-Gaussian state with zero photons, known as the vacuum state.
+Gaussian state with zero photons, known as the vacuum state. The symplectic representation is defined by `basis`.
 
 ## Mathematical description of a vacuum state
 
@@ -46,10 +46,10 @@ function _vacuumstate(basis::SymplecticBasis{N}) where {N<:Int}
 end
 
 """
-    thermalstate([Tm=Vector{Float64}, Tc=Matrix{Float64},] photons<:Int)
+    thermalstate([Tm=Vector{Float64}, Tc=Matrix{Float64},] basis::SymplecticBasis, photons<:Int)
 
-Gaussian state at thermal equilibrium, known as the thermal state. The mean photon number of the
-state is given by `photons`.
+Gaussian state at thermal equilibrium, known as the thermal state. The symplectic representation
+is defined by `basis`. The mean photon number of the state is given by `photons`.
 
 ## Mathematical description of a thermal state
 
@@ -102,10 +102,11 @@ function _thermalstate(basis::QuadPairBasis{N}, photons::P) where {N<:Int,P<:Vec
 end
 
 """
-    coherentstate([Tm=Vector{Float64}, Tc=Matrix{Float64},] alpha<:Number)
+    coherentstate([Tm=Vector{Float64}, Tc=Matrix{Float64},] basis::SymplecticBasis, alpha<:Number)
 
 Gaussian state that is the quantum analogue of a monochromatic electromagnetic field, known
-as the coherent state. The complex amplitude of the state is given by `alpha`.
+as the coherent state. The symplectic representation is defined by `basis`.
+The complex amplitude of the state is given by `alpha`.
 
 ## Mathematical description of a coherent state
 
@@ -154,10 +155,10 @@ function _coherentstate(basis::QuadPairBasis{N}, alpha::A) where {N<:Int,A<:Vect
 end
 
 """
-    squeezedstate([Tm=Vector{Float64}, Tc=Matrix{Float64},] r<:Real, theta<:Real)
+    squeezedstate([Tm=Vector{Float64}, Tc=Matrix{Float64},] basis::SymplecticBasis, r<:Real, theta<:Real)
 
 Gaussian state with quantum uncertainty in its phase and amplitude, known as
-the squeezed state. The amplitude and phase squeezing parameters are given by `r`
+the squeezed state. The symplectic representation is defined by `basis`. The amplitude and phase squeezing parameters are given by `r`
 and `theta`, respectively.
 
 ## Mathematical description of a squeezed state
@@ -226,10 +227,10 @@ function _squeezedstate(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R
 end
 
 """
-    eprstate([Tm=Vector{Float64}, Tc=Matrix{Float64},] r<:Real, theta<:Real)
+    eprstate([Tm=Vector{Float64}, Tc=Matrix{Float64},] basis::SymplecticBasis, r<:Real, theta<:Real)
 
-Gaussian state that is a two-mode squeezed state, known as the Einstein-Podolski-Rosen (EPR) state.
-The amplitude and phase squeezing parameters are given by `r` and `theta`, respectively.
+Gaussian state that is a two-mode squeezed state, known as the Einstein-Podolski-Rosen (EPR) state. The symplectic
+representation is defined by `basis`. The amplitude and phase squeezing parameters are given by `r` and `theta`, respectively.
 
 ## Mathematical description of an EPR state
 

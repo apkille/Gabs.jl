@@ -1,7 +1,7 @@
 """
-    randstate([Tm=Vector{Float64}, Tc=Matrix{Float64},] nmodes<:Int; pure=false)
+    randstate([Tm=Vector{Float64}, Tc=Matrix{Float64},] basis::SymplecticBasis; pure=false)
 
-Calculate a random Gaussian state.
+Calculate a random Gaussian state in symplectic representation defined by `basis`.
 """
 function randstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}; pure = false) where {Tm,Tc,N<:Int}
     mean, covar = _randstate(basis, pure)
@@ -32,9 +32,9 @@ function _randstate(basis::QuadPairBasis{N}, pure) where {N<:Int}
 end
 
 """
-    randunitary([Td=Vector{Float64}, Ts=Matrix{Float64},] nmodes<:Int; passive=false)
+    randunitary([Td=Vector{Float64}, Ts=Matrix{Float64},] basis::SymplecticBasis; passive=false)
 
-Calculate a random Gaussian unitary operator.
+Calculate a random Gaussian unitary operator in symplectic representation defined by `basis`.
 """
 function randunitary(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}; passive = false) where {Td,Ts,N<:Int}
     disp, symp = _randunitary(basis, passive)
@@ -53,9 +53,9 @@ function _randunitary(basis::SymplecticBasis{N}, passive) where {N<:Int}
 end
 
 """
-    randchannel([Td=Vector{Float64}, Tt=Matrix{Float64},] nmodes<:Int)
+    randchannel([Td=Vector{Float64}, Tt=Matrix{Float64},] basis::SymplecticBasis)
 
-Calculate a random Gaussian channel.
+Calculate a random Gaussian channel in symplectic representation defined by `basis`.
 """
 function randchannel(::Type{Td}, ::Type{Tt}, basis::SymplecticBasis{N}) where {Td,Tt,N<:Int}
     disp, transform, noise = _randchannel(basis)
@@ -80,9 +80,9 @@ function _randchannel(basis::SymplecticBasis{N}) where {N<:Int}
 end
 
 """
-    randsymplectic([T=Matrix{Float64},] nmodes<:Int, passive=false)
+    randsymplectic([T=Matrix{Float64},] basis::SymplecticBasis, passive=false)
 
-Calculate a random symplectic matrix of size `2*nmodes x 2*nmodes`.
+Calculate a random symplectic matrix in symplectic representation defined by `basis`.
 """
 function randsymplectic(basis::QuadPairBasis{N}; passive = false) where {N<:Int}
     nmodes = basis.nmodes
