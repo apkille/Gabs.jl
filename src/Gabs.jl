@@ -5,7 +5,7 @@ using BlockArrays: BlockedArray, BlockArray, Block, mortar
 import LinearAlgebra
 using LinearAlgebra: I, det, mul!, diagm, diag, qr
 
-import QuantumInterface: Basis, StateVector, AbstractOperator, apply!, tensor, ⊗
+import QuantumInterface: StateVector, AbstractOperator, apply!, tensor, ⊗
 
 export 
     # types

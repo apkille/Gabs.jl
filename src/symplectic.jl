@@ -1,4 +1,4 @@
-abstract type SymplecticBasis{N} <: Basis end
+abstract type SymplecticBasis{N} end
 
 struct QuadPairBasis{N} <: SymplecticBasis{N}
     nmodes::N
