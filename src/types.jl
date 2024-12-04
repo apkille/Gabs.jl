@@ -3,9 +3,9 @@ Defines a Gaussian state for an N-mode bosonic system over a 2N-dimensional phas
 
 ## Fields
 
+- `basis`: Symplectic basis for Gaussian state.
 - `mean`: The mean vector of length 2N.
 - `covar`: The covariance matrix of size 2N x 2N.
-- `nmodes`: The number of modes N of the Gaussian state.
 
 ## Mathematical description of a Gaussian state
 
@@ -17,8 +17,8 @@ the Wigner representation of a Gaussian state is a Gaussian function.
 ## Example
 
 ```jldoctest
-julia> coherentstate(1.0+im)
-GaussianState for 1 mode.
+julia> coherentstate(QuadPairBasis(1), 1.0+im)
+GaussianState for 1 mode in QuadPairBasis representation.
 mean: 2-element Vector{Float64}:
  1.4142135623730951
  1.4142135623730951
@@ -27,19 +27,18 @@ covariance: 2×2 Matrix{Float64}:
  0.0  1.0
 ```
 """
-struct GaussianState{M,V,N<:Int} <: StateVector{M,V}
+struct GaussianState{B<:SymplecticBasis,M,V} <: StateVector{M,V}
+    basis::B
     mean::M
     covar::V
-    nmodes::N
-    function GaussianState(m::M, v::V, n::N) where {M,V,N}
-        all(size(v) .== length(m) .== 2*n) || throw(DimensionMismatch(STATE_ERROR))
-        return new{M,V,N}(m, v, n)
+    function GaussianState(b::B, m::M, v::V) where {B,M,V}
+        all(size(v) .== length(m) .== 2*(b.nmodes)) || throw(DimensionMismatch(STATE_ERROR))
+        return new{B,M,V}(b, m, v)
     end
 end
-GaussianState(mean::M, covar::V) where {M,V} = GaussianState(mean, covar, Int(length(mean)/2))
 
-Base.:(==)(x::GaussianState, y::GaussianState) = x.mean == y.mean && x.covar == y.covar
-Base.isapprox(x::GaussianState, y::GaussianState) = isapprox(x.mean,y.mean) && isapprox(x.covar,y.covar)
+Base.:(==)(x::GaussianState, y::GaussianState) = x.basis == y.basis && x.mean == y.mean && x.covar == y.covar
+Base.isapprox(x::GaussianState, y::GaussianState) = x.basis == y.basis && isapprox(x.mean,y.mean) && isapprox(x.covar,y.covar)
 function Base.show(io::IO, mime::MIME"text/plain", x::GaussianState)
     Base.summary(io, x)
     print(io, "\nmean: ")
@@ -54,9 +53,9 @@ Defines a Gaussian unitary for an N-mode bosonic system over a 2N-dimensional ph
 
 ## Fields
 
+- `basis`: Symplectic basis for Gaussian unitary.
 - `disp`: The displacement vector of length 2N.
 - `symplectic`: The symplectic matrix of size 2N x 2N.
-- `nmodes`: The number of modes N for the Gaussian unitary.
 
 ## Mathematical description of a Gaussian unitary
 
@@ -75,8 +74,8 @@ the statistical moments of the Gaussian state:
 ## Example
 
 ```jldoctest
-julia> displace(1.0+im)
-GaussianUnitary for 1 mode.
+julia> displace(QuadPairBasis(1), 1.0+im)
+GaussianUnitary for 1 mode in QuadPairBasis representation.
 displacement: 2-element Vector{Float64}:
  1.4142135623730951
  1.4142135623730951
@@ -85,19 +84,18 @@ symplectic: 2×2 Matrix{Float64}:
  0.0  1.0
 ```
 """
-struct GaussianUnitary{D,S,N<:Int} <: AbstractOperator{D,S}
+struct GaussianUnitary{B<:SymplecticBasis,D,S} <: AbstractOperator{D,S}
+    basis::B
     disp::D
     symplectic::S
-    nmodes::N
-    function GaussianUnitary(d::D, s::S, n::N) where {D,S,N}
-        all(size(s) .== length(d) .== 2*n) || throw(DimensionMismatch(UNITARY_ERROR))
-        return new{D,S,N}(d, s, n)
+    function GaussianUnitary(b::B, d::D, s::S) where {B,D,S}
+        all(size(s) .== length(d) .== 2*(b.nmodes)) || throw(DimensionMismatch(UNITARY_ERROR))
+        return new{B,D,S}(b, d, s)
     end
 end
-GaussianUnitary(disp::D, symplectic::S) where {D,S} = GaussianUnitary(disp, symplectic, Int(length(disp)/2))
 
-Base.:(==)(x::GaussianUnitary, y::GaussianUnitary) = x.disp == y.disp && x.symplectic == y.symplectic
-Base.isapprox(x::GaussianUnitary, y::GaussianUnitary) = isapprox(x.disp, y.disp) && isapprox(x.symplectic, y.symplectic)
+Base.:(==)(x::GaussianUnitary, y::GaussianUnitary) = x.basis == y.basis && x.disp == y.disp && x.symplectic == y.symplectic
+Base.isapprox(x::GaussianUnitary, y::GaussianUnitary) = x.basis == y.basis && isapprox(x.disp, y.disp) && isapprox(x.symplectic, y.symplectic)
 function Base.show(io::IO, mime::MIME"text/plain", x::GaussianUnitary)
     Base.summary(io, x)
     print(io, "\ndisplacement: ")
@@ -107,15 +105,15 @@ function Base.show(io::IO, mime::MIME"text/plain", x::GaussianUnitary)
 end
 
 function Base.:(*)(op::GaussianUnitary, state::GaussianState)
+    op.basis == state.basis || throw(DimensionMismatch(ACTION_ERROR))
     d, S, = op.disp, op.symplectic
-    op.nmodes == state.nmodes || throw(DimensionMismatch(ACTION_ERROR))
     mean′ = S * state.mean .+ d
     covar′ = S * state.covar * transpose(S)
-    return GaussianState(mean′, covar′, state.nmodes)
+    return GaussianState(state.basis, mean′, covar′)
 end
 function apply!(state::GaussianState, op::GaussianUnitary)
+    op.basis == state.basis || throw(DimensionMismatch(ACTION_ERROR))
     d, S = op.disp, op.symplectic
-    state.nmodes == op.nmodes || throw(DimensionMismatch(ACTION_ERROR))
     state.mean .= S * state.mean .+ d
     state.covar .= S * state.covar * transpose(S)
     return state
@@ -126,10 +124,10 @@ Defines a Gaussian channel for an N-mode bosonic system over a 2N-dimensional ph
 
 ## Fields
 
+- `basis`: Symplectic representation for Gaussian channel.
 - `disp`: The displacement vector of length 2N.
 - `transform`: The transformation matrix of size 2N x 2N.
 - `noise`: The noise matrix of size 2N x 2N.
-- `nmodes`: The number of modes N for the Gaussian channel.
 
 ## Mathematical description of a Gaussian channel
 
@@ -150,8 +148,8 @@ described by its maps on the statistical moments of the Gaussian state:
 ```jldoctest
 julia> noise = [1.0 -3.0; 4.0 2.0];
 
-julia> displace(1.0+im, noise)
-GaussianChannel for 1 mode.
+julia> displace(QuadPairBasis(1), 1.0+im, noise)
+GaussianChannel for 1 mode in QuadPairBasis representation.
 displacement: 2-element Vector{Float64}:
  1.4142135623730951
  1.4142135623730951
@@ -163,20 +161,19 @@ noise: 2×2 Matrix{Float64}:
  4.0   2.0
 ```
 """
-struct GaussianChannel{D,T,N<:Int} <: AbstractOperator{D,T}
+struct GaussianChannel{B<:SymplecticBasis,D,T} <: AbstractOperator{D,T}
+    basis::B
     disp::D
     transform::T
     noise::T
-    nmodes::N
-    function GaussianChannel(d::D, t::T, n::T, m::N) where {D,T,N}
-        all(length(d) .== size(t) .== size(n) .== 2*m) || throw(DimensionMismatch(CHANNEL_ERROR))
-        return new{D,T,N}(d, t, n, m)
+    function GaussianChannel(b::B, d::D, t::T, n::T) where {B,D,T}
+        all(length(d) .== size(t) .== size(n) .== 2*(b.nmodes)) || throw(DimensionMismatch(CHANNEL_ERROR))
+        return new{B,D,T}(b, d, t, n)
     end
 end
-GaussianChannel(disp::D, transform::T, noise::T) where {D,T} = GaussianChannel(disp, transform, noise, Int(length(disp)/2))
 
-Base.:(==)(x::GaussianChannel, y::GaussianChannel) = x.disp == y.disp && x.transform == y.transform && x.noise == y.noise
-Base.isapprox(x::GaussianChannel, y::GaussianChannel) = isapprox(x.disp, y.disp) && isapprox(x.transform, y.transform) && isapprox(x.noise, y.noise)
+Base.:(==)(x::GaussianChannel, y::GaussianChannel) = x.basis == y.basis && x.disp == y.disp && x.transform == y.transform && x.noise == y.noise
+Base.isapprox(x::GaussianChannel, y::GaussianChannel) = x.basis == y.basis && isapprox(x.disp, y.disp) && isapprox(x.transform, y.transform) && isapprox(x.noise, y.noise)
 function Base.show(io::IO, mime::MIME"text/plain", x::GaussianChannel)
     Base.summary(io, x)
     print(io, "\ndisplacement: ")
@@ -188,24 +185,28 @@ function Base.show(io::IO, mime::MIME"text/plain", x::GaussianChannel)
 end
 function Base.summary(io::IO, x::Union{GaussianState,GaussianUnitary,GaussianChannel})
     printstyled(io, nameof(typeof(x)); color=:blue)
-    modenum = x.nmodes
+    basis = x.basis
+    modenum = basis.nmodes
     if isone(modenum)
-        print(io, " for $(modenum) mode.")
+        print(io, " for $(modenum) mode ")
     else
-        print(io, " for $(modenum) modes.")
+        print(io, " for $(modenum) modes ")
     end
+    print(io, "in ")
+    printstyled(io, "$(nameof(typeof(basis)))"; color = :blue)
+    print(io, " representation.")
 end
 
 function Base.:(*)(op::GaussianChannel, state::GaussianState)
+    op.basis == state.basis || throw(DimensionMismatch(ACTION_ERROR))
     d, T, N = op.disp, op.transform, op.noise
-    op.nmodes == state.nmodes || throw(DimensionMismatch(ACTION_ERROR))
     mean′ = T * state.mean .+ d
     covar′ = T * state.covar * transpose(T) .+ N
-    return GaussianState(mean′, covar′, state.nmodes)
+    return GaussianState(state.basis, mean′, covar′)
 end
 function apply!(state::GaussianState, op::GaussianChannel)
+    op.basis == state.basis || throw(DimensionMismatch(ACTION_ERROR))
     d, T, N = op.disp, op.transform, op.noise
-    state.nmodes == op.nmodes || throw(DimensionMismatch(ACTION_ERROR))
     state.mean .= T * state.mean .+ d
     state.covar .= T * state.covar * transpose(T) .+ N
     return state
