@@ -26,8 +26,8 @@ matrix ``\\mathbf{S}``, expressed respectively as follows:
 ## Example
 
 ```jldoctest
-julia> displace(CanonicalForm(1), 1.0+im)
-GaussianUnitary for 1 mode in CanonicalForm representation.
+julia> displace(QuadPairBasis(1), 1.0+im)
+GaussianUnitary for 1 mode in QuadPairBasis representation.
 displacement: 2-element Vector{Float64}:
  1.4142135623730951
  1.4142135623730951
@@ -36,23 +36,23 @@ symplectic: 2×2 Matrix{Float64}:
  0.0  1.0
 ```
 """
-function displace(::Type{Td}, ::Type{Ts}, repr::SymplecticRepr{N}, alpha::A) where {Td,Ts,N<:Int,A}
-    disp, symplectic = _displace(repr, alpha)
-    return GaussianUnitary(repr, Td(disp), Ts(symplectic))
+function displace(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}, alpha::A) where {Td,Ts,N<:Int,A}
+    disp, symplectic = _displace(basis, alpha)
+    return GaussianUnitary(basis, Td(disp), Ts(symplectic))
 end
-displace(::Type{T}, repr::SymplecticRepr{N}, alpha::A) where {T,N<:Int,A} = displace(T, T, repr, alpha)
-function displace(repr::SymplecticRepr{N}, alpha::A) where {N<:Int,A}
-    disp, symplectic = _displace(repr, alpha)
-    return GaussianUnitary(repr, disp, symplectic)
+displace(::Type{T}, basis::SymplecticBasis{N}, alpha::A) where {T,N<:Int,A} = displace(T, T, basis, alpha)
+function displace(basis::SymplecticBasis{N}, alpha::A) where {N<:Int,A}
+    disp, symplectic = _displace(basis, alpha)
+    return GaussianUnitary(basis, disp, symplectic)
 end
-function _displace(repr::CanonicalForm{N}, alpha::A) where {N<:Int,A<:Number}
-    nmodes = repr.nmodes
+function _displace(basis::QuadPairBasis{N}, alpha::A) where {N<:Int,A<:Number}
+    nmodes = basis.nmodes
     disp = repeat([sqrt(2)*real(alpha), sqrt(2)*imag(alpha)], nmodes)
     symplectic = Matrix{Float64}(I, 2*nmodes, 2*nmodes)
     return disp, symplectic
 end
-function _displace(repr::CanonicalForm{N}, alpha::A) where {N<:Int,A<:Vector}
-    nmodes = repr.nmodes
+function _displace(basis::QuadPairBasis{N}, alpha::A) where {N<:Int,A<:Vector}
+    nmodes = basis.nmodes
     disp = sqrt(2) * reinterpret(Float64, alpha)
     symplectic = Matrix{Float64}(I, 2*nmodes, 2*nmodes)
     return disp, symplectic
@@ -86,8 +86,8 @@ where ``\\mathbf{R}(\\theta)`` is the rotation matrix.
 ## Example
 
 ```jldoctest
-julia> squeeze(CanonicalForm(1), 0.25, pi/4)
-GaussianUnitary for 1 mode in CanonicalForm representation.
+julia> squeeze(QuadPairBasis(1), 0.25, pi/4)
+GaussianUnitary for 1 mode in QuadPairBasis representation.
 displacement: 2-element Vector{Float64}:
  0.0
  0.0
@@ -96,17 +96,17 @@ symplectic: 2×2 Matrix{Float64}:
  -0.178624   1.21004
 ```
 """
-function squeeze(::Type{Td}, ::Type{Ts}, repr::SymplecticRepr{N}, r::R, theta::R) where {Td,Ts,N<:Int,R}
-    disp, symplectic = _squeeze(repr, r, theta)
-    return GaussianUnitary(repr, Td(disp), Ts(symplectic))
+function squeeze(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}, r::R, theta::R) where {Td,Ts,N<:Int,R}
+    disp, symplectic = _squeeze(basis, r, theta)
+    return GaussianUnitary(basis, Td(disp), Ts(symplectic))
 end
-squeeze(::Type{T}, repr::SymplecticRepr{N}, r::R, theta::R) where {T,N<:Int,R} = squeeze(T, T, repr, r, theta)
-function squeeze(repr::SymplecticRepr{N}, r::R, theta::R) where {N<:Int, R}
-    disp, symplectic = _squeeze(repr, r, theta)
-    return GaussianUnitary(repr, disp, symplectic)
+squeeze(::Type{T}, basis::SymplecticBasis{N}, r::R, theta::R) where {T,N<:Int,R} = squeeze(T, T, basis, r, theta)
+function squeeze(basis::SymplecticBasis{N}, r::R, theta::R) where {N<:Int, R}
+    disp, symplectic = _squeeze(basis, r, theta)
+    return GaussianUnitary(basis, disp, symplectic)
 end
-function _squeeze(repr::CanonicalForm{N}, r::R, theta::R) where {N<:Int,R<:Real}
-    nmodes = repr.nmodes
+function _squeeze(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Real}
+    nmodes = basis.nmodes
     disp = zeros(2*nmodes)
     cr, sr = cosh(r), sinh(r)
     ct, st = cos(theta), sin(theta)
@@ -119,8 +119,8 @@ function _squeeze(repr::CanonicalForm{N}, r::R, theta::R) where {N<:Int,R<:Real}
     end
     return disp, symplectic
 end
-function _squeeze(repr::CanonicalForm{N}, r::R, theta::R) where {N<:Int,R<:Vector}
-    nmodes = repr.nmodes
+function _squeeze(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Vector}
+    nmodes = basis.nmodes
     disp = zeros(2*nmodes)
     symplectic = zeros(2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
@@ -165,8 +165,8 @@ where ``\\mathbf{R}(\\theta)`` is the rotation matrix.
 ## Example
 
 ```jldoctest
-julia> twosqueeze(CanonicalForm(2), 0.25, pi/4)
-GaussianUnitary for 2 modes in CanonicalForm representation.
+julia> twosqueeze(QuadPairBasis(2), 0.25, pi/4)
+GaussianUnitary for 2 modes in QuadPairBasis representation.
 displacement: 4-element Vector{Float64}:
  0.0
  0.0
@@ -179,17 +179,17 @@ symplectic: 4×4 Matrix{Float64}:
  -0.178624   0.178624   0.0        1.03141
 ```
 """
-function twosqueeze(::Type{Td}, ::Type{Ts}, repr::SymplecticRepr{N}, r::R, theta::R) where {Td,Ts,N<:Int,R}
-    disp, symplectic = _twosqueeze(repr, r, theta)
-    return GaussianUnitary(repr, Td(disp), Ts(symplectic))
+function twosqueeze(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}, r::R, theta::R) where {Td,Ts,N<:Int,R}
+    disp, symplectic = _twosqueeze(basis, r, theta)
+    return GaussianUnitary(basis, Td(disp), Ts(symplectic))
 end
-twosqueeze(::Type{T}, repr::SymplecticRepr{N}, r::R, theta::R) where {T,N<:Int,R} = twosqueeze(T, T, repr, r, theta)
-function twosqueeze(repr::SymplecticRepr{N}, r::R, theta::R) where {N<:Int,R}
-    disp, symplectic = _twosqueeze(repr, r, theta)
-    return GaussianUnitary(repr, disp, symplectic)
+twosqueeze(::Type{T}, basis::SymplecticBasis{N}, r::R, theta::R) where {T,N<:Int,R} = twosqueeze(T, T, basis, r, theta)
+function twosqueeze(basis::SymplecticBasis{N}, r::R, theta::R) where {N<:Int,R}
+    disp, symplectic = _twosqueeze(basis, r, theta)
+    return GaussianUnitary(basis, disp, symplectic)
 end
-function _twosqueeze(repr::CanonicalForm{N}, r::R, theta::R) where {N<:Int,R<:Real}
-    nmodes = repr.nmodes
+function _twosqueeze(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Real}
+    nmodes = basis.nmodes
     disp = zeros(2*nmodes)
     cr, sr = cosh(r), sinh(r)
     ct, st = cos(theta), sin(theta)
@@ -213,8 +213,8 @@ function _twosqueeze(repr::CanonicalForm{N}, r::R, theta::R) where {N<:Int,R<:Re
     end
     return disp, symplectic
 end
-function _twosqueeze(repr::CanonicalForm{N}, r::R, theta::R) where {N<:Int,R<:Vector}
-    nmodes = repr.nmodes
+function _twosqueeze(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Vector}
+    nmodes = basis.nmodes
     disp = zeros(2*nmodes)
     symplectic = zeros(2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
@@ -269,8 +269,8 @@ matrix ``\\mathbf{S}``, expressed respectively as follows:
 ## Example
 
 ```jldoctest
-julia> phaseshift(CanonicalForm(1), 3pi/4)
-GaussianUnitary for 1 mode in CanonicalForm representation.
+julia> phaseshift(QuadPairBasis(1), 3pi/4)
+GaussianUnitary for 1 mode in QuadPairBasis representation.
 displacement: 2-element Vector{Float64}:
  0.0
  0.0
@@ -279,17 +279,17 @@ symplectic: 2×2 Matrix{Float64}:
  -0.707107  -0.707107
 ```
 """
-function phaseshift(::Type{Td}, ::Type{Ts}, repr::SymplecticRepr{N}, theta::R) where {Td,Ts,N<:Int,R}
-    disp, symplectic = _phaseshift(repr, theta)
-    return GaussianUnitary(repr, Td(disp), Ts(symplectic))
+function phaseshift(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}, theta::R) where {Td,Ts,N<:Int,R}
+    disp, symplectic = _phaseshift(basis, theta)
+    return GaussianUnitary(basis, Td(disp), Ts(symplectic))
 end
-phaseshift(::Type{T}, repr::SymplecticRepr{N}, theta::R) where {T,N<:Int,R} = phaseshift(T, T, repr, theta)
-function phaseshift(repr::SymplecticRepr{N}, theta::R) where {N<:Int,R}
-    disp, symplectic = _phaseshift(repr, theta)
-    return GaussianUnitary(repr, disp, symplectic)
+phaseshift(::Type{T}, basis::SymplecticBasis{N}, theta::R) where {T,N<:Int,R} = phaseshift(T, T, basis, theta)
+function phaseshift(basis::SymplecticBasis{N}, theta::R) where {N<:Int,R}
+    disp, symplectic = _phaseshift(basis, theta)
+    return GaussianUnitary(basis, disp, symplectic)
 end
-function _phaseshift(repr::CanonicalForm{N}, theta::R) where {N<:Int,R}
-    nmodes = repr.nmodes
+function _phaseshift(basis::QuadPairBasis{N}, theta::R) where {N<:Int,R}
+    nmodes = basis.nmodes
     disp = zeros(2*nmodes)
     ct, st = cos(theta), sin(theta)
     symplectic = zeros(2*nmodes, 2*nmodes)
@@ -301,8 +301,8 @@ function _phaseshift(repr::CanonicalForm{N}, theta::R) where {N<:Int,R}
     end
     return disp, symplectic
 end
-function _phaseshift(repr::CanonicalForm{N}, theta::R) where {N<:Int,R<:Vector}
-    nmodes = repr.nmodes
+function _phaseshift(basis::QuadPairBasis{N}, theta::R) where {N<:Int,R<:Vector}
+    nmodes = basis.nmodes
     disp = zeros(2*nmodes)
     symplectic = zeros(2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
@@ -345,8 +345,8 @@ matrix ``\\mathbf{S}``, expressed respectively as follows:
 ## Example
 
 ```jldoctest
-julia> beamsplitter(CanonicalForm(2), 0.75)
-GaussianUnitary for 2 modes in CanonicalForm representation.
+julia> beamsplitter(QuadPairBasis(2), 0.75)
+GaussianUnitary for 2 modes in QuadPairBasis representation.
 displacement: 4-element Vector{Float64}:
  0.0
  0.0
@@ -359,17 +359,17 @@ symplectic: 4×4 Matrix{Float64}:
   0.0       -0.5       0.0       0.866025
 ```
 """
-function beamsplitter(::Type{Td}, ::Type{Ts}, repr::SymplecticRepr{N}, transmit::R) where {Td,Ts,N<:Int,R}
-    disp, symplectic = _beamsplitter(repr, transmit)
-    return GaussianUnitary(repr, Td(disp), Ts(symplectic))
+function beamsplitter(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}, transmit::R) where {Td,Ts,N<:Int,R}
+    disp, symplectic = _beamsplitter(basis, transmit)
+    return GaussianUnitary(basis, Td(disp), Ts(symplectic))
 end
-beamsplitter(::Type{T}, repr::SymplecticRepr{N}, transmit::R) where {T,N<:Int,R} = beamsplitter(T, T, repr, transmit)
-function beamsplitter(repr::SymplecticRepr{N}, transmit::R) where {N<:Int,R}
-    disp, symplectic = _beamsplitter(repr, transmit)
-    return GaussianUnitary(repr, disp, symplectic)
+beamsplitter(::Type{T}, basis::SymplecticBasis{N}, transmit::R) where {T,N<:Int,R} = beamsplitter(T, T, basis, transmit)
+function beamsplitter(basis::SymplecticBasis{N}, transmit::R) where {N<:Int,R}
+    disp, symplectic = _beamsplitter(basis, transmit)
+    return GaussianUnitary(basis, disp, symplectic)
 end
-function _beamsplitter(repr::CanonicalForm{N}, transmit::R) where {N<:Int,R<:Real}
-    nmodes = repr.nmodes
+function _beamsplitter(basis::QuadPairBasis{N}, transmit::R) where {N<:Int,R<:Real}
+    nmodes = basis.nmodes
     disp = zeros(2*nmodes)
     a1, a2 = sqrt(transmit), sqrt(1 - transmit)
     symplectic = zeros(2*nmodes, 2*nmodes)
@@ -388,8 +388,8 @@ function _beamsplitter(repr::CanonicalForm{N}, transmit::R) where {N<:Int,R<:Rea
     end
     return disp, symplectic
 end
-function _beamsplitter(repr::CanonicalForm{N}, transmit::R) where {N<:Int,R<:Vector}
-    nmodes = repr.nmodes
+function _beamsplitter(basis::QuadPairBasis{N}, transmit::R) where {N<:Int,R<:Vector}
+    nmodes = basis.nmodes
     disp = zeros(2*nmodes)
     symplectic = zeros(2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
@@ -415,18 +415,18 @@ end
 ##
 
 function tensor(::Type{Td}, ::Type{Ts}, op1::GaussianUnitary, op2::GaussianUnitary) where {Td,Ts}
-    typeof(op1.repr) == typeof(op2.repr) || throw(ArgumentError(SYMPLECTIC_ERROR))
+    typeof(op1.basis) == typeof(op2.basis) || throw(ArgumentError(SYMPLECTIC_ERROR))
     disp, symplectic = _tensor(op1, op2)
-    return GaussianUnitary(op1.repr + op2.repr, Td(disp), Ts(symplectic))
+    return GaussianUnitary(op1.basis + op2.basis, Td(disp), Ts(symplectic))
 end
 tensor(::Type{T}, op1::GaussianUnitary, op2::GaussianUnitary) where {T} = tensor(T, T, op1, op2)
 function tensor(op1::GaussianUnitary, op2::GaussianUnitary)
     disp, symplectic = _tensor(op1, op2)
-    return GaussianUnitary(op1.repr + op2.repr, disp, symplectic)
+    return GaussianUnitary(op1.basis + op2.basis, disp, symplectic)
 end
 function _tensor(op1::GaussianUnitary, op2::GaussianUnitary)
     disp1, disp2 = op1.disp, op2.disp
-    repr1, repr2 = op1.repr, op2.repr
+    repr1, repr2 = op1.basis, op2.basis
     length1, length2 = 2*repr1.nmodes, 2*repr2.nmodes
     slengths = length1 + length2
     symp1, symp2 = op1.symplectic, op2.symplectic

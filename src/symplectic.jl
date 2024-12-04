@@ -1,20 +1,20 @@
-abstract type SymplecticRepr{N} end
+abstract type SymplecticBasis{N} <: Basis end
 
-struct CanonicalForm{N} <: SymplecticRepr{N}
+struct QuadPairBasis{N} <: SymplecticBasis{N}
     nmodes::N
 end
 
-struct BlockForm{N} <: SymplecticRepr{N}
+struct QuadBlockBasis{N} <: SymplecticBasis{N}
     nmodes::N
 end
 
-function Base.:(*)(n::N, repr2::R) where {N<:Number,R<:SymplecticRepr}
+function Base.:(*)(n::N, repr2::R) where {N<:Number,R<:SymplecticBasis}
     R(n*repr2.nmodes)
 end
-function Base.:(+)(repr1::R, repr2::R) where {R<:SymplecticRepr}
+function Base.:(+)(repr1::R, repr2::R) where {R<:SymplecticBasis}
     R(repr1.nmodes + repr2.nmodes)
 end
-function Base.:(-)(repr1::R, repr2::R) where {R<:SymplecticRepr}
+function Base.:(-)(repr1::R, repr2::R) where {R<:SymplecticBasis}
     R(repr1.nmodes - repr2.nmodes)
 end
 
@@ -23,8 +23,8 @@ end
 
 Compute the symplectic form matrix of size 2N x 2N, where N is given by `nmodes`.
 """
-function symplecticform(repr::CanonicalForm{N}) where {N<:Int}
-    nmodes = repr.nmodes
+function symplecticform(basis::QuadPairBasis{N}) where {N<:Int}
+    nmodes = basis.nmodes
     Omega = zeros(2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
         Omega[2*i-1, 2*i] = 1.0
@@ -32,8 +32,8 @@ function symplecticform(repr::CanonicalForm{N}) where {N<:Int}
     end
     return Omega
 end
-function symplecticform(repr::BlockForm{N}) where {N<:Int}
-    nmodes = repr.nmodes
+function symplecticform(basis::QuadBlockBasis{N}) where {N<:Int}
+    nmodes = basis.nmodes
     Omega = zeros(2*nmodes, 2*nmodes)
     @inbounds for i in 1:nmodes, j in nmodes:2*nmodes
         if isequal(i, j-nmodes)
@@ -47,5 +47,5 @@ function symplecticform(repr::BlockForm{N}) where {N<:Int}
     end
     return Omega
 end
-symplecticform(::Type{T}, repr::SymplecticRepr{N}) where {T, N<:Int} = T(symplecticform(repr))
+symplecticform(::Type{T}, basis::SymplecticBasis{N}) where {T, N<:Int} = T(symplecticform(basis))
 

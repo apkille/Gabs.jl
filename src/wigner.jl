@@ -4,8 +4,8 @@
 Compute the Wigner function of an N-mode Gaussian state at `x`, a vector of size 2N.
 """
 function wigner(state::GaussianState, x::T) where {T}
-    repr = state.repr
-    nmodes = repr.nmodes
+    basis = state.basis
+    nmodes = basis.nmodes
     mean = state.mean
     isequal(length(mean), length(x)) || throw(ArgumentError(WIGNER_ERROR))
 
@@ -22,13 +22,13 @@ end
 Compute the Wigner characteristic function of an N-mode Gaussian state at `xi`, a vector of size 2N.
 """
 function wignerchar(state::GaussianState, xi::T) where {T}
-    repr = state.repr
-    nmodes = repr.nmodes
+    basis = state.basis
+    nmodes = basis.nmodes
     mean = state.mean
     isequal(length(mean), length(xi)) || throw(ArgumentError(WIGNER_ERROR))
 
     V = state.covar
-    Omega = symplecticform(repr)
+    Omega = symplecticform(basis)
 
     arg1 = -(1/2) * transpose(xi) * (Omega*V*transpose(Omega))*xi
     arg2 = im * transpose(Omega*mean) * xi

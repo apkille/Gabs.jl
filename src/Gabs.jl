@@ -5,13 +5,13 @@ using BlockArrays: BlockedArray, BlockArray, Block, mortar
 import LinearAlgebra
 using LinearAlgebra: I, det, mul!, diagm, diag, qr
 
-import QuantumInterface: StateVector, AbstractOperator, apply!, tensor, ⊗
+import QuantumInterface: Basis, StateVector, AbstractOperator, apply!, tensor, ⊗
 
 export 
     # types
     GaussianState, GaussianUnitary, GaussianChannel, Generaldyne,
     # symplectic representations
-    CanonicalForm, BlockForm,
+    QuadPairBasis, QuadBlockBasis,
     # operations
     tensor, ⊗, apply!, ptrace, output, prob,
     # predefined Gaussian states

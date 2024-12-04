@@ -38,10 +38,10 @@ such state vector simulations, we recommend using the [QuantumOptics.jl](https:/
 which can be typed in the Julia REPL as `\otimes<TAB>`. Take the following example, where we produce a 3-mode Gaussian state that consists of a coherent state, vacuumstate, and squeezed state:
 
 ```jldoctest
-julia> repr = CanonicalForm(1);
+julia> basis = QuadPairBasis(1);
 
-julia> coherentstate(repr, -1.0) ⊗ vacuumstate(repr) ⊗ squeezedstate(repr, 0.25, pi/4)
-GaussianState for 3 modes in CanonicalForm representation.
+julia> coherentstate(basis, -1.0) ⊗ vacuumstate(basis) ⊗ squeezedstate(basis, 0.25, pi/4)
+GaussianState for 3 modes in QuadPairBasis representation.
 mean: 6-element Vector{Float64}:
  -1.4142135623730951
   0.0
@@ -115,12 +115,12 @@ Listed below are a list of predefined Gaussian channels supported by Gabs:
     method can be called with an additional noise matrix to create a [`GaussianChannel`](@ref) object. For instance, a noisy displacement operator can be called with [`displace`](@ref) as follows:
 
     ```jldoctest
-    julia> repr = CanonicalForm(1);
+    julia> basis = QuadPairBasis(1);
 
     julia> noise = [1.0 -2.0; 4.0 -3.0];
 
-    julia> displace(repr, 1.0-im, noise)
-    GaussianChannel for 1 mode in CanonicalForm representation.
+    julia> displace(basis, 1.0-im, noise)
+    GaussianChannel for 1 mode in QuadPairBasis representation.
     displacement: 2-element Vector{Float64}:
       1.4142135623730951
      -1.4142135623730951

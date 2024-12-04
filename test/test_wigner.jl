@@ -1,11 +1,11 @@
-@testitem "CanonicalForm" begin
+@testitem "Quadrature pair basis" begin
     using Gabs
     using StaticArrays
 
-    repr1 = CanonicalForm(1)
+    basis1 = QuadPairBasis(1)
     @testset "symplectic form" begin
-        Omega = symplecticform(2*repr1)
-        Omega_static = symplecticform(SMatrix{4, 4}, 2*repr1)
+        Omega = symplecticform(2*basis1)
+        Omega_static = symplecticform(SMatrix{4, 4}, 2*basis1)
         test_Omega = [0.0 1.0 0.0 0.0;
                       -1.0 0.0 0.0 0.0;
                       0.0 0.0 0.0 1.0;
@@ -15,8 +15,8 @@
     end
 
     @testset "wigner functions" begin
-        vac = vacuumstate(repr1)
-        c = coherentstate(repr1, 1.0)
+        vac = vacuumstate(basis1)
+        c = coherentstate(basis1, 1.0)
         @test isapprox(wignerchar(vac, [0.0, 0.0]), 1.0 - 0.0im)
         @test wigner(vac, [rand(), rand()]) > 0.0
         @test wigner(c, [rand(), rand()]) > 0.0

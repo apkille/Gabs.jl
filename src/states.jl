@@ -19,8 +19,8 @@ matrix ``\\mathbf{V}``, expressed respectively as follows:
 ## Example
 
 ```jldoctest
-julia> vacuumstate(CanonicalForm(1))
-GaussianState for 1 mode in CanonicalForm representation.
+julia> vacuumstate(QuadPairBasis(1))
+GaussianState for 1 mode in QuadPairBasis representation.
 mean: 2-element Vector{Float64}:
  0.0
  0.0
@@ -29,17 +29,17 @@ covariance: 2×2 Matrix{Float64}:
  0.0  1.0
 ```
 """
-function vacuumstate(::Type{Tm}, ::Type{Tc}, repr::SymplecticRepr{N}) where {Tm,Tc,N<:Int}
-    mean, covar = _vacuumstate(repr)
-    return GaussianState(repr, Tm(mean), Tc(covar))
+function vacuumstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}) where {Tm,Tc,N<:Int}
+    mean, covar = _vacuumstate(basis)
+    return GaussianState(basis, Tm(mean), Tc(covar))
 end
-vacuumstate(::Type{T}, repr::SymplecticRepr{N}) where {T,N<:Int} = vacuumstate(T, T, repr)
-function vacuumstate(repr::SymplecticRepr{N}) where {N<:Int}
-    mean, covar = _vacuumstate(repr)
-    return GaussianState(repr, mean, covar)
+vacuumstate(::Type{T}, basis::SymplecticBasis{N}) where {T,N<:Int} = vacuumstate(T, T, basis)
+function vacuumstate(basis::SymplecticBasis{N}) where {N<:Int}
+    mean, covar = _vacuumstate(basis)
+    return GaussianState(basis, mean, covar)
 end
-function _vacuumstate(repr::SymplecticRepr{N}) where {N<:Int}
-    nmodes = repr.nmodes
+function _vacuumstate(basis::SymplecticBasis{N}) where {N<:Int}
+    nmodes = basis.nmodes
     mean = zeros(2*nmodes)
     covar = Matrix{Float64}(I, 2*nmodes, 2*nmodes)
     return mean, covar
@@ -64,8 +64,8 @@ matrix ``\\mathbf{V}``, expressed respectively as follows:
 ## Example
 
 ```jldoctest
-julia> thermalstate(CanonicalForm(1), 4)
-GaussianState for 1 mode in CanonicalForm representation.
+julia> thermalstate(QuadPairBasis(1), 4)
+GaussianState for 1 mode in QuadPairBasis representation.
 mean: 2-element Vector{Float64}:
  0.0
  0.0
@@ -74,23 +74,23 @@ covariance: 2×2 Matrix{Float64}:
  0.0  4.5
 ```
 """
-function thermalstate(::Type{Tm}, ::Type{Tc}, repr::SymplecticRepr{N}, photons::P) where {Tm,Tc,N<:Int,P}
-    mean, covar = _thermalstate(repr, photons)
-    return GaussianState(repr, Tm(mean), Tc(covar))
+function thermalstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, photons::P) where {Tm,Tc,N<:Int,P}
+    mean, covar = _thermalstate(basis, photons)
+    return GaussianState(basis, Tm(mean), Tc(covar))
 end
-thermalstate(::Type{T}, repr::SymplecticRepr{N}, photons::P) where {T,N<:Int,P} = thermalstate(T, T, repr, photons)
-function thermalstate(repr::SymplecticRepr{N}, photons::P) where {N<:Int,P}
-    mean, covar = _thermalstate(repr, photons)
-    return GaussianState(repr, mean, covar)
+thermalstate(::Type{T}, basis::SymplecticBasis{N}, photons::P) where {T,N<:Int,P} = thermalstate(T, T, basis, photons)
+function thermalstate(basis::SymplecticBasis{N}, photons::P) where {N<:Int,P}
+    mean, covar = _thermalstate(basis, photons)
+    return GaussianState(basis, mean, covar)
 end
-function _thermalstate(repr::CanonicalForm{N}, photons::P) where {N<:Int,P<:Int}
-    nmodes = repr.nmodes
+function _thermalstate(basis::QuadPairBasis{N}, photons::P) where {N<:Int,P<:Int}
+    nmodes = basis.nmodes
     mean = zeros(2*nmodes)
     covar = Matrix{Float64}((photons + 1/2) * I, 2*nmodes, 2*nmodes)
     return mean, covar
 end
-function _thermalstate(repr::CanonicalForm{N}, photons::P) where {N<:Int,P<:Vector}
-    nmodes = repr.nmodes
+function _thermalstate(basis::QuadPairBasis{N}, photons::P) where {N<:Int,P<:Vector}
+    nmodes = basis.nmodes
     mean = zeros(2*nmodes)
     covar = zeros(2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
@@ -121,8 +121,8 @@ matrix ``\\mathbf{V}``, expressed respectively as follows:
 ## Example
 
 ```jldoctest
-julia> coherentstate(CanonicalForm(1), 1.0+im)
-GaussianState for 1 mode in CanonicalForm representation.
+julia> coherentstate(QuadPairBasis(1), 1.0+im)
+GaussianState for 1 mode in QuadPairBasis representation.
 mean: 2-element Vector{Float64}:
  1.4142135623730951
  1.4142135623730951
@@ -131,23 +131,23 @@ covariance: 2×2 Matrix{Float64}:
  0.0  1.0
 ```
 """
-function coherentstate(::Type{Tm}, ::Type{Tc}, repr::SymplecticRepr{N}, alpha::A) where {Tm,Tc,N<:Int,A}
-    mean, covar = _coherentstate(repr, alpha)
-    return GaussianState(repr, Tm(mean), Tc(covar))
+function coherentstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, alpha::A) where {Tm,Tc,N<:Int,A}
+    mean, covar = _coherentstate(basis, alpha)
+    return GaussianState(basis, Tm(mean), Tc(covar))
 end
-coherentstate(::Type{T}, repr::SymplecticRepr{N}, alpha::A) where {T,N<:Int,A} = coherentstate(T, T, repr, alpha)
-function coherentstate(repr::SymplecticRepr{N}, alpha::A) where {N<:Int,A}
-    mean, covar = _coherentstate(repr, alpha)
-    return GaussianState(repr, mean, covar)
+coherentstate(::Type{T}, basis::SymplecticBasis{N}, alpha::A) where {T,N<:Int,A} = coherentstate(T, T, basis, alpha)
+function coherentstate(basis::SymplecticBasis{N}, alpha::A) where {N<:Int,A}
+    mean, covar = _coherentstate(basis, alpha)
+    return GaussianState(basis, mean, covar)
 end
-function _coherentstate(repr::CanonicalForm{N}, alpha::A) where {N<:Int,A<:Number}
-    nmodes = repr.nmodes
+function _coherentstate(basis::QuadPairBasis{N}, alpha::A) where {N<:Int,A<:Number}
+    nmodes = basis.nmodes
     mean = repeat([sqrt(2)*real(alpha), sqrt(2)*imag(alpha)], nmodes)
     covar = Matrix{Float64}(I, 2*nmodes, 2*nmodes)
     return mean, covar
 end
-function _coherentstate(repr::CanonicalForm{N}, alpha::A) where {N<:Int,A<:Vector}
-    nmodes = repr.nmodes
+function _coherentstate(basis::QuadPairBasis{N}, alpha::A) where {N<:Int,A<:Vector}
+    nmodes = basis.nmodes
     mean = sqrt(2) * reinterpret(Float64, alpha)
     covar = Matrix{Float64}(I, 2*nmodes, 2*nmodes)
     return mean, covar
@@ -177,8 +177,8 @@ where ``\\mathbf{R}(\\theta)`` is the rotation matrix.
 ## Example
 
 ```jldoctest
-julia> squeezedstate(CanonicalForm(1), 0.5, pi/4)
-GaussianState for 1 mode in CanonicalForm representation.
+julia> squeezedstate(QuadPairBasis(1), 0.5, pi/4)
+GaussianState for 1 mode in QuadPairBasis representation.
 mean: 2-element Vector{Float64}:
  0.0
  0.0
@@ -187,17 +187,17 @@ covariance: 2×2 Matrix{Float64}:
  0.415496  1.18704
 ```
 """
-function squeezedstate(::Type{Tm}, ::Type{Tc}, repr::SymplecticRepr{N}, r::R, theta::R) where {Tm,Tc,N<:Int,R}
-    mean, covar = _squeezedstate(repr, r, theta)
-    return GaussianState(repr, Tm(mean), Tc(covar))
+function squeezedstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, r::R, theta::R) where {Tm,Tc,N<:Int,R}
+    mean, covar = _squeezedstate(basis, r, theta)
+    return GaussianState(basis, Tm(mean), Tc(covar))
 end
-squeezedstate(::Type{T}, repr::SymplecticRepr{N}, r::R, theta::R) where {T,N<:Int,R} = squeezedstate(T, T, repr, r, theta)
-function squeezedstate(repr::SymplecticRepr{N}, r::R, theta::R) where {N<:Int,R}
-    mean, covar = _squeezedstate(repr, r, theta)
-    return GaussianState(repr, mean, covar)
+squeezedstate(::Type{T}, basis::SymplecticBasis{N}, r::R, theta::R) where {T,N<:Int,R} = squeezedstate(T, T, basis, r, theta)
+function squeezedstate(basis::SymplecticBasis{N}, r::R, theta::R) where {N<:Int,R}
+    mean, covar = _squeezedstate(basis, r, theta)
+    return GaussianState(basis, mean, covar)
 end
-function _squeezedstate(repr::CanonicalForm{N}, r::R, theta::R) where {N<:Int,R<:Real}
-    nmodes = repr.nmodes
+function _squeezedstate(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Real}
+    nmodes = basis.nmodes
     mean = zeros(2*nmodes)
     covar = zeros(2*nmodes, 2*nmodes)
     cr, sr = cosh(2*r), sinh(2*r)
@@ -210,8 +210,8 @@ function _squeezedstate(repr::CanonicalForm{N}, r::R, theta::R) where {N<:Int,R<
     end
     return mean, covar
 end
-function _squeezedstate(repr::CanonicalForm{N}, r::R, theta::R) where {N<:Int,R<:Vector}
-    nmodes = repr.nmodes
+function _squeezedstate(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Vector}
+    nmodes = basis.nmodes
     mean = zeros(2*nmodes)
     covar = zeros(2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
@@ -251,8 +251,8 @@ where ``\\mathbf{R}(\\theta)`` is the rotation matrix.
 ## Example
 
 ```jldoctest
-julia> eprstate(CanonicalForm(2), 0.5, pi/4)
-GaussianState for 2 modes in CanonicalForm representation.
+julia> eprstate(QuadPairBasis(2), 0.5, pi/4)
+GaussianState for 2 modes in QuadPairBasis representation.
 mean: 4-element Vector{Float64}:
  0.0
  0.0
@@ -265,17 +265,17 @@ covariance: 4×4 Matrix{Float64}:
  0.415496  -0.415496  0.0        0.77154
 ```
 """
-function eprstate(::Type{Tm}, ::Type{Tc}, repr::SymplecticRepr{N}, r::R, theta::R) where {Tm,Tc,N<:Int,R}
-    mean, covar = _eprstate(repr, r, theta)
-    return GaussianState(repr, Tm(mean), Tc(covar))
+function eprstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, r::R, theta::R) where {Tm,Tc,N<:Int,R}
+    mean, covar = _eprstate(basis, r, theta)
+    return GaussianState(basis, Tm(mean), Tc(covar))
 end
-eprstate(::Type{T}, repr::SymplecticRepr{N}, r::R, theta::R) where {T,N<:Int,R} = eprstate(T, T, repr, r, theta)
-function eprstate(repr::SymplecticRepr{N}, r::R, theta::R) where {N<:Int,R}
-    mean, covar = _eprstate(repr, r, theta)
-    return GaussianState(repr, mean, covar)
+eprstate(::Type{T}, basis::SymplecticBasis{N}, r::R, theta::R) where {T,N<:Int,R} = eprstate(T, T, basis, r, theta)
+function eprstate(basis::SymplecticBasis{N}, r::R, theta::R) where {N<:Int,R}
+    mean, covar = _eprstate(basis, r, theta)
+    return GaussianState(basis, mean, covar)
 end
-function _eprstate(repr::CanonicalForm{N}, r::R, theta::R) where {N<:Int,R<:Real}
-    nmodes = repr.nmodes
+function _eprstate(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Real}
+    nmodes = basis.nmodes
     mean = zeros(2*nmodes)
     cr, sr = (1/2)*cosh(2*r), (1/2)*sinh(2*r)
     ct, st = cos(theta), sin(theta)
@@ -299,8 +299,8 @@ function _eprstate(repr::CanonicalForm{N}, r::R, theta::R) where {N<:Int,R<:Real
     end
     return mean, covar
 end
-function _eprstate(repr::CanonicalForm{N}, r::R, theta::R) where {N<:Int,R<:Vector}
-    nmodes = repr.nmodes
+function _eprstate(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Vector}
+    nmodes = basis.nmodes
     mean = zeros(2*nmodes)
     covar = zeros(2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(Int(nmodes/2))
@@ -337,10 +337,10 @@ tensor product of Gaussian states, which can also be called with `⊗`.
 
 ## Example
 ```jldoctest
-julia> repr = CanonicalForm(1);
+julia> basis = QuadPairBasis(1);
 
-julia> coherentstate(repr, 1.0+im) ⊗ thermalstate(repr, 2)
-GaussianState for 2 modes in CanonicalForm representation.
+julia> coherentstate(basis, 1.0+im) ⊗ thermalstate(basis, 2)
+GaussianState for 2 modes in QuadPairBasis representation.
 mean: 4-element Vector{Float64}:
  1.4142135623730951
  1.4142135623730951
@@ -354,19 +354,19 @@ covariance: 4×4 Matrix{Float64}:
 ```
 """
 function tensor(::Type{Tm}, ::Type{Tc}, state1::GaussianState, state2::GaussianState) where {Tm,Tc}
-    typeof(state1.repr) == typeof(state2.repr) || throw(ArgumentError(SYMPLECTIC_ERROR))
+    typeof(state1.basis) == typeof(state2.basis) || throw(ArgumentError(SYMPLECTIC_ERROR))
     mean, covar = _tensor(state1, state2)
-    return GaussianState(state1.repr + state2.repr, Tm(mean), Tc(covar))
+    return GaussianState(state1.basis + state2.basis, Tm(mean), Tc(covar))
 end
 tensor(::Type{T}, state1::GaussianState, state2::GaussianState) where {T} = tensor(T, T, state1, state2)
 function tensor(state1::GaussianState, state2::GaussianState)
-    typeof(state1.repr) == typeof(state2.repr) || throw(ArgumentError(SYMPLECTIC_ERROR))
+    typeof(state1.basis) == typeof(state2.basis) || throw(ArgumentError(SYMPLECTIC_ERROR))
     mean, covar = _tensor(state1, state2)
-    return GaussianState(state1.repr + state2.repr, mean, covar)
+    return GaussianState(state1.basis + state2.basis, mean, covar)
 end
 function _tensor(state1::GaussianState, state2::GaussianState)
     mean1, mean2 = state1.mean, state2.mean
-    repr1, repr2 = state1.repr, state2.repr
+    repr1, repr2 = state1.basis, state2.basis
     length1, length2 = 2*repr1.nmodes, 2*repr2.nmodes
     slengths = length1 + length2
     covar1, covar2 = state1.covar, state2.covar
@@ -403,10 +403,10 @@ indicated by `indices`.
 
 ## Example
 ```jldoctest
-julia> repr = CanonicalForm(1);
+julia> basis = QuadPairBasis(1);
 
-julia> state = coherentstate(repr, 1.0+im) ⊗ thermalstate(repr, 2) ⊗ squeezedstate(repr, 3.0, pi/4)
-GaussianState for 3 modes in CanonicalForm representation.
+julia> state = coherentstate(basis, 1.0+im) ⊗ thermalstate(basis, 2) ⊗ squeezedstate(basis, 3.0, pi/4)
+GaussianState for 3 modes in QuadPairBasis representation.
 mean: 6-element Vector{Float64}:
  1.4142135623730951
  1.4142135623730951
@@ -423,7 +423,7 @@ covariance: 6×6 Matrix{Float64}:
  0.0  0.0  0.0  0.0  71.3164  172.174
 
 julia> ptrace(state, 2)
-GaussianState for 1 mode in CanonicalForm representation.
+GaussianState for 1 mode in QuadPairBasis representation.
 mean: 2-element Vector{Float64}:
  0.0
  0.0
@@ -432,7 +432,7 @@ covariance: 2×2 Matrix{Float64}:
  0.0  2.5
 
 julia> ptrace(state, [1, 3])
-GaussianState for 2 modes in CanonicalForm representation.
+GaussianState for 2 modes in QuadPairBasis representation.
 mean: 4-element Vector{Float64}:
  1.4142135623730951
  1.4142135623730951
@@ -447,21 +447,21 @@ covariance: 4×4 Matrix{Float64}:
 """
 function ptrace(::Type{Tm}, ::Type{Tc}, state::GaussianState, idx::N) where {Tm,Tc,N<:Int}
     mean′, covar′ = _ptrace(state, idx)
-    return GaussianState(typeof(state.repr)(1), Tm(mean′), Tc(covar′))
+    return GaussianState(typeof(state.basis)(1), Tm(mean′), Tc(covar′))
 end
 ptrace(::Type{T}, state::GaussianState, idx::N) where {T,N<:Int} = ptrace(T, T, state, idx)
 function ptrace(state::GaussianState, idx::N) where {N<:Int}
     mean′, covar′ = _ptrace(state, idx)
-    return GaussianState(typeof(state.repr)(1), mean′, covar′)
+    return GaussianState(typeof(state.basis)(1), mean′, covar′)
 end
 function ptrace(::Type{Tm}, ::Type{Tc}, state::GaussianState, indices::N) where {Tm,Tc,N<:AbstractVector}
     mean, covar = _ptrace(state, indices)
-    return GaussianState(typeof(state.repr)(length(indices)), Tm(mean), Tc(covar))
+    return GaussianState(typeof(state.basis)(length(indices)), Tm(mean), Tc(covar))
 end
 ptrace(::Type{T}, state::GaussianState, indices::N) where {T,N<:AbstractVector} = ptrace(T, T, state, indices)
 function ptrace(state::GaussianState, indices::T) where {T<:AbstractVector}
     mean, covar = _ptrace(state, indices)
-    return GaussianState(typeof(state.repr)(length(indices)), mean, covar)
+    return GaussianState(typeof(state.basis)(length(indices)), mean, covar)
 end
 function _ptrace(state::GaussianState, idx::T) where {T<:Int}
     idxV = 2*idx-1:(2*idx)
