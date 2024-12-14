@@ -12,7 +12,7 @@ function randstate(basis::SymplecticBasis{N}; pure = false) where {N<:Int}
     mean, covar = _randstate(basis, pure)
     return GaussianState(basis, mean, covar)
 end
-function _randstate(basis::QuadPairBasis{N}, pure) where {N<:Int}
+function _randstate(basis::SymplecticBasis{N}, pure) where {N<:Int}
     nmodes = basis.nmodes
     mean = randn(2*nmodes)
     covar = zeros(2*nmodes, 2*nmodes)
@@ -84,7 +84,12 @@ end
 
 Calculate a random symplectic matrix in symplectic representation defined by `basis`.
 """
-function randsymplectic(basis::QuadPairBasis{N}; passive = false) where {N<:Int}
+function randsymplectic(::Type{T}, basis::SymplecticBasis{N}; passive = false) where {T, N<:Int} 
+    symp = randsymplectic(basis, passive = passive)
+    return T(symp)
+end
+randsymplectic(basis::SymplecticBasis{N}; passive = false) where {N<:Int} = _randsymplectic(basis, passive = passive)
+function _randsymplectic(basis::QuadPairBasis{N}; passive = false) where {N<:Int}
     nmodes = basis.nmodes
     # generate random orthogonal symplectic matrix
     O = _rand_orthogonal_symplectic(basis)
@@ -103,10 +108,26 @@ function randsymplectic(basis::QuadPairBasis{N}; passive = false) where {N<:Int}
     end
     return O * squeezes * O′
 end
-function randsymplectic(::Type{T}, basis::QuadPairBasis{N}; passive = false) where {T, N<:Int} 
-    symp = randsymplectic(basis, passive = passive)
-    return T(symp)
+function _randsymplectic(basis::QuadBlockBasis{N}; passive = false) where {N<:Int}
+    nmodes = basis.nmodes
+    # generate random orthogonal symplectic matrix
+    O = _rand_orthogonal_symplectic(basis)
+    if passive
+        return O
+    end
+    # instead generate random active symplectic matrix
+    O′ = _rand_orthogonal_symplectic(basis)
+    # direct sum of symplectic matrices for single-mode squeeze transformations
+    rs = rand(nmodes)
+    squeezes = zeros(2*nmodes, 2*nmodes)
+    @inbounds for i in Base.OneTo(nmodes)
+        val = rs[i]
+        squeezes[i, i] = val
+        squeezes[i+nmodes, i+nmodes] = 1/val
+    end
+    return O * squeezes * O′
 end
+
 
 # Generates random orthogonal symplectic matrix by blocking real
 # and imaginary parts of a random unitary matrix
@@ -123,10 +144,23 @@ function _rand_orthogonal_symplectic(basis::QuadPairBasis{N}) where {N<:Int}
     end
     return O
 end
+function _rand_orthogonal_symplectic(basis::QuadBlockBasis{N}) where {N<:Int}
+    nmodes = basis.nmodes
+    U = _rand_unitary(basis)
+    O = zeros(2*nmodes, 2*nmodes)
+    @inbounds for i in Base.OneTo(nmodes), j in Base.OneTo(nmodes)
+        val = U[i,j]
+        O[i,j] = real(val)
+        O[i+nmodes, j] = -imag(val)
+        O[i, j+nmodes] = imag(val)
+        O[i+nmodes, j+nmodes] = real(val)
+    end
+    return O
+end
 # Generates unitary matrix randomly distributed over Haar measure;
 # see https://arxiv.org/abs/math-ph/0609050 for algorithm.
 # This approach is faster and creates less allocations than rand(Haar(2), nmodes) from RandomMatrices.jl
-function _rand_unitary(basis::QuadPairBasis{N}) where {N<:Int}
+function _rand_unitary(basis::SymplecticBasis{N}) where {N<:Int}
     nmodes = basis.nmodes
     M = rand(ComplexF64, nmodes, nmodes) ./ sqrt(2.0)
     q, r = qr(M)

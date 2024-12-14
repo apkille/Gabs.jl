@@ -97,14 +97,14 @@ function attenuator(basis::SymplecticBasis{N}, theta::R, n::M) where {N<:Int,R,M
     disp, transform, noise = _attenuator(basis, theta, n)
     return GaussianChannel(basis, disp, transform, noise)
 end
-function _attenuator(basis::QuadPairBasis{N}, theta::R, n::M) where {N<:Int,R<:Real,M<:Int}
+function _attenuator(basis::Union{QuadPairBasis{N},QuadBlockBasis{N}}, theta::R, n::M) where {N<:Int,R<:Real,M<:Int}
     nmodes = basis.nmodes
     disp = zeros(2*nmodes) 
     transform = Matrix{Float64}(cos(theta) * I, 2*nmodes, 2*nmodes)
     noise = Matrix{Float64}((sin(theta))^2 * n * I, 2*nmodes, 2*nmodes)
     return disp, transform, noise
 end
-function _attenuator(basis::QuadPairBasis{N}, theta::R, n::M) where {N<:Int,R<:Vector,M<:Vector}
+function _attenuator(basis::Union{QuadPairBasis{N},QuadBlockBasis{N}}, theta::R, n::M) where {N<:Int,R<:Vector,M<:Vector}
     nmodes = basis.nmodes
     disp = zeros(2*nmodes) 
     transform = zeros(2*nmodes, 2*nmodes)
@@ -167,14 +167,14 @@ function amplifier(basis::SymplecticBasis{N}, r::R, n::M) where {N<:Int,R,M}
     disp, transform, noise = _amplifier(basis, r, n)
     return GaussianChannel(basis, disp, transform, noise)
 end
-function _amplifier(basis::QuadPairBasis{N}, r::R, n::M) where {N<:Int,R<:Real,M<:Int}
+function _amplifier(basis::Union{QuadPairBasis{N},QuadBlockBasis{N}}, r::R, n::M) where {N<:Int,R<:Real,M<:Int}
     nmodes = basis.nmodes
     disp = zeros(2*nmodes) 
     transform = Matrix{Float64}(cosh(r) * I, 2*nmodes, 2*nmodes)
     noise = Matrix{Float64}((sinh(r))^2 * n * I, 2*nmodes, 2*nmodes)
     return disp, transform, noise
 end
-function _amplifier(basis::QuadPairBasis{N}, r::R, n::M) where {N<:Int,R<:Vector,M<:Vector}
+function _amplifier(basis::Union{QuadPairBasis{N},QuadBlockBasis{N}}, r::R, n::M) where {N<:Int,R<:Vector,M<:Vector}
     nmodes = basis.nmodes
     disp = zeros(2*nmodes) 
     transform = zeros(2*nmodes, 2*nmodes)
@@ -205,38 +205,81 @@ function tensor(op1::GaussianChannel, op2::GaussianChannel)
     disp, transform, noise = _tensor(op1, op2)
     return GaussianChannel(op1.basis + op2.basis, disp, transform, noise)
 end
-function _tensor(op1::GaussianChannel, op2::GaussianChannel)
-    disp1, disp2 = op1.disp, op2.disp
+function _tensor(op1::GaussianChannel{B1,D1,T1}, op2::GaussianChannel{B2,D2,T2}) where {B1<:QuadPairBasis,B2<:QuadPairBasis,D1,D2,T1,T2}
     basis1, basis2 = op1.basis, op2.basis
-    length1, length2 = 2*basis1.nmodes, 2*basis2.nmodes
-    slengths = length1 + length2
-    trans1, trans2 = op1.transform, op2.transform
+    nmodes1, nmodes2 = basis1.nmodes, basis2.nmodes
+    nmodes = nmodes1 + nmodes2
+    block1, block2 = Base.OneTo(2*nmodes1), Base.OneTo(2*nmodes2)
     # initialize direct sum of displacement vectors
-    disp′ = zeros(slengths)
-    @inbounds for i in eachindex(disp1)
+    disp1, disp2 = op1.disp, op2.disp
+    disp′ = zeros(2*nmodes)
+    @inbounds for i in block1
         disp′[i] = disp1[i]
     end
-    @inbounds for i in eachindex(disp2)
-        disp′[i+length1] = disp2[i]
+    @inbounds for i in block2
+        disp′[i+2*nmodes1] = disp2[i]
     end
-    # initialize direct sum of transform matrix
-    transform′ = zeros(slengths, slengths)
-    axes1 = (Base.OneTo(length1), Base.OneTo(length1))
-    @inbounds for i in axes1[1], j in axes1[2]
-        transform′[i,j] = trans1[i,j]
-    end
-    axes2 = (Base.OneTo(length2), Base.OneTo(length2))
-    @inbounds for i in axes2[1], j in axes2[2]
-        transform′[i+length1,j+length1] = trans2[i,j]
-    end
+    # initialize direct sum of transform and noise matrices
+    trans1, trans2 = op1.transform, op2.transform
+    transform′ = zeros(2*nmodes, 2*nmodes)
     noise1, noise2 = op1.noise, op2.noise
-    # initialize direct sum of noise matrix
-    noise′ = zeros(slengths, slengths)
-    @inbounds for i in axes1[1], j in axes1[2]
+    noise′ = zeros(2*nmodes, 2*nmodes)
+    @inbounds for i in block1, j in block1
+        transform′[i,j] = trans1[i,j]
         noise′[i,j] = noise1[i,j]
     end
-    @inbounds for i in axes2[1], j in axes2[2]
-        noise′[i+length1,j+length1] = noise2[i,j]
+    @inbounds for i in block2, j in block2
+        transform′[i+2*nmodes1,j+2*nmodes1] = trans2[i,j]
+        noise′[i+2*nmodes1,j+2*nmodes1] = noise2[i,j]
+    end
+    # extract output array types
+    disp′′ = _promote_output_vector(typeof(disp1), typeof(disp2), disp′)
+    transform′′ = _promote_output_matrix(typeof(trans1), typeof(trans2), transform′)
+    noise′′ = _promote_output_matrix(typeof(noise1), typeof(noise2), noise′)
+    return disp′′, transform′′, noise′′
+end
+function _tensor(op1::GaussianChannel{B1,D1,T1}, op2::GaussianChannel{B2,D2,T2}) where {B1<:QuadBlockBasis,B2<:QuadBlockBasis,D1,D2,T1,T2}
+    basis1, basis2 = op1.basis, op2.basis
+    nmodes1, nmodes2 = basis1.nmodes, basis2.nmodes
+    nmodes = nmodes1 + nmodes2
+    block1, block2 = Base.OneTo(nmodes1), Base.OneTo(nmodes2)
+    # initialize direct sum of displacement vectors
+    disp1, disp2 = op1.disp, op2.disp
+    disp′ = zeros(2*nmodes)
+    @inbounds for i in block1
+        disp′[i] = disp1[i]
+        disp′[i+nmodes] = disp1[i+nmodes1]
+    end
+    @inbounds for i in block2
+        disp′[i+nmodes1] = disp2[i]
+        disp′[i+nmodes+nmodes1] = disp2[i+nmodes2]
+    end
+    # initialize direct sum of transform and noise matrices
+    trans1, trans2 = op1.transform, op2.transform
+    transform′ = zeros(2*nmodes, 2*nmodes)
+    noise1, noise2 = op1.noise, op2.noise
+    noise′ = zeros(2*nmodes, 2*nmodes)
+    @inbounds for i in block1, j in block1
+        transform′[i,j] = trans1[i,j]
+        transform′[i,j+nmodes] = trans1[i,j+nmodes1]
+        transform′[i+nmodes,j] = trans1[i+nmodes1,j]
+        transform′[i+nmodes,j+nmodes] = trans1[i+nmodes1,j+nmodes1]
+
+        noise′[i,j] = noise1[i,j]
+        noise′[i,j+nmodes] = noise1[i,j+nmodes1]
+        noise′[i+nmodes,j] = noise1[i+nmodes1,j]
+        noise′[i+nmodes,j+nmodes] = noise1[i+nmodes1,j+nmodes1]
+    end
+    @inbounds for i in block2, j in block2
+        transform′[i+nmodes1,j+nmodes1] = trans2[i,j]
+        transform′[i+nmodes1,j+nmodes+nmodes1] = trans2[i,j+nmodes2]
+        transform′[i+nmodes+nmodes1,j+nmodes1] = trans2[i+nmodes2,j]
+        transform′[i+nmodes+nmodes1,j+nmodes+nmodes1] = trans2[i+nmodes2,j+nmodes2]
+
+        noise′[i+nmodes1,j+nmodes1] = noise2[i,j]
+        noise′[i+nmodes1,j+nmodes+nmodes1] = noise2[i,j+nmodes2]
+        noise′[i+nmodes+nmodes1,j+nmodes1] = noise2[i+nmodes2,j]
+        noise′[i+nmodes+nmodes1,j+nmodes+nmodes1] = noise2[i+nmodes2,j+nmodes2]
     end
     # extract output array types
     disp′′ = _promote_output_vector(typeof(disp1), typeof(disp2), disp′)
