@@ -1,8 +1,9 @@
 # News
 
-## v1.1.1 - dev
+## v1.2.0 - dev
 
 - Add a benchmark suite as a part of the Github workflows.
+- **(breaking)** Require a `SymplecticBasis` subtype to be defined when creating a Gaussian object.
 
 ## v1.1.0 - 2024-11-18
 
