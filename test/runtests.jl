@@ -6,7 +6,7 @@ testfilter = ti -> begin
   exclude = Symbol[:jet]
   if !(VERSION >= v"1.10")
     push!(exclude, :doctests)
-    push!(exclude, :aqua)
+    push!(exclude, :aqua)                                 
   end
 
   return all(!in(exclude), ti.tags)

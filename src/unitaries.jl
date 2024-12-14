@@ -575,7 +575,7 @@ function tensor(op1::GaussianUnitary, op2::GaussianUnitary)
     disp, symplectic = _tensor(op1, op2)
     return GaussianUnitary(op1.basis + op2.basis, disp, symplectic)
 end
-function _tensor(op1::GaussianUnitary{B1,D1,S1}, op2::GaussianChannel{B2,D2,S2}) where {B1<:QuadPairBasis,B2<:QuadPairBasis,D1,D2,S1,S2}
+function _tensor(op1::GaussianUnitary{B1,D1,S1}, op2::GaussianUnitary{B2,D2,S2}) where {B1<:QuadPairBasis,B2<:QuadPairBasis,D1,D2,S1,S2}
     basis1, basis2 = op1.basis, op2.basis
     nmodes1, nmodes2 = basis1.nmodes, basis2.nmodes
     nmodes = nmodes1 + nmodes2

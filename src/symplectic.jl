@@ -48,4 +48,3 @@ function symplecticform(basis::QuadBlockBasis{N}) where {N<:Int}
     return Omega
 end
 symplecticform(::Type{T}, basis::SymplecticBasis{N}) where {T, N<:Int} = T(symplecticform(basis))
-
