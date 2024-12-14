@@ -339,20 +339,3 @@ function _changebasis(op::GaussianChannel{B1,D,S}, ::Type{B2}) where {B1<:QuadPa
     noise = T * op.noise * transpose(T)
     return GaussianChannel(B2(nmodes), disp, transform, noise)
 end
-function _changebasis(op::GaussianChannel{B1,D,S}, ::Type{B2}) where {B1<:QuadBlockBasis,B2<:QuadPairBasis,D,S}
-    if B1 == B2
-        return op
-    end
-    basis = op.basis
-    nmodes = basis.nmodes
-    T = zeros(2*nmodes, 2*nmodes)
-    @inbounds for i in Base.OneTo(2*nmodes), j in Base.OneTo(2*nmodes)
-        if (j == 2*i-1) || (j + 2*nmodes == 2*i)
-            T[i,j] = 1
-        end
-    end
-    disp = T * op.disp
-    transform = T * op.transform * transpose(T)
-    noise = T * op.noise * transpose(T)
-    return GaussianChannel(B2(nmodes), disp, transform, noise)
-end

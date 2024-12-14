@@ -75,6 +75,10 @@
         p = phaseshift(qpairbasis, theta)
         @test tensor(p, tensor(d1, d2)) == p ⊗ d1 ⊗ d2
 
+        p_block = phaseshift(qblockbasis, theta)
+        p_blocks = phaseshift(2*qblockbasis, repeat([theta], 2*nmodes))
+        @test p_block ⊗ p_block == p_blocks
+
         dstatic = displace(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, alpha1)
         tpstatic = dstatic ⊗ dstatic ⊗ dstatic
         @test tpstatic.disp isa SVector{6*nmodes}

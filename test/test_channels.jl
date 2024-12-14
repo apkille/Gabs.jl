@@ -114,6 +114,9 @@
         p = phaseshift(qpairbasis, theta, noise)
         @test tensor(tensor(p, d1), d2) == p ⊗ d1 ⊗ d2
 
+        p_block = phaseshift(qblockbasis, theta, T * noise * transpose(T))
+        p_blocks = phaseshift(2*qblockbasis, repeat([theta], 2*nmodes), T_ds * noise_ds * transpose(T_ds))
+        @test p_block ⊗ p_block == p_blocks
 
         dstatic = displace(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, alpha1, noise)
         tpstatic = dstatic ⊗ dstatic ⊗ dstatic

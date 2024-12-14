@@ -66,6 +66,11 @@
         c = coherentstate(qpairbasis, alpha)
         @test tensor(c, tensor(v, v)) == c ⊗ v ⊗ v
 
+        r, theta = rand(Float64), rand(Float64)
+        sq = squeezedstate(qblockbasis, r, theta)
+        sqs = squeezedstate(2*qblockbasis, repeat([r], 2*nmodes), repeat([theta], 2*nmodes))
+        @test sq ⊗ sq == sqs
+
         vstatic = vacuumstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis)
         tpstatic = vstatic ⊗ vstatic ⊗ vstatic
         @test tpstatic.mean isa SVector{6*nmodes}
@@ -77,24 +82,34 @@
 
     @testset "partial trace" begin
         qpairbasis1 = QuadPairBasis(1)
+        qblockbasis1 = QuadBlockBasis(1)
         alpha = rand(Float64)
         r, theta = rand(Float64), rand(Float64)
         n = rand(Int)
-        s1, s2, s3 = coherentstate(qpairbasis1, alpha), squeezedstate(qpairbasis1, r, theta), thermalstate(qpairbasis1, n)
-        state = s1 ⊗ s2 ⊗ s3
-        @test ptrace(state, 1) == s1
-        @test ptrace(state, 2) == s2
-        @test ptrace(state, 3) == s3
-        @test ptrace(state, [1, 2]) == s1 ⊗ s2
-        @test ptrace(state, [1, 3]) == s1 ⊗ s3
-        @test ptrace(state, [2, 3]) == s2 ⊗ s3
+        s1_qpair, s2_qpair, s3_qpair = coherentstate(qpairbasis1, alpha), squeezedstate(qpairbasis1, r, theta), thermalstate(qpairbasis1, n)
+        state_qpair = s1_qpair ⊗ s2_qpair ⊗ s3_qpair
+        @test ptrace(state_qpair, 1) == s1_qpair
+        @test ptrace(state_qpair, 2) == s2_qpair
+        @test ptrace(state_qpair, 3) == s3_qpair
+        @test ptrace(state_qpair, [1, 2]) == s1_qpair ⊗ s2_qpair
+        @test ptrace(state_qpair, [1, 3]) == s1_qpair ⊗ s3_qpair
+        @test ptrace(state_qpair, [2, 3]) == s2_qpair ⊗ s3_qpair
+
+        s1_qblock, s2_qblock, s3_qblock = coherentstate(qpairbasis1, alpha), squeezedstate(qpairbasis1, r, theta), thermalstate(qpairbasis1, n)
+        state_qblock = s1_qblock ⊗ s2_qblock ⊗ s3_qblock
+        @test ptrace(state_qblock, 1) == s1_qblock
+        @test ptrace(state_qblock, 2) == s2_qblock
+        @test ptrace(state_qblock, 3) == s3_qblock
+        @test ptrace(state_qblock, [1, 2]) == s1_qblock ⊗ s2_qblock
+        @test ptrace(state_qblock, [1, 3]) == s1_qblock ⊗ s3_qblock
+        @test ptrace(state_qblock, [2, 3]) == s2_qblock ⊗ s3_qblock
 
         sstatic = coherentstate(SVector{2}, SMatrix{2,2}, qpairbasis1, alpha)
         tpstatic = sstatic ⊗ sstatic ⊗ sstatic
         @test ptrace(tpstatic, 1) == sstatic
         @test ptrace(tpstatic, [1,3]) == sstatic ⊗ sstatic
 
-        @test ptrace(SVector{2}, SMatrix{2,2}, state, 1) isa GaussianState
-        @test ptrace(SVector{4}, SMatrix{4,4}, state, [1, 3]) isa GaussianState
+        @test ptrace(SVector{2}, SMatrix{2,2}, state_qpair, 1) isa GaussianState
+        @test ptrace(SVector{4}, SMatrix{4,4}, state_qpair, [1, 3]) isa GaussianState
     end
 end

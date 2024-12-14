@@ -103,11 +103,6 @@ function Base.show(io::IO, mime::MIME"text/plain", x::GaussianUnitary)
     print(io, "\nsymplectic: ")
     Base.show(io, mime, x.symplectic)
 end
-function issymplectic(op::GaussianUnitary)
-    symp = op.symplectic
-    omega = symplecticform(op.basis)
-    return isapprox(transpose(symp) * omega * symp, omega)
-end
 
 function Base.:(*)(op::GaussianUnitary, state::GaussianState)
     op.basis == state.basis || throw(DimensionMismatch(ACTION_ERROR))
