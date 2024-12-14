@@ -302,10 +302,10 @@ mean: 4-element Vector{Float64}:
  0.0
  0.0
 covariance: 4×4 Matrix{Float64}:
- 0.77154    0.0       0.415496   0.415496
- 0.0        0.77154   0.415496  -0.415496
- 0.415496   0.415496  0.77154    0.0
- 0.415496  -0.415496  0.0        0.77154
+  0.77154    0.0       -0.415496  -0.415496
+  0.0        0.77154   -0.415496   0.415496
+ -0.415496  -0.415496   0.77154    0.0
+ -0.415496   0.415496   0.0        0.77154
 ```
 """
 function eprstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, r::R, theta::R) where {Tm,Tc,N<:Int,R}
@@ -325,19 +325,19 @@ function _eprstate(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Rea
     covar = zeros(2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(Int(nmodes/2))
         covar[4*i-3, 4*i-3] = cr
-        covar[4*i-3, 4*i-1] = sr * ct
-        covar[4*i-3, 4*i] = sr * st
+        covar[4*i-3, 4*i-1] = -sr * ct
+        covar[4*i-3, 4*i] = -sr * st
 
         covar[4*i-2, 4*i-2] = cr
-        covar[4*i-2, 4*i-1] = sr * st
-        covar[4*i-2, 4*i] = -sr * ct
+        covar[4*i-2, 4*i-1] = -sr * st
+        covar[4*i-2, 4*i] = sr * ct
 
-        covar[4*i-1, 4*i-3] = sr * ct
-        covar[4*i-1, 4*i-2] = sr * st
+        covar[4*i-1, 4*i-3] = -sr * ct
+        covar[4*i-1, 4*i-2] = -sr * st
         covar[4*i-1, 4*i-1] = cr
 
-        covar[4*i, 4*i-3] = sr * st
-        covar[4*i, 4*i-2] = -sr * ct
+        covar[4*i, 4*i-3] = -sr * st
+        covar[4*i, 4*i-2] = sr * ct
         covar[4*i, 4*i] = cr
     end
     return mean, covar
@@ -351,19 +351,19 @@ function _eprstate(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Vec
         ct, st = cos(theta[i]), sin(theta[i])
 
         covar[4*i-3, 4*i-3] = cr
-        covar[4*i-3, 4*i-1] = sr * ct
-        covar[4*i-3, 4*i] = sr * st
+        covar[4*i-3, 4*i-1] = -sr * ct
+        covar[4*i-3, 4*i] = -sr * st
 
         covar[4*i-2, 4*i-2] = cr
-        covar[4*i-2, 4*i-1] = sr * st
-        covar[4*i-2, 4*i] = -sr * ct
+        covar[4*i-2, 4*i-1] = -sr * st
+        covar[4*i-2, 4*i] = sr * ct
 
-        covar[4*i-1, 4*i-3] = sr * ct
-        covar[4*i-1, 4*i-2] = sr * st
+        covar[4*i-1, 4*i-3] = -sr * ct
+        covar[4*i-1, 4*i-2] = -sr * st
         covar[4*i-1, 4*i-1] = cr
 
-        covar[4*i, 4*i-3] = sr * st
-        covar[4*i, 4*i-2] = -sr * ct
+        covar[4*i, 4*i-3] = -sr * st
+        covar[4*i, 4*i-2] = sr * ct
         covar[4*i, 4*i] = cr
     end
     return mean, covar
@@ -674,4 +674,21 @@ function _ptrace(state::GaussianState{B,M,V}, indices::T) where {B<:QuadBlockBas
     mean′′ = _promote_output_vector(typeof(mean), mean′, 2*idxlength)
     covar′′ = _promote_output_matrix(typeof(covar), covar′, 2*idxlength)
     return mean′′, covar′′
+end
+
+function _changebasis(state::GaussianState{B1,M,V}, ::Type{B2}) where {B1<:QuadPairBasis,B2<:QuadBlockBasis,M,V}
+    if B1 == B2
+        return state
+    end
+    basis = state.basis
+    nmodes = basis.nmodes
+    T = zeros(2*nmodes, 2*nmodes)
+    @inbounds for i in Base.OneTo(2*nmodes), j in Base.OneTo(2*nmodes)
+        if (j == 2*i-1) || (j + 2*nmodes == 2*i)
+            T[i,j] = 1
+        end
+    end
+    mean = T * state.mean
+    covar = T * state.covar * transpose(T)
+    return GaussianState(B2(nmodes), mean, covar)
 end

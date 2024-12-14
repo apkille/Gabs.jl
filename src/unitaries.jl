@@ -472,10 +472,10 @@ displacement: 4-element Vector{Float64}:
  0.0
  0.0
 symplectic: 4×4 Matrix{Float64}:
-  0.866025   0.0       0.5       0.0
-  0.0        0.866025  0.0       0.5
- -0.5        0.0       0.866025  0.0
-  0.0       -0.5       0.0       0.866025
+  0.5        0.0       0.866025  0.0
+  0.0        0.5       0.0       0.866025
+ -0.866025   0.0       0.5       0.0
+  0.0       -0.866025  0.0       0.5
 ```
 """
 function beamsplitter(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}, transmit::R) where {Td,Ts,N<:Int,R}
@@ -493,17 +493,17 @@ function _beamsplitter(basis::QuadPairBasis{N}, transmit::R) where {N<:Int,R<:Re
     a1, a2 = sqrt(transmit), sqrt(1 - transmit)
     symplectic = zeros(2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
-        symplectic[4*i-3, 4*i-3] = a1
-        symplectic[4*i-3, 4*i-1] = a2
+        symplectic[4*i-3, 4*i-3] = a2
+        symplectic[4*i-3, 4*i-1] = a1
 
-        symplectic[4*i-2, 4*i-2] = a1
-        symplectic[4*i-2, 4*i] = a2
+        symplectic[4*i-2, 4*i-2] = a2
+        symplectic[4*i-2, 4*i] = a1
     
-        symplectic[4*i-1, 4*i-3] = -a2
-        symplectic[4*i-1, 4*i-1] = a1
+        symplectic[4*i-1, 4*i-3] = -a1
+        symplectic[4*i-1, 4*i-1] = a2
 
-        symplectic[4*i, 4*i-2] = -a2
-        symplectic[4*i, 4*i] = a1
+        symplectic[4*i, 4*i-2] = -a1
+        symplectic[4*i, 4*i] = a2
     end
     return disp, symplectic
 end
@@ -514,17 +514,17 @@ function _beamsplitter(basis::QuadPairBasis{N}, transmit::R) where {N<:Int,R<:Ve
     @inbounds for i in Base.OneTo(nmodes)
         a1, a2 = sqrt(transmit[i]), sqrt(1 - transmit[i])
 
-        symplectic[4*i-3, 4*i-3] = a1
-        symplectic[4*i-3, 4*i-1] = a2
+        symplectic[4*i-3, 4*i-3] = a2
+        symplectic[4*i-3, 4*i-1] = a1
 
-        symplectic[4*i-2, 4*i-2] = a1
-        symplectic[4*i-2, 4*i] = a2
+        symplectic[4*i-2, 4*i-2] = a2
+        symplectic[4*i-2, 4*i] = a1
     
-        symplectic[4*i-1, 4*i-3] = -a2
+        symplectic[4*i-1, 4*i-3] = -a1
         symplectic[4*i-1, 4*i-1] = a1
 
-        symplectic[4*i, 4*i-2] = -a2
-        symplectic[4*i, 4*i] = a1
+        symplectic[4*i, 4*i-2] = -a1
+        symplectic[4*i, 4*i] = a2
     end
     return disp, symplectic
 end
@@ -639,4 +639,21 @@ function _tensor(op1::GaussianUnitary{B1,D1,S1}, op2::GaussianUnitary{B2,D2,S2})
     disp′′ = _promote_output_vector(typeof(disp1), typeof(disp2), disp′)
     symp′′ = _promote_output_matrix(typeof(symp1), typeof(symp2), symp′)
     return disp′′, symp′′
+end
+
+function _changebasis(op::GaussianUnitary{B1,D,S}, ::Type{B2}) where {B1<:QuadPairBasis,B2<:QuadBlockBasis,D,S}
+    if B1 == B2
+        return op
+    end
+    basis = op.basis
+    nmodes = basis.nmodes
+    T = zeros(2*nmodes, 2*nmodes)
+    @inbounds for i in Base.OneTo(2*nmodes), j in Base.OneTo(2*nmodes)
+        if (j == 2*i-1) || (j + 2*nmodes == 2*i)
+            T[i,j] = 1
+        end
+    end
+    disp = T * op.disp
+    symp = T * op.symplectic * transpose(T)
+    return GaussianUnitary(B2(nmodes), disp, symp)
 end
