@@ -23,67 +23,83 @@
 
     @testset "displacement operator" begin
         alpha = rand(ComplexF64)
+        alphas = rand(ComplexF64, nmodes)
         op = displace(qpairbasis, alpha, noise)
         @test op isa GaussianChannel
         @test displace(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, alpha, noise) isa GaussianChannel
         @test displace(Array, qpairbasis, alpha, noise) isa GaussianChannel
         @test displace(qblockbasis, alpha, T*noise*transpose(T)) == _changebasis(op, QuadBlockBasis)
+        @test displace(qblockbasis, alphas, T*noise*transpose(T)) == _changebasis(displace(qpairbasis, alphas, noise), QuadBlockBasis)
     end
 
     @testset "squeeze operator" begin
         r, theta = rand(Float64), rand(Float64)
+        rs, thetas = rand(Float64, nmodes), rand(Float64, nmodes)
         op = squeeze(qpairbasis, r, theta, noise)
         @test op isa GaussianChannel
         @test squeeze(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, r, theta, noise) isa GaussianChannel
         @test squeeze(Array, qpairbasis, r, theta, noise) isa GaussianChannel
         @test squeeze(qblockbasis, r, theta, T*noise*transpose(T)) == _changebasis(op, QuadBlockBasis)
+        @test squeeze(qblockbasis, rs, thetas, T*noise*transpose(T)) == _changebasis(squeeze(qpairbasis, rs, thetas, noise), QuadBlockBasis)
     end
 
     @testset "two-mode squeeze operator" begin
         r, theta = rand(Float64), rand(Float64)
+        rs, thetas = rand(Float64, nmodes), rand(Float64, nmodes)
         op = twosqueeze(2*qpairbasis, r, theta, noise_ds)
         @test op isa GaussianChannel
         @test twosqueeze(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, 2*qpairbasis, r, theta, noise_ds) isa GaussianChannel
         @test twosqueeze(Array, 2*qpairbasis, r, theta, noise_ds) isa GaussianChannel
         @test twosqueeze(2*qblockbasis, r, theta, T_ds*noise_ds*transpose(T_ds)) == _changebasis(op, QuadBlockBasis)
+        @test twosqueeze(2*qblockbasis, rs, thetas, T_ds*noise_ds*transpose(T_ds)) == _changebasis(twosqueeze(2*qpairbasis, rs, thetas, noise_ds), QuadBlockBasis)
     end
 
     @testset "phase-shift operator" begin
         theta = rand(Float64)
+        thetas = rand(Float64, nmodes)
         op = phaseshift(qpairbasis, theta, noise)
         @test op isa GaussianChannel
         @test phaseshift(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, theta, noise) isa GaussianChannel
         @test phaseshift(Array, qpairbasis, theta, noise) isa GaussianChannel
         @test phaseshift(qblockbasis, theta, T*noise*transpose(T)) == _changebasis(op, QuadBlockBasis)
+        @test phaseshift(qblockbasis, thetas, T*noise*transpose(T)) == _changebasis(phaseshift(qpairbasis, thetas, noise), QuadBlockBasis)
     end
 
     @testset "beamsplitter operator" begin
         theta = rand(Float64)
+        thetas = rand(Float64, nmodes)
         op = beamsplitter(2*qpairbasis, theta, noise_ds)
         @test op isa GaussianChannel
         @test beamsplitter(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, 2*qpairbasis, theta, noise_ds) isa GaussianChannel
         @test beamsplitter(Array, 2*qpairbasis, theta, noise_ds) isa GaussianChannel
         @test beamsplitter(2*qblockbasis, theta, T_ds*noise_ds*transpose(T_ds)) == _changebasis(op, QuadBlockBasis)
+        @test beamsplitter(2*qblockbasis, thetas, T_ds*noise_ds*transpose(T_ds)) == _changebasis(beamsplitter(2*qpairbasis, thetas, noise_ds), QuadBlockBasis)
     end
 
     @testset "attenuator channel" begin
         theta = rand(Float64)
+        thetas = rand(Float64, nmodes)
         n = rand(Int64)
+        ns = rand(Int64, nmodes)
         op = attenuator(qpairbasis, theta, n)
         @test op isa GaussianChannel
         @test attenuator(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, theta, n) isa GaussianChannel
         @test attenuator(Array, qpairbasis, theta, n) isa GaussianChannel
         @test attenuator(qblockbasis, theta, n) == _changebasis(op, QuadBlockBasis)
+        @test attenuator(qblockbasis, thetas, ns) == _changebasis(attenuator(qpairbasis, thetas, ns), QuadBlockBasis)
     end
 
     @testset "amplifier channel" begin
         r = rand(Float64)
+        rs = rand(Float64, nmodes)
         n = rand(Int64)
+        ns = rand(Float64, nmodes)
         op = amplifier(qpairbasis, r, n)
         @test op isa GaussianChannel
         @test amplifier(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, r, n) isa GaussianChannel
         @test amplifier(Array, qpairbasis, r, n) isa GaussianChannel
         @test amplifier(qblockbasis, r, n) == _changebasis(op, QuadBlockBasis)
+        @test amplifier(qblockbasis, rs, ns) == _changebasis(amplifier(qpairbasis, rs, ns), QuadBlockBasis)
     end
     
     @testset "tensor products" begin

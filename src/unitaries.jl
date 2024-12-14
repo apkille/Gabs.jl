@@ -311,8 +311,8 @@ function _twosqueeze(basis::QuadBlockBasis{N}, r::R, theta::R) where {N<:Int,R<:
     disp = zeros(2*nmodes)
     symplectic = zeros(2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(Int(nmodes/2))
-        cr, sr = cosh(r[2*i]), sinh(r[2*i])
-        ct, st = cos(theta[2*i]), sin(theta[2*i])
+        cr, sr = cosh(r[i]), sinh(r[i])
+        ct, st = cos(theta[i]), sin(theta[i])
 
         symplectic[2*i-1, 2*i-1] = cr
         symplectic[2*i-1, 2*i] = -sr * ct
@@ -521,7 +521,7 @@ function _beamsplitter(basis::QuadPairBasis{N}, transmit::R) where {N<:Int,R<:Ve
         symplectic[4*i-2, 4*i] = a1
     
         symplectic[4*i-1, 4*i-3] = -a1
-        symplectic[4*i-1, 4*i-1] = a1
+        symplectic[4*i-1, 4*i-1] = a2
 
         symplectic[4*i, 4*i-2] = -a1
         symplectic[4*i, 4*i] = a2

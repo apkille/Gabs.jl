@@ -1,4 +1,4 @@
-@testitem "Quadrature pair basis" begin
+@testitem "Unitaries" begin
     import Gabs: _changebasis
     using Gabs
     using StaticArrays
@@ -9,47 +9,57 @@
 
     @testset "displacement operator" begin
         alpha = rand(ComplexF64)
+        alphas = rand(ComplexF64, nmodes)
         op = displace(qpairbasis, alpha)
         @test op isa GaussianUnitary
         @test displace(Array, qpairbasis, alpha) isa GaussianUnitary
         @test displace(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, alpha) isa GaussianUnitary
         @test displace(qblockbasis, alpha) == _changebasis(op, QuadBlockBasis)
+        @test displace(qblockbasis, alphas) == _changebasis(displace(qpairbasis, alphas), QuadBlockBasis)
     end
 
     @testset "squeeze operator" begin
         r, theta = rand(Float64), rand(Float64)
+        rs, thetas = rand(Float64, nmodes), rand(Float64, nmodes)
         op = squeeze(qpairbasis, r, theta)
         @test op isa GaussianUnitary
         @test squeeze(Array, qpairbasis, r, theta) isa GaussianUnitary
         @test squeeze(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, r, theta) isa GaussianUnitary
         @test squeeze(qblockbasis, r, theta) == _changebasis(op, QuadBlockBasis)
+        @test squeeze(qblockbasis, rs, thetas) == _changebasis(squeeze(qpairbasis, rs, thetas), QuadBlockBasis)
     end
 
     @testset "two-mode squeeze operator" begin
         r, theta = rand(Float64), rand(Float64)
+        rs, thetas = rand(Float64, nmodes), rand(Float64, nmodes)
         op = twosqueeze(2*qpairbasis, r, theta)
         @test op isa GaussianUnitary
         @test twosqueeze(Array, 2*qpairbasis, r, theta) isa GaussianUnitary
         @test twosqueeze(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, 2*qpairbasis, r, theta) isa GaussianUnitary
         @test twosqueeze(2*qblockbasis, r, theta) == _changebasis(op, QuadBlockBasis)
+        @test twosqueeze(2*qblockbasis, rs, thetas) == _changebasis(twosqueeze(2*qpairbasis, rs, thetas), QuadBlockBasis)
     end
 
     @testset "phase-shift operator" begin
         theta = rand(Float64)
+        thetas = rand(Float64, nmodes)
         op = phaseshift(qpairbasis, theta)
         @test op isa GaussianUnitary
         @test phaseshift(Array, qpairbasis, theta) isa GaussianUnitary
         @test phaseshift(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, theta) isa GaussianUnitary
         @test phaseshift(qblockbasis, theta) == _changebasis(op, QuadBlockBasis)
+        @test phaseshift(qblockbasis, thetas) == _changebasis(phaseshift(qpairbasis, thetas), QuadBlockBasis)
     end
 
     @testset "beamsplitter operator" begin
         theta = rand(Float64)
+        thetas = rand(Float64, nmodes)
         op = beamsplitter(2*qpairbasis, theta)
         @test op isa GaussianUnitary
         @test beamsplitter(Array, 2*qpairbasis, theta) isa GaussianUnitary
         @test beamsplitter(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, 2*qpairbasis, theta) isa GaussianUnitary
         @test beamsplitter(2*qblockbasis, theta) == _changebasis(op, QuadBlockBasis)
+        @test beamsplitter(2*qblockbasis, thetas) == _changebasis(beamsplitter(2*qpairbasis, thetas), QuadBlockBasis)
     end
 
     @testset "tensor products" begin

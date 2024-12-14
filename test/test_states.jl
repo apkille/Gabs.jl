@@ -1,4 +1,4 @@
-@testitem "Quadrature pair basis" begin
+@testitem "States" begin
     import Gabs: _changebasis
     using Gabs
     using StaticArrays

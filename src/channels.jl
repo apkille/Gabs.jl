@@ -104,7 +104,7 @@ function _attenuator(basis::Union{QuadPairBasis{N},QuadBlockBasis{N}}, theta::R,
     noise = Matrix{Float64}((sin(theta))^2 * n * I, 2*nmodes, 2*nmodes)
     return disp, transform, noise
 end
-function _attenuator(basis::Union{QuadPairBasis{N},QuadBlockBasis{N}}, theta::R, n::M) where {N<:Int,R<:Vector,M<:Vector}
+function _attenuator(basis::QuadPairBasis{N}, theta::R, n::M) where {N<:Int,R<:Vector,M<:Vector}
     nmodes = basis.nmodes
     disp = zeros(2*nmodes) 
     transform = zeros(2*nmodes, 2*nmodes)
@@ -118,6 +118,23 @@ function _attenuator(basis::Union{QuadPairBasis{N},QuadBlockBasis{N}}, theta::R,
 
         noise[2*i-1, 2*i-1] = st^2 * ni
         noise[2*i, 2*i] = st^2 * ni
+    end
+    return disp, transform, noise
+end
+function _attenuator(basis::QuadBlockBasis{N}, theta::R, n::M) where {N<:Int,R<:Vector,M<:Vector}
+    nmodes = basis.nmodes
+    disp = zeros(2*nmodes) 
+    transform = zeros(2*nmodes, 2*nmodes)
+    noise = zeros(2*nmodes, 2*nmodes)
+    @inbounds for i in Base.OneTo(nmodes)
+        ct, st = cos(theta[i]), sin(theta[i])
+        ni = n[i]
+
+        transform[i, i] = ct
+        transform[i+nmodes, i+nmodes] = ct
+
+        noise[i, i] = st^2 * ni
+        noise[i+nmodes, i+nmodes] = st^2 * ni
     end
     return disp, transform, noise
 end
@@ -174,7 +191,7 @@ function _amplifier(basis::Union{QuadPairBasis{N},QuadBlockBasis{N}}, r::R, n::M
     noise = Matrix{Float64}((sinh(r))^2 * n * I, 2*nmodes, 2*nmodes)
     return disp, transform, noise
 end
-function _amplifier(basis::Union{QuadPairBasis{N},QuadBlockBasis{N}}, r::R, n::M) where {N<:Int,R<:Vector,M<:Vector}
+function _amplifier(basis::QuadPairBasis{N}, r::R, n::M) where {N<:Int,R<:Vector,M<:Vector}
     nmodes = basis.nmodes
     disp = zeros(2*nmodes) 
     transform = zeros(2*nmodes, 2*nmodes)
@@ -188,6 +205,23 @@ function _amplifier(basis::Union{QuadPairBasis{N},QuadBlockBasis{N}}, r::R, n::M
 
         noise[2*i-1, 2*i-1] = sr^2 * ni
         noise[2*i, 2*i] = sr^2 * ni
+    end
+    return disp, transform, noise
+end
+function _amplifier(basis::QuadBlockBasis{N}, r::R, n::M) where {N<:Int,R<:Vector,M<:Vector}
+    nmodes = basis.nmodes
+    disp = zeros(2*nmodes) 
+    transform = zeros(2*nmodes, 2*nmodes)
+    noise = zeros(2*nmodes, 2*nmodes)
+    @inbounds for i in Base.OneTo(nmodes)
+        cr, sr = cos(r[i]), sin(r[i])
+        ni = n[i]
+
+        transform[i, i] = cr
+        transform[i+nmodes, i+nmodes] = cr
+
+        noise[i, i] = sr^2 * ni
+        noise[i+nmodes, i+nmodes] = sr^2 * ni
     end
     return disp, transform, noise
 end
@@ -318,7 +352,7 @@ function _changebasis(op::GaussianChannel{B1,D,S}, ::Type{B2}) where {B1<:QuadBl
         end
     end
     disp = T * op.disp
-    transform = transpose(T) * op.transform * T
-    noise = transpose(T) * op.noise * T
+    transform = T * op.transform * transpose(T)
+    noise = T * op.noise * transpose(T)
     return GaussianChannel(B2(nmodes), disp, transform, noise)
 end
