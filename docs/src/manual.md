@@ -40,11 +40,11 @@ which can be typed in the Julia REPL as `\otimes<TAB>`. Take the following examp
 ```jldoctest
 julia> basis = QuadPairBasis(1);
 
-julia> coherentstate(basis, -1.0) ⊗ vacuumstate(basis) ⊗ squeezedstate(basis, 0.25, pi/4)
+julia> coherentstate(basis, -1.0+im) ⊗ vacuumstate(basis) ⊗ squeezedstate(basis, 0.25, pi/4)
 GaussianState for 3 modes in QuadPairBasis representation.
 mean: 6-element Vector{Float64}:
  -1.4142135623730951
-  0.0
+  1.4142135623730951
   0.0
   0.0
   0.0
@@ -58,9 +58,29 @@ covariance: 6×6 Matrix{Float64}:
  0.0  0.0  0.0  0.0  0.184235  0.748048
 ```
 
-Note that in the above example, we defined the symplectic basis of the Gaussian state to be `QuadPairBasis`,
-which determines the arrangement of our quadrature field operators to be pairwise: $\mathbf{\hat{x}} = (q_1, p_1, q_2, p_2, q_3, p_3)^{\text{T}}$. If we wanted the field operators to be ordered blockwise, i.e.,
-$\mathbf{\hat{x}} = (q_1, q_2, q_3, p_1, p_2, p_3)^{\text{T}}$ then we would call `QuadBlockBasis` instead.
+Note that in the above example, we defined the symplectic basis of the Gaussian state to be [`QuadPairBasis`](@ref), which determines the arrangement of our quadrature field operators to be pairwise: $\mathbf{\hat{x}} = (q_1, p_1, q_2, p_2, q_3, p_3)^{\text{T}}$. If we wanted the field operators to be ordered blockwise, i.e.,
+$\mathbf{\hat{x}} = (q_1, q_2, q_3, p_1, p_2, p_3)^{\text{T}}$ then we would call [`QuadBlockBasis`](@ref) instead:
+
+```julia
+julia> basis = QuadBlockBasis(1);
+
+julia> coherentstate(basis, -1.0+im) ⊗ vacuumstate(basis) ⊗ squeezedstate(basis, 0.25, pi/4)
+GaussianState for 3 modes in QuadBlockBasis representation.
+mean: 6-element Vector{Float64}:
+ -1.4142135623730951
+  0.0
+  0.0
+  1.4142135623730951
+  0.0
+  0.0
+covariance: 6×6 Matrix{Float64}:
+ 1.0  0.0  0.0       0.0  0.0  0.0
+ 0.0  1.0  0.0       0.0  0.0  0.0
+ 0.0  0.0  0.379578  0.0  0.0  0.184235
+ 0.0  0.0  0.0       1.0  0.0  0.0
+ 0.0  0.0  0.0       0.0  1.0  0.0
+ 0.0  0.0  0.184235  0.0  0.0  0.748048
+```
 
 ## Gaussian Operators
 

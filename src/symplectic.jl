@@ -1,9 +1,17 @@
 abstract type SymplecticBasis{N} end
 
+"""
+Defines a symplectic basis for a bosonic system of size `nmodes` in which
+the quadrature field operators are arranged pairwise.
+"""
 struct QuadPairBasis{N} <: SymplecticBasis{N}
     nmodes::N
 end
 
+"""
+Defines a symplectic basis for a bosonic system of size `nmodes` in which
+the quadrature field operators are arranged blockwise.
+"""
 struct QuadBlockBasis{N} <: SymplecticBasis{N}
     nmodes::N
 end
