@@ -58,6 +58,10 @@ covariance: 6×6 Matrix{Float64}:
  0.0  0.0  0.0  0.0  0.184235  0.748048
 ```
 
+Note that in the above example, we defined the symplectic basis of the Gaussian state to be `QuadPairBasis`,
+which determines the arrangement of our quadrature field operators to be pairwise: $\mathbf{\hat{x}} = (q_1, p_1, q_2, p_2, q_3, p_3)^{\text{T}}$. If we wanted the field operators to be ordered blockwise, i.e.,
+$\mathbf{\hat{x}} = (q_1, q_2, q_3, p_1, p_2, p_3)^{\text{T}}$ then we would call `QuadBlockBasis` instead.
+
 ## Gaussian Operators
 
 To transform Gaussian states into Gaussian states, we need Gaussian maps. There are various ways to construct Gaussian transformations, which we will discuss in this section.
@@ -76,16 +80,11 @@ an `N`-mode Gaussian bosonic system. As long as we have a displacement vector of
 !!! note
     A matrix $\mathbf{S}$ of size $2N\times 2N$ is symplectic when it satisfies the following relation:
 
-    $$\mathbf{S} \mathbf{\Omega} \mathbf{S}^{\text{T}} = \mathbf{\Omega}, \qquad \mathbf{\Omega} = \bigoplus_{i=1}^{N} \begin{pmatrix} 0 & -1 \\ -1 & 0 \end{pmatrix}.$$
+    $$\mathbf{S} \mathbf{\Omega} \mathbf{S}^{\text{T}} = \mathbf{\Omega}.
 
     In this library, we define symplectic matrices with respect to $\Omega$, the *symplectic form*, which satisfies the canonical
     commutation relation $[\hat{x}_i, \hat{x}_j] = 2i\Omega_{ij}$, where $\hat{x}_i$ and $\hat{x}_j$
-    are quadrature field operators. However, a different basis can of course be used for a symplectic matrix. 
-    Another common way of expressing symplectic matrices is with the block diagonal symplectic form:
-    
-    $$\mathbf{J} = \begin{pmatrix} 0 & \mathbf{I}_N \\ -\mathbf{I}_N & 0 \end{pmatrix},$$
-
-    where $\mathbf{I}_N$ is the identity matrix of size $N \times N$.
+    are quadrature field operators.
 
 This library has a number of predefined Gaussian unitaries, which are listed below:
 
