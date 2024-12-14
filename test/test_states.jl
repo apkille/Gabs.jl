@@ -16,34 +16,42 @@
 
     @testset "thermal states" begin
         n = rand(Int64)
+        ns = rand(Int64, nmodes)
         state = thermalstate(qpairbasis, n)
         @test state isa GaussianState
         @test thermalstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, n) isa GaussianState
         @test thermalstate(qblockbasis, n) == _changebasis(state, QuadBlockBasis)
+        @test thermalstate(qblockbasis, ns) == _changebasis(thermalstate(qpairbasis, ns), QuadBlockBasis)
     end
 
     @testset "coherent states" begin
         alpha = rand(ComplexF64)
+        alphas = rand(ComplexF64, nmodes)
         state = coherentstate(qpairbasis, alpha)
         @test state isa GaussianState
         @test coherentstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, alpha) isa GaussianState
         @test coherentstate(qblockbasis, alpha) == _changebasis(state, QuadBlockBasis)
+        @test coherentstate(qblockbasis, alphas) == _changebasis(coherentstate(qpairbasis, alphas), QuadBlockBasis)
     end
 
     @testset "squeezed states" begin
         r, theta = rand(Float64), rand(Float64)
+        rs, thetas = rand(Float64, nmodes), rand(Float64, nmodes)
         state = squeezedstate(qpairbasis, r, theta)
         @test state isa GaussianState
         @test squeezedstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, r, theta) isa GaussianState
         @test squeezedstate(qblockbasis, r, theta) == _changebasis(state, QuadBlockBasis)
+        @test squeezedstate(qblockbasis, rs, thetas) == _changebasis(squeezedstate(qpairbasis, rs, thetas), QuadBlockBasis)
     end
 
     @testset "epr states" begin
         r, theta = rand(Float64), rand(Float64)
+        rs, thetas = rand(Float64, nmodes), rand(Float64, nmodes)
         state = eprstate(2*qpairbasis, r, theta)
         @test state isa GaussianState
         @test eprstate(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, 2*qpairbasis, r, theta) isa GaussianState
         @test eprstate(2*qblockbasis, r, theta) == _changebasis(state, QuadBlockBasis)
+        @test eprstate(2*qblockbasis, rs, thetas) == _changebasis(eprstate(2*qpairbasis, rs, thetas), QuadBlockBasis)
     end
 
     @testset "tensor products" begin
