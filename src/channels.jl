@@ -76,7 +76,8 @@ and noise matrix ``\\mathbf{N}``, expressed respectively as follows:
 
 ```jldoctest
 julia> attenuator(QuadPairBasis(1), pi/6, 3)
-GaussianChannel for 1 mode in QuadPairBasis representation.
+GaussianChannel for 1 mode.
+  symplectic basis: QuadPairBasis
 displacement: 2-element Vector{Float64}:
  0.0
  0.0
@@ -163,7 +164,8 @@ and noise matrix ``\\mathbf{N}``, expressed respectively as follows:
 
 ```jldoctest
 julia> amplifier(QuadPairBasis(1), 2.0, 3)
-GaussianChannel for 1 mode in QuadPairBasis representation.
+GaussianChannel for 1 mode.
+  symplectic basis: QuadPairBasis
 displacement: 2-element Vector{Float64}:
  0.0
  0.0

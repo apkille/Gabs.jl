@@ -18,7 +18,8 @@ the Wigner representation of a Gaussian state is a Gaussian function.
 
 ```jldoctest
 julia> coherentstate(QuadPairBasis(1), 1.0+im)
-GaussianState for 1 mode in QuadPairBasis representation.
+GaussianState for 1 mode.
+  symplectic basis: QuadPairBasis
 mean: 2-element Vector{Float64}:
  1.4142135623730951
  1.4142135623730951
@@ -41,6 +42,8 @@ Base.:(==)(x::GaussianState, y::GaussianState) = x.basis == y.basis && x.mean ==
 Base.isapprox(x::GaussianState, y::GaussianState) = x.basis == y.basis && isapprox(x.mean,y.mean) && isapprox(x.covar,y.covar)
 function Base.show(io::IO, mime::MIME"text/plain", x::GaussianState)
     Base.summary(io, x)
+    print(io, "\n  symplectic basis: ")
+    printstyled(io, "$(nameof(typeof(x.basis)))"; color = :blue)
     print(io, "\nmean: ")
     Base.show(io, mime, x.mean)
     print(io, "\ncovariance: ")
@@ -75,7 +78,8 @@ the statistical moments of the Gaussian state:
 
 ```jldoctest
 julia> displace(QuadPairBasis(1), 1.0+im)
-GaussianUnitary for 1 mode in QuadPairBasis representation.
+GaussianUnitary for 1 mode.
+  symplectic basis: QuadPairBasis
 displacement: 2-element Vector{Float64}:
  1.4142135623730951
  1.4142135623730951
@@ -98,6 +102,8 @@ Base.:(==)(x::GaussianUnitary, y::GaussianUnitary) = x.basis == y.basis && x.dis
 Base.isapprox(x::GaussianUnitary, y::GaussianUnitary) = x.basis == y.basis && isapprox(x.disp, y.disp) && isapprox(x.symplectic, y.symplectic)
 function Base.show(io::IO, mime::MIME"text/plain", x::GaussianUnitary)
     Base.summary(io, x)
+    print(io, "\n  symplectic basis: ")
+    printstyled(io, "$(nameof(typeof(x.basis)))"; color = :blue)
     print(io, "\ndisplacement: ")
     Base.show(io, mime, x.disp)
     print(io, "\nsymplectic: ")
@@ -149,7 +155,8 @@ described by its maps on the statistical moments of the Gaussian state:
 julia> noise = [1.0 -3.0; 4.0 2.0];
 
 julia> displace(QuadPairBasis(1), 1.0+im, noise)
-GaussianChannel for 1 mode in QuadPairBasis representation.
+GaussianChannel for 1 mode.
+  symplectic basis: QuadPairBasis
 displacement: 2-element Vector{Float64}:
  1.4142135623730951
  1.4142135623730951
@@ -176,6 +183,8 @@ Base.:(==)(x::GaussianChannel, y::GaussianChannel) = x.basis == y.basis && x.dis
 Base.isapprox(x::GaussianChannel, y::GaussianChannel) = x.basis == y.basis && isapprox(x.disp, y.disp) && isapprox(x.transform, y.transform) && isapprox(x.noise, y.noise)
 function Base.show(io::IO, mime::MIME"text/plain", x::GaussianChannel)
     Base.summary(io, x)
+    print(io, "\n  symplectic basis: ")
+    printstyled(io, "$(nameof(typeof(x.basis)))"; color = :blue)
     print(io, "\ndisplacement: ")
     Base.show(io, mime, x.disp)
     print(io, "\ntransform: ")
@@ -188,13 +197,10 @@ function Base.summary(io::IO, x::Union{GaussianState,GaussianUnitary,GaussianCha
     basis = x.basis
     modenum = basis.nmodes
     if isone(modenum)
-        print(io, " for $(modenum) mode ")
+        print(io, " for $(modenum) mode.")
     else
-        print(io, " for $(modenum) modes ")
+        print(io, " for $(modenum) modes.")
     end
-    print(io, "in ")
-    printstyled(io, "$(nameof(typeof(basis)))"; color = :blue)
-    print(io, " representation.")
 end
 
 function Base.:(*)(op::GaussianChannel, state::GaussianState)

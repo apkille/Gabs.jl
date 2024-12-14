@@ -41,7 +41,8 @@ which can be typed in the Julia REPL as `\otimes<TAB>`. Take the following examp
 julia> basis = QuadPairBasis(1);
 
 julia> coherentstate(basis, -1.0+im) ⊗ vacuumstate(basis) ⊗ squeezedstate(basis, 0.25, pi/4)
-GaussianState for 3 modes in QuadPairBasis representation.
+GaussianState for 3 modes.
+  symplectic basis: QuadPairBasis
 mean: 6-element Vector{Float64}:
  -1.4142135623730951
   1.4142135623730951
@@ -65,7 +66,8 @@ $\mathbf{\hat{x}} = (q_1, q_2, q_3, p_1, p_2, p_3)^{\text{T}}$ then we would cal
 julia> basis = QuadBlockBasis(1);
 
 julia> coherentstate(basis, -1.0+im) ⊗ vacuumstate(basis) ⊗ squeezedstate(basis, 0.25, pi/4)
-GaussianState for 3 modes in QuadBlockBasis representation.
+GaussianState for 3 modes.
+  symplectic basis: QuadBlockBasis
 mean: 6-element Vector{Float64}:
  -1.4142135623730951
   0.0
@@ -139,7 +141,8 @@ Listed below are a list of predefined Gaussian channels supported by Gabs:
     julia> noise = [1.0 -2.0; 4.0 -3.0];
 
     julia> displace(basis, 1.0-im, noise)
-    GaussianChannel for 1 mode in QuadPairBasis representation.
+    GaussianChannel for 1 mode.
+      symplectic basis: QuadPairBasis
     displacement: 2-element Vector{Float64}:
       1.4142135623730951
      -1.4142135623730951

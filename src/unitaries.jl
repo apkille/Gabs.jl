@@ -27,7 +27,8 @@ matrix ``\\mathbf{S}``, expressed respectively as follows:
 
 ```jldoctest
 julia> displace(QuadPairBasis(1), 1.0+im)
-GaussianUnitary for 1 mode in QuadPairBasis representation.
+GaussianUnitary for 1 mode.
+  symplectic basis: QuadPairBasis
 displacement: 2-element Vector{Float64}:
  1.4142135623730951
  1.4142135623730951
@@ -101,7 +102,8 @@ where ``\\mathbf{R}(\\theta)`` is the rotation matrix.
 
 ```jldoctest
 julia> squeeze(QuadPairBasis(1), 0.25, pi/4)
-GaussianUnitary for 1 mode in QuadPairBasis representation.
+GaussianUnitary for 1 mode.
+  symplectic basis: QuadPairBasis
 displacement: 2-element Vector{Float64}:
  0.0
  0.0
@@ -208,7 +210,8 @@ where ``\\mathbf{R}(\\theta)`` is the rotation matrix.
 
 ```jldoctest
 julia> twosqueeze(QuadPairBasis(2), 0.25, pi/4)
-GaussianUnitary for 2 modes in QuadPairBasis representation.
+GaussianUnitary for 2 modes.
+  symplectic basis: QuadPairBasis
 displacement: 4-element Vector{Float64}:
  0.0
  0.0
@@ -363,7 +366,8 @@ matrix ``\\mathbf{S}``, expressed respectively as follows:
 
 ```jldoctest
 julia> phaseshift(QuadPairBasis(1), 3pi/4)
-GaussianUnitary for 1 mode in QuadPairBasis representation.
+GaussianUnitary for 1 mode.
+  symplectic basis: QuadPairBasis
 displacement: 2-element Vector{Float64}:
  0.0
  0.0
@@ -465,7 +469,8 @@ matrix ``\\mathbf{S}``, expressed respectively as follows:
 
 ```jldoctest
 julia> beamsplitter(QuadPairBasis(2), 0.75)
-GaussianUnitary for 2 modes in QuadPairBasis representation.
+GaussianUnitary for 2 modes.
+  symplectic basis: QuadPairBasis
 displacement: 4-element Vector{Float64}:
  0.0
  0.0

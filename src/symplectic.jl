@@ -16,6 +16,9 @@ struct QuadBlockBasis{N} <: SymplecticBasis{N}
     nmodes::N
 end
 
+function Base.show(io::IO, x::SymplecticBasis)
+    print(io, "$(nameof(typeof(x)))($(x.nmodes))")
+end
 function Base.:(*)(n::N, repr2::R) where {N<:Number,R<:SymplecticBasis}
     R(n*repr2.nmodes)
 end

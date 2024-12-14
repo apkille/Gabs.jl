@@ -20,7 +20,8 @@ matrix ``\\mathbf{V}``, expressed respectively as follows:
 
 ```jldoctest
 julia> vacuumstate(QuadPairBasis(1))
-GaussianState for 1 mode in QuadPairBasis representation.
+GaussianState for 1 mode.
+  symplectic basis: QuadPairBasis
 mean: 2-element Vector{Float64}:
  0.0
  0.0
@@ -65,7 +66,8 @@ matrix ``\\mathbf{V}``, expressed respectively as follows:
 
 ```jldoctest
 julia> thermalstate(QuadPairBasis(1), 4)
-GaussianState for 1 mode in QuadPairBasis representation.
+GaussianState for 1 mode.
+  symplectic basis: QuadPairBasis
 mean: 2-element Vector{Float64}:
  0.0
  0.0
@@ -134,7 +136,8 @@ matrix ``\\mathbf{V}``, expressed respectively as follows:
 
 ```jldoctest
 julia> coherentstate(QuadPairBasis(1), 1.0+im)
-GaussianState for 1 mode in QuadPairBasis representation.
+GaussianState for 1 mode.
+  symplectic basis: QuadPairBasis
 mean: 2-element Vector{Float64}:
  1.4142135623730951
  1.4142135623730951
@@ -204,7 +207,8 @@ where ``\\mathbf{R}(\\theta)`` is the rotation matrix.
 
 ```jldoctest
 julia> squeezedstate(QuadPairBasis(1), 0.5, pi/4)
-GaussianState for 1 mode in QuadPairBasis representation.
+GaussianState for 1 mode.
+  symplectic basis: QuadPairBasis
 mean: 2-element Vector{Float64}:
  0.0
  0.0
@@ -306,7 +310,8 @@ where ``\\mathbf{R}(\\theta)`` is the rotation matrix.
 
 ```jldoctest
 julia> eprstate(QuadPairBasis(2), 0.5, pi/4)
-GaussianState for 2 modes in QuadPairBasis representation.
+GaussianState for 2 modes.
+  symplectic basis: QuadPairBasis
 mean: 4-element Vector{Float64}:
  0.0
  0.0
@@ -445,7 +450,8 @@ tensor product of Gaussian states, which can also be called with `⊗`.
 julia> basis = QuadPairBasis(1);
 
 julia> coherentstate(basis, 1.0+im) ⊗ thermalstate(basis, 2)
-GaussianState for 2 modes in QuadPairBasis representation.
+GaussianState for 2 modes.
+  symplectic basis: QuadPairBasis
 mean: 4-element Vector{Float64}:
  1.4142135623730951
  1.4142135623730951
@@ -547,7 +553,8 @@ indicated by `indices`.
 julia> basis = QuadPairBasis(1);
 
 julia> state = coherentstate(basis, 1.0+im) ⊗ thermalstate(basis, 2) ⊗ squeezedstate(basis, 3.0, pi/4)
-GaussianState for 3 modes in QuadPairBasis representation.
+GaussianState for 3 modes.
+  symplectic basis: QuadPairBasis
 mean: 6-element Vector{Float64}:
  1.4142135623730951
  1.4142135623730951
@@ -564,7 +571,8 @@ covariance: 6×6 Matrix{Float64}:
  0.0  0.0  0.0  0.0  71.3164  172.174
 
 julia> ptrace(state, 2)
-GaussianState for 1 mode in QuadPairBasis representation.
+GaussianState for 1 mode.
+  symplectic basis: QuadPairBasis
 mean: 2-element Vector{Float64}:
  0.0
  0.0
@@ -573,7 +581,8 @@ covariance: 2×2 Matrix{Float64}:
  0.0  2.5
 
 julia> ptrace(state, [1, 3])
-GaussianState for 2 modes in QuadPairBasis representation.
+GaussianState for 2 modes.
+  symplectic basis: QuadPairBasis
 mean: 4-element Vector{Float64}:
  1.4142135623730951
  1.4142135623730951

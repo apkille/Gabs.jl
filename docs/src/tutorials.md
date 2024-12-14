@@ -44,7 +44,8 @@ Let's explore this feature in detail, using [StaticArrays.jl](https://github.com
 [`coherentstate`](@ref) can be called with a single complex argument:
 ```jldoctest
 julia> coherentstate(QuadPairBasis(1), 1.0-im)
-GaussianState for 1 mode in QuadPairBasis representation.
+GaussianState for 1 mode.
+  symplectic basis: QuadPairBasis
 mean: 2-element Vector{Float64}:
   1.4142135623730951
  -1.4142135623730951
@@ -60,7 +61,8 @@ can specify an array type in its first (and second) arguments. Let's see an exam
 julia> using StaticArrays
 
 julia> state = coherentstate(SVector{2}, SMatrix{2,2}, QuadPairBasis(1), 1.0-im)
-GaussianState for 1 mode in QuadPairBasis representation.
+GaussianState for 1 mode.
+  symplectic basis: QuadPairBasis
 mean: 2-element SVector{2, Float64} with indices SOneTo(2):
   1.4142135623730951
  -1.4142135623730951
@@ -69,7 +71,8 @@ covariance: 2×2 SMatrix{2, 2, Float64, 4} with indices SOneTo(2)×SOneTo(2):
  0.0  1.0
 
 julia> tp = state ⊗ state
-GaussianState for 2 modes in QuadPairBasis representation.
+GaussianState for 2 modes.
+  symplectic basis: QuadPairBasis
 mean: 4-element SVector{4, Float64} with indices SOneTo(4):
   1.4142135623730951
  -1.4142135623730951
@@ -84,7 +87,8 @@ covariance: 4×4 SMatrix{4, 4, Float64, 16} with indices SOneTo(4)×SOneTo(4):
 julia> using SparseArrays
 
 julia> ptrace(SparseVector, SparseMatrixCSC, tp, 1)
-GaussianState for 1 mode in QuadPairBasis representation.
+GaussianState for 1 mode.
+  symplectic basis: QuadPairBasis
 mean: 2-element SparseVector{Float64, Int64} with 2 stored entries:
   [1]  =  1.41421
   [2]  =  -1.41421
@@ -100,7 +104,8 @@ Importantly, methods that create or manipulate a Gaussian state, such as [`tenso
     than `Float64`, simply pass `Array{Float32}` to any relevant Gabs.jl method:
     ```jldoctest
     julia> state = displace(Array{Float32}, QuadPairBasis(1), 1.0-im)
-    GaussianUnitary for 1 mode in QuadPairBasis representation.
+    GaussianUnitary for 1 mode.
+      symplectic basis: QuadPairBasis
     displacement: 2-element Vector{Float32}:
       1.4142135
      -1.4142135
