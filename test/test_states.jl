@@ -95,7 +95,7 @@
         @test ptrace(state_qpair, [1, 3]) == s1_qpair ⊗ s3_qpair
         @test ptrace(state_qpair, [2, 3]) == s2_qpair ⊗ s3_qpair
 
-        s1_qblock, s2_qblock, s3_qblock = coherentstate(qpairbasis1, alpha), squeezedstate(qpairbasis1, r, theta), thermalstate(qpairbasis1, n)
+        s1_qblock, s2_qblock, s3_qblock = coherentstate(qblockbasis1, alpha), squeezedstate(qblockbasis1, r, theta), thermalstate(qblockbasis1, n)
         state_qblock = s1_qblock ⊗ s2_qblock ⊗ s3_qblock
         @test ptrace(state_qblock, 1) == s1_qblock
         @test ptrace(state_qblock, 2) == s2_qblock
