@@ -38,11 +38,13 @@ such state vector simulations, we recommend using the [QuantumOptics.jl](https:/
 which can be typed in the Julia REPL as `\otimes<TAB>`. Take the following example, where we produce a 3-mode Gaussian state that consists of a coherent state, vacuumstate, and squeezed state:
 
 ```jldoctest
-julia> coherentstate(-1.0) ⊗ vacuumstate() ⊗ squeezedstate(0.25, pi/4)
-GaussianState for 3 modes.
+julia> basis = QuadPairBasis(1);
+
+julia> coherentstate(basis, -1.0+im) ⊗ vacuumstate(basis) ⊗ squeezedstate(basis, 0.25, pi/4)
+GaussianState for 3 modes in QuadPairBasis representation.
 mean: 6-element Vector{Float64}:
  -1.4142135623730951
-  0.0
+  1.4142135623730951
   0.0
   0.0
   0.0
@@ -54,6 +56,30 @@ covariance: 6×6 Matrix{Float64}:
  0.0  0.0  0.0  1.0  0.0       0.0
  0.0  0.0  0.0  0.0  0.379578  0.184235
  0.0  0.0  0.0  0.0  0.184235  0.748048
+```
+
+Note that in the above example, we defined the symplectic basis of the Gaussian state to be [`QuadPairBasis`](@ref), which determines the arrangement of our quadrature field operators to be pairwise: $\mathbf{\hat{x}} = (q_1, p_1, q_2, p_2, q_3, p_3)^{\text{T}}$. If we wanted the field operators to be ordered blockwise, i.e.,
+$\mathbf{\hat{x}} = (q_1, q_2, q_3, p_1, p_2, p_3)^{\text{T}}$ then we would call [`QuadBlockBasis`](@ref) instead:
+
+```julia
+julia> basis = QuadBlockBasis(1);
+
+julia> coherentstate(basis, -1.0+im) ⊗ vacuumstate(basis) ⊗ squeezedstate(basis, 0.25, pi/4)
+GaussianState for 3 modes in QuadBlockBasis representation.
+mean: 6-element Vector{Float64}:
+ -1.4142135623730951
+  0.0
+  0.0
+  1.4142135623730951
+  0.0
+  0.0
+covariance: 6×6 Matrix{Float64}:
+ 1.0  0.0  0.0       0.0  0.0  0.0
+ 0.0  1.0  0.0       0.0  0.0  0.0
+ 0.0  0.0  0.379578  0.0  0.0  0.184235
+ 0.0  0.0  0.0       1.0  0.0  0.0
+ 0.0  0.0  0.0       0.0  1.0  0.0
+ 0.0  0.0  0.184235  0.0  0.0  0.748048
 ```
 
 ## Gaussian Operators
@@ -74,16 +100,11 @@ an `N`-mode Gaussian bosonic system. As long as we have a displacement vector of
 !!! note
     A matrix $\mathbf{S}$ of size $2N\times 2N$ is symplectic when it satisfies the following relation:
 
-    $$\mathbf{S} \mathbf{\Omega} \mathbf{S}^{\text{T}} = \mathbf{\Omega}, \qquad \mathbf{\Omega} = \bigoplus_{i=1}^{N} \begin{pmatrix} 0 & -1 \\ -1 & 0 \end{pmatrix}.$$
+    $$\mathbf{S} \mathbf{\Omega} \mathbf{S}^{\text{T}} = \mathbf{\Omega}.
 
     In this library, we define symplectic matrices with respect to $\Omega$, the *symplectic form*, which satisfies the canonical
     commutation relation $[\hat{x}_i, \hat{x}_j] = 2i\Omega_{ij}$, where $\hat{x}_i$ and $\hat{x}_j$
-    are quadrature field operators. However, a different basis can of course be used for a symplectic matrix. 
-    Another common way of expressing symplectic matrices is with the block diagonal symplectic form:
-    
-    $$\mathbf{J} = \begin{pmatrix} 0 & \mathbf{I}_N \\ -\mathbf{I}_N & 0 \end{pmatrix},$$
-
-    where $\mathbf{I}_N$ is the identity matrix of size $N \times N$.
+    are quadrature field operators.
 
 This library has a number of predefined Gaussian unitaries, which are listed below:
 
@@ -113,10 +134,12 @@ Listed below are a list of predefined Gaussian channels supported by Gabs:
     method can be called with an additional noise matrix to create a [`GaussianChannel`](@ref) object. For instance, a noisy displacement operator can be called with [`displace`](@ref) as follows:
 
     ```jldoctest
+    julia> basis = QuadPairBasis(1);
+
     julia> noise = [1.0 -2.0; 4.0 -3.0];
 
-    julia> displace(1.0-im, noise)
-    GaussianChannel for 1 mode.
+    julia> displace(basis, 1.0-im, noise)
+    GaussianChannel for 1 mode in QuadPairBasis representation.
     displacement: 2-element Vector{Float64}:
       1.4142135623730951
      -1.4142135623730951

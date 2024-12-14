@@ -10,6 +10,8 @@ import QuantumInterface: StateVector, AbstractOperator, apply!, tensor, ⊗
 export 
     # types
     GaussianState, GaussianUnitary, GaussianChannel, Generaldyne,
+    # symplectic representations
+    QuadPairBasis, QuadBlockBasis,
     # operations
     tensor, ⊗, apply!, ptrace, output, prob,
     # predefined Gaussian states
@@ -29,6 +31,8 @@ export
 include("errors.jl")
 
 include("utils.jl")
+
+include("symplectic.jl")
 
 include("types.jl")
 

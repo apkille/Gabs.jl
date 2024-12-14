@@ -1,21 +1,22 @@
 """
-    randstate([Tm=Vector{Float64}, Tc=Matrix{Float64},] nmodes<:Int; pure=false)
+    randstate([Tm=Vector{Float64}, Tc=Matrix{Float64},] basis::SymplecticBasis; pure=false)
 
-Calculate a random Gaussian state.
+Calculate a random Gaussian state in symplectic representation defined by `basis`.
 """
-function randstate(::Type{Tm}, ::Type{Tc}, nmodes::N; pure = false) where {Tm,Tc,N<:Int}
-    mean, covar = _randstate_fields(nmodes, pure)
-    return GaussianState(Tm(mean), Tc(covar), nmodes)
+function randstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}; pure = false) where {Tm,Tc,N<:Int}
+    mean, covar = _randstate(basis, pure)
+    return GaussianState(basis, Tm(mean), Tc(covar))
 end
-randstate(::Type{T}, nmodes::N; pure = false) where {T,N<:Int} = randstate(T,T,nmodes,pure=pure)
-function randstate(nmodes::N; pure = false) where {N<:Int}
-    mean, covar = _randstate_fields(nmodes, pure)
-    return GaussianState(mean, covar, nmodes)
+randstate(::Type{T}, basis::SymplecticBasis{N}; pure = false) where {T,N<:Int} = randstate(T,T,basis,pure=pure)
+function randstate(basis::SymplecticBasis{N}; pure = false) where {N<:Int}
+    mean, covar = _randstate(basis, pure)
+    return GaussianState(basis, mean, covar)
 end
-function _randstate_fields(nmodes::N, pure) where {N<:Int}
+function _randstate(basis::SymplecticBasis{N}, pure) where {N<:Int}
+    nmodes = basis.nmodes
     mean = randn(2*nmodes)
     covar = zeros(2*nmodes, 2*nmodes)
-    symp = randsymplectic(nmodes)
+    symp = randsymplectic(basis)
     # generate pure Gaussian state
     if pure
         mul!(covar, symp, symp')
@@ -31,44 +32,46 @@ function _randstate_fields(nmodes::N, pure) where {N<:Int}
 end
 
 """
-    randunitary([Td=Vector{Float64}, Ts=Matrix{Float64},] nmodes<:Int; passive=false)
+    randunitary([Td=Vector{Float64}, Ts=Matrix{Float64},] basis::SymplecticBasis; passive=false)
 
-Calculate a random Gaussian unitary operator.
+Calculate a random Gaussian unitary operator in symplectic representation defined by `basis`.
 """
-function randunitary(::Type{Td}, ::Type{Ts}, nmodes::N; passive = false) where {Td,Ts,N}
-    disp, symp = _randunitary_fields(nmodes, passive)
-    return GaussianUnitary(Td(disp), Ts(symp))
+function randunitary(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}; passive = false) where {Td,Ts,N<:Int}
+    disp, symp = _randunitary(basis, passive)
+    return GaussianUnitary(basis, Td(disp), Ts(symp))
 end
-randunitary(::Type{T}, nmodes::N; passive = false) where {T,N<:Int} = randunitary(T,T,nmodes; passive = passive)
-function randunitary(nmodes::N; passive = false) where {N<:Int}
-    disp, symp = _randunitary_fields(nmodes, passive)
-    return GaussianUnitary(disp, symp)
+randunitary(::Type{T}, basis::SymplecticBasis{N}; passive = false) where {T,N<:Int} = randunitary(T,T,basis; passive = passive)
+function randunitary(basis::SymplecticBasis{N}; passive = false) where {N<:Int}
+    disp, symp = _randunitary(basis, passive)
+    return GaussianUnitary(basis, disp, symp)
 end
-function _randunitary_fields(nmodes::N, passive) where {N<:Int}
+function _randunitary(basis::SymplecticBasis{N}, passive) where {N<:Int}
+    nmodes = basis.nmodes
     disp = rand(2*nmodes)
-    symp = randsymplectic(nmodes, passive = passive)
+    symp = randsymplectic(basis, passive = passive)
     return disp, symp
 end
 
 """
-    randchannel([Td=Vector{Float64}, Tt=Matrix{Float64},] nmodes<:Int)
+    randchannel([Td=Vector{Float64}, Tt=Matrix{Float64},] basis::SymplecticBasis)
 
-Calculate a random Gaussian channel.
+Calculate a random Gaussian channel in symplectic representation defined by `basis`.
 """
-function randchannel(::Type{Td}, ::Type{Tt}, nmodes::N) where {Td,Tt,N<:Int}
-    disp, transform, noise = _randchannel(nmodes)
-    return GaussianChannel(Td(disp), Tt(transform), Tt(noise), nmodes)
+function randchannel(::Type{Td}, ::Type{Tt}, basis::SymplecticBasis{N}) where {Td,Tt,N<:Int}
+    disp, transform, noise = _randchannel(basis)
+    return GaussianChannel(basis, Td(disp), Tt(transform), Tt(noise))
 end
-randchannel(::Type{T}, nmodes::N) where {T,N<:Int} = randchannel(T,T,nmodes)
-function randchannel(nmodes::N) where {N<:Int}
-    disp, transform, noise = _randchannel(nmodes)
-    return GaussianChannel(disp, transform, noise, nmodes)
+randchannel(::Type{T}, basis::SymplecticBasis{N}) where {T,N<:Int} = randchannel(T,T,basis)
+function randchannel(basis::SymplecticBasis{N}) where {N<:Int}
+    disp, transform, noise = _randchannel(basis)
+    return GaussianChannel(basis, disp, transform, noise)
 end
-function _randchannel(nmodes::N) where {N<:Int}
+function _randchannel(basis::SymplecticBasis{N}) where {N<:Int}
+    nmodes = basis.nmodes
     disp = randn(2*nmodes)
     # generate symplectic matrix describing the evolution of the system with N modes
     # and environment with 2N modes
-    symp = randsymplectic(3*nmodes)
+    symp = randsymplectic(typeof(basis)(3*nmodes))
     transform, B = symp[1:2*nmodes, 1:2*nmodes], @view(symp[1:2*nmodes, 2*nmodes+1:6*nmodes])
     # generate noise matrix from evolution of environment
     noise = zeros(2*nmodes, 2*nmodes)
@@ -77,18 +80,24 @@ function _randchannel(nmodes::N) where {N<:Int}
 end
 
 """
-    randsymplectic([T=Matrix{Float64},] nmodes<:Int, passive=false)
+    randsymplectic([T=Matrix{Float64},] basis::SymplecticBasis, passive=false)
 
-Calculate a random symplectic matrix of size `2*nmodes x 2*nmodes`.
+Calculate a random symplectic matrix in symplectic representation defined by `basis`.
 """
-function randsymplectic(nmodes::N; passive = false) where {N<:Int}
+function randsymplectic(::Type{T}, basis::SymplecticBasis{N}; passive = false) where {T, N<:Int} 
+    symp = randsymplectic(basis, passive = passive)
+    return T(symp)
+end
+randsymplectic(basis::SymplecticBasis{N}; passive = false) where {N<:Int} = _randsymplectic(basis, passive = passive)
+function _randsymplectic(basis::QuadPairBasis{N}; passive = false) where {N<:Int}
+    nmodes = basis.nmodes
     # generate random orthogonal symplectic matrix
-    O = _rand_orthogonal_symplectic(nmodes)
+    O = _rand_orthogonal_symplectic(basis)
     if passive
         return O
     end
     # instead generate random active symplectic matrix
-    O′ = _rand_orthogonal_symplectic(nmodes)
+    O′ = _rand_orthogonal_symplectic(basis)
     # direct sum of symplectic matrices for single-mode squeeze transformations
     rs = rand(nmodes)
     squeezes = zeros(2*nmodes, 2*nmodes)
@@ -99,15 +108,32 @@ function randsymplectic(nmodes::N; passive = false) where {N<:Int}
     end
     return O * squeezes * O′
 end
-function randsymplectic(::Type{T}, nmodes::N; passive = false) where {T, N<:Int} 
-    symp = randsymplectic(nmodes, passive = passive)
-    return T(symp)
+function _randsymplectic(basis::QuadBlockBasis{N}; passive = false) where {N<:Int}
+    nmodes = basis.nmodes
+    # generate random orthogonal symplectic matrix
+    O = _rand_orthogonal_symplectic(basis)
+    if passive
+        return O
+    end
+    # instead generate random active symplectic matrix
+    O′ = _rand_orthogonal_symplectic(basis)
+    # direct sum of symplectic matrices for single-mode squeeze transformations
+    rs = rand(nmodes)
+    squeezes = zeros(2*nmodes, 2*nmodes)
+    @inbounds for i in Base.OneTo(nmodes)
+        val = rs[i]
+        squeezes[i, i] = val
+        squeezes[i+nmodes, i+nmodes] = 1/val
+    end
+    return O * squeezes * O′
 end
+
 
 # Generates random orthogonal symplectic matrix by blocking real
 # and imaginary parts of a random unitary matrix
-function _rand_orthogonal_symplectic(nmodes::N) where {N<:Int}
-    U = _rand_unitary(nmodes)
+function _rand_orthogonal_symplectic(basis::QuadPairBasis{N}) where {N<:Int}
+    nmodes = basis.nmodes
+    U = _rand_unitary(basis)
     O = zeros(2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes), j in Base.OneTo(nmodes)
         val = U[i,j]
@@ -118,12 +144,26 @@ function _rand_orthogonal_symplectic(nmodes::N) where {N<:Int}
     end
     return O
 end
+function _rand_orthogonal_symplectic(basis::QuadBlockBasis{N}) where {N<:Int}
+    nmodes = basis.nmodes
+    U = _rand_unitary(basis)
+    O = zeros(2*nmodes, 2*nmodes)
+    @inbounds for i in Base.OneTo(nmodes), j in Base.OneTo(nmodes)
+        val = U[i,j]
+        O[i,j] = real(val)
+        O[i+nmodes, j] = -imag(val)
+        O[i, j+nmodes] = imag(val)
+        O[i+nmodes, j+nmodes] = real(val)
+    end
+    return O
+end
 # Generates unitary matrix randomly distributed over Haar measure;
 # see https://arxiv.org/abs/math-ph/0609050 for algorithm.
-# This approach is faster and creates less allocations than rand(Haar(2), size) from RandomMatrices.jl
-function _rand_unitary(size::N) where {N<:Int}
-    M = rand(ComplexF64, size, size) ./ sqrt(2.0)
+# This approach is faster and creates less allocations than rand(Haar(2), nmodes) from RandomMatrices.jl
+function _rand_unitary(basis::SymplecticBasis{N}) where {N<:Int}
+    nmodes = basis.nmodes
+    M = rand(ComplexF64, nmodes, nmodes) ./ sqrt(2.0)
     q, r = qr(M)
-    d = diagm([r[i, i] / abs(r[i, i]) for i in Base.OneTo(size)])
+    d = diagm([r[i, i] / abs(r[i, i]) for i in Base.OneTo(nmodes)])
     return q * d
 end

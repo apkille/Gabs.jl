@@ -1,3 +1,4 @@
+SYMPLECTIC_ERROR = lazy"The symplectic forms of the Gaussian objects do not match."
 
 STATE_ERROR = lazy"Either the input covariance matrix is not
     square or its dimensions do not match the mean vector. An
@@ -16,7 +17,8 @@ CHANNEL_ERROR = lazy"Either an input matrix is not square or
     of size 2N x 2N." 
 
 ACTION_ERROR = lazy"The number of modes for the Gaussian operator
-    does not match the number of modes for the Gaussian state."
+    does not match the number of modes for the Gaussian state, or the symplectic representations for
+    the two types are different."
 
 GENERALDYNE_ERROR = lazy"The number of modes for the measurement state
     does not match the number of modes for the projected subsystem."

@@ -16,14 +16,16 @@ currently has support for the following distributions, which can be called with 
 Below is a code example that plots the wigner distribution of a vacuum state:
 ```@example
 using Gabs, CairoMakie
-state = vacuumstate()
+basis = QuadPairBasis(1)
+state = vacuumstate(basis)
 q, p = collect(-5.0:0.5:5.0), collect(-5.0:0.5:5.0) # phase space coordinates
 heatmap(q, p, state, dist = :wigner)
 ```
 Of course, more plotting sugar can be added to this example with internal Makie attributes:
 ```@example
 using Gabs, CairoMakie
-state = vacuumstate()
+basis = QuadPairBasis(1)
+state = vacuumstate(basis)
 q, p = collect(-5.0:0.5:5.0), collect(-5.0:0.5:5.0) # phase space coordinates
 fig = Figure(fontsize=15, size = (375, 300), fonts = (; regular="CMU Serif"))
 ax = Axis(fig[1,1], xlabel = L"q", ylabel = L"p")
@@ -41,8 +43,8 @@ follow the [`AbstractArray` interface](https://docs.julialang.org/en/v1/manual/i
 Let's explore this feature in detail, using [StaticArrays.jl](https://github.com/JuliaArrays/StaticArrays.jl) and [SparseArrays.jl](https://github.com/JuliaSparse/SparseArrays.jl) as a case study. To create a coherent state that wraps around pure Julia arrays, the function
 [`coherentstate`](@ref) can be called with a single complex argument:
 ```jldoctest
-julia> coherentstate(1.0-im)
-GaussianState for 1 mode.
+julia> coherentstate(QuadPairBasis(1), 1.0-im)
+GaussianState for 1 mode in QuadPairBasis representation.
 mean: 2-element Vector{Float64}:
   1.4142135623730951
  -1.4142135623730951
@@ -57,8 +59,8 @@ can specify an array type in its first (and second) arguments. Let's see an exam
 ```jldoctest
 julia> using StaticArrays
 
-julia> state = coherentstate(SVector{2}, SMatrix{2,2}, 1.0-im)
-GaussianState for 1 mode.
+julia> state = coherentstate(SVector{2}, SMatrix{2,2}, QuadPairBasis(1), 1.0-im)
+GaussianState for 1 mode in QuadPairBasis representation.
 mean: 2-element SVector{2, Float64} with indices SOneTo(2):
   1.4142135623730951
  -1.4142135623730951
@@ -67,7 +69,7 @@ covariance: 2×2 SMatrix{2, 2, Float64, 4} with indices SOneTo(2)×SOneTo(2):
  0.0  1.0
 
 julia> tp = state ⊗ state
-GaussianState for 2 modes.
+GaussianState for 2 modes in QuadPairBasis representation.
 mean: 4-element SVector{4, Float64} with indices SOneTo(4):
   1.4142135623730951
  -1.4142135623730951
@@ -82,7 +84,7 @@ covariance: 4×4 SMatrix{4, 4, Float64, 16} with indices SOneTo(4)×SOneTo(4):
 julia> using SparseArrays
 
 julia> ptrace(SparseVector, SparseMatrixCSC, tp, 1)
-GaussianState for 1 mode.
+GaussianState for 1 mode in QuadPairBasis representation.
 mean: 2-element SparseVector{Float64, Int64} with 2 stored entries:
   [1]  =  1.41421
   [2]  =  -1.41421
@@ -97,8 +99,8 @@ Importantly, methods that create or manipulate a Gaussian state, such as [`tenso
     and matrices, then you can specify the array type with a single argument. For instance, to initialize a state that contains `Array`s holding numbers of type `Float32` rather
     than `Float64`, simply pass `Array{Float32}` to any relevant Gabs.jl method:
     ```jldoctest
-    julia> state = displace(Array{Float32}, 1.0-im)
-    GaussianUnitary for 1 mode.
+    julia> state = displace(Array{Float32}, QuadPairBasis(1), 1.0-im)
+    GaussianUnitary for 1 mode in QuadPairBasis representation.
     displacement: 2-element Vector{Float32}:
       1.4142135
      -1.4142135
