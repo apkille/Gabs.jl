@@ -17,9 +17,9 @@ relations (CCRs) of quantized continuous variable systems, manifestations of the
 appear everywhere. In Gabs, symplectic basis types must be defined from the beginning. Here's how they are laid out in this library:
 
 | canonical ordering | symplectic form | basis type |
-| --- | --- | --- |
-| $\mathbf{\hat{r}} = (\hat{x}_1, \hat{p}_1, \cdots, \hat{x}_N, \hat{p}_N)$ | $\mathbf{\Omega} = \begin{pmatrix} 0 & 1 \\ - 1 & 0 \end{pmatrix} \otimes \mathbf{I}_N$ | [`QuadPairBasis`](@ref) |
-| $\mathbf{\hat{r}} = (\hat{x}_1, \cdots, \hat{x}_N, \hat{p}_1, \cdots, \hat{p}_N)$ | $\mathbf{J} = \begin{pmatrix} 0 & \mathbf{I}_N \\ -\mathbf{I}_N & 0 \end{pmatrix}$ | [`QuadBlockBasis`](@ref) |
+| :---: | :---: | :---: |
+| $(\hat{x}_1, \hat{p}_1, \cdots, \hat{x}_N, \hat{p}_N)$ | $\begin{pmatrix} 0 & 1 \\ - 1 & 0 \end{pmatrix} \otimes \mathbf{I}_N$ | [`QuadPairBasis`](@ref) |
+| $(\hat{x}_1, \cdots, \hat{x}_N, \hat{p}_1, \cdots, \hat{p}_N)$ | $\begin{pmatrix} 0 & \mathbf{I}_N \\ -\mathbf{I}_N & 0 \end{pmatrix}$ | [`QuadBlockBasis`](@ref) |
 
 Each symplectic basis type is wrapped around the number of bosonic modes $N$. We can compose a larger symplectic basis
 with [`directsum`](@ref) or `⊕`, the direct sum symbol which can be typed in the Julia REPL as `\oplus<TAB>`:
