@@ -5,7 +5,7 @@ using BlockArrays: BlockedArray, BlockArray, Block, mortar
 import LinearAlgebra
 using LinearAlgebra: I, det, mul!, diagm, diag, qr
 
-import QuantumInterface: StateVector, AbstractOperator, apply!, tensor, ⊗
+import QuantumInterface: StateVector, AbstractOperator, apply!, tensor, ⊗, directsum, ⊕
 
 export 
     # types
@@ -13,7 +13,7 @@ export
     # symplectic representations
     QuadPairBasis, QuadBlockBasis,
     # operations
-    tensor, ⊗, apply!, ptrace, output, prob,
+    tensor, ⊗, directsum, ⊕, apply!, ptrace, output, prob,
     # predefined Gaussian states
     vacuumstate, thermalstate, coherentstate, squeezedstate, eprstate,
     # predefined Gaussian channels

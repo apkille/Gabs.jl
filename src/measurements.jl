@@ -158,7 +158,7 @@ function output(meas::Generaldyne)
         _promote_output_matrix(typeof(outcome.covar), covarAB, (2*(sysbasis.nmodes - outbasis.nmodes), 2*outbasis.nmodes)))
     # map subsystem A
     meanA′, covarA′ = _generaldyne_map(meanA′, meanB′, covarA′, covarB′, covarAB′, sys, outcome)
-    return GaussianState(sysbasis - outbasis, meanA′, covarA′)
+    return GaussianState(typeof(outbasis)(sysbasis.nmodes-outbasis.nmodes) , meanA′, covarA′)
 end
 
 """

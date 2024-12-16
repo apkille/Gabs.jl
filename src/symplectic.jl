@@ -19,14 +19,17 @@ end
 function Base.show(io::IO, x::SymplecticBasis)
     print(io, "$(nameof(typeof(x)))($(x.nmodes))")
 end
-function Base.:(*)(n::N, repr2::R) where {N<:Number,R<:SymplecticBasis}
-    R(n*repr2.nmodes)
+function Base.:(*)(n::N, basis::R) where {N<:Number,R<:SymplecticBasis}
+    R(n*basis.nmodes)
 end
-function Base.:(+)(repr1::R, repr2::R) where {R<:SymplecticBasis}
-    R(repr1.nmodes + repr2.nmodes)
-end
-function Base.:(-)(repr1::R, repr2::R) where {R<:SymplecticBasis}
-    R(repr1.nmodes - repr2.nmodes)
+
+"""
+    directsum(basis1::SymplecticBasis, basis2::SymplecticBasis)
+
+Compute the direct sum of symplectic bases.
+"""
+function directsum(basis1::R, basis2::R) where {R<:SymplecticBasis}
+    R(basis1.nmodes + basis2.nmodes)
 end
 
 """
