@@ -35,7 +35,7 @@ Of course, this type of behavior will occur implicitly when we take tensor produ
 in the following sections.
 
 !!! note
-    A matrix $\mathbf{S}$ of size $2N\times 2N$ is symplectic when it satisfies the relation $\mathbf{S} \mathbf{\Omega} \mathbf{S}^{\text{T}} = \mathbf{\Omega},$ where $\mathbf{\Omega}$ is an invertible skew-symmetric matrix.
+    A matrix $\mathbf{S}$ of size $2N\times 2N$ is symplectic when it satisfies the relation $\mathbf{S} \mathbf{\Omega} \mathbf{S}^{\text{T}} = \mathbf{\Omega},$ where $\mathbf{\Omega}$ is an invertible skew-symmetric matrix known as the *symplectic form*.
 
 ## Gaussian States
 
