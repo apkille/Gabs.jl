@@ -102,7 +102,7 @@ an `N`-mode Gaussian bosonic system. As long as we have a displacement vector of
 !!! note
     A matrix $\mathbf{S}$ of size $2N\times 2N$ is symplectic when it satisfies the following relation:
 
-    $$\mathbf{S} \mathbf{\Omega} \mathbf{S}^{\text{T}} = \mathbf{\Omega}.
+    $$\mathbf{S} \mathbf{\Omega} \mathbf{S}^{\text{T}} = \mathbf{\Omega}.$$
 
     In this library, we define symplectic matrices with respect to $\Omega$, the *symplectic form*, which satisfies the canonical
     commutation relation $[\hat{x}_i, \hat{x}_j] = 2i\Omega_{ij}$, where $\hat{x}_i$ and $\hat{x}_j$
