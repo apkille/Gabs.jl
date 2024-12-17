@@ -1,5 +1,9 @@
 # News
 
+## v1.2.1 - dev
+
+- Add `issymplectic` and `isgaussian` checks.
+  
 ## v1.2.0 - 2024-12-16
 
 - Add a benchmark suite as a part of the Github workflows.
