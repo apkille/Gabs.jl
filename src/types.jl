@@ -242,6 +242,7 @@ symplectic: 2×2 Matrix{Float64}:
 
 julia> isgaussian(op)
 true
+```
 """
 function isgaussian(x::GaussianState; atol::R1 = 0, rtol::R2 = atol) where {R1<:Real, R2<:Real}
     covar = x.covar

@@ -658,6 +658,7 @@ julia> basis = QuadPairBasis(1);
 
 julia> issymplectic(basis, [1.0 0.0; 0.0 1.0])
 true
+```
 """
 function issymplectic(basis::SymplecticBasis, x::T; atol::R1 = 0, rtol::R2 = atol) where {T,R1<:Real,R2<:Real}
     form = symplecticform(basis)
