@@ -15,13 +15,14 @@
     end
 
     @testset "thermal states" begin
-        n = rand(Int64)
-        ns = rand(Int64, nmodes)
+        n = rand(1:10)
+        ns = rand(1:10, nmodes)
         state = thermalstate(qpairbasis, n)
         @test state isa GaussianState
         @test thermalstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, n) isa GaussianState
         @test thermalstate(qblockbasis, n) == _changebasis(state, QuadBlockBasis)
         @test thermalstate(qblockbasis, ns) == _changebasis(thermalstate(qpairbasis, ns), QuadBlockBasis)
+        @test isgaussian(state, atol = 1e-4)
     end
 
     @testset "coherent states" begin
@@ -32,6 +33,7 @@
         @test coherentstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, alpha) isa GaussianState
         @test coherentstate(qblockbasis, alpha) == _changebasis(state, QuadBlockBasis)
         @test coherentstate(qblockbasis, alphas) == _changebasis(coherentstate(qpairbasis, alphas), QuadBlockBasis)
+        @test isgaussian(state, atol = 1e-4)
     end
 
     @testset "squeezed states" begin

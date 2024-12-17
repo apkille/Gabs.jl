@@ -3,7 +3,7 @@ module Gabs
 using BlockArrays: BlockedArray, BlockArray, Block, mortar
 
 import LinearAlgebra
-using LinearAlgebra: I, det, mul!, diagm, diag, qr
+using LinearAlgebra: I, det, mul!, diagm, diag, qr, eigvals
 
 import QuantumInterface: StateVector, AbstractOperator, apply!, tensor, ⊗, directsum, ⊕
 
@@ -23,8 +23,8 @@ export
     randstate, randunitary, randchannel, randsymplectic,
     # wigner functions
     wigner, wignerchar,
-    # symplectic form
-    symplecticform,
+    # symplectic form and checks
+    symplecticform, issymplectic, isgaussian,
     # metrics
     purity
 
