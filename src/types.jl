@@ -247,9 +247,8 @@ function isgaussian(x::GaussianState; atol::R1 = 0, rtol::R2 = atol) where {R1<:
     covar = x.covar
     basis = x.basis
     form = symplecticform(Matrix{ComplexF64}, basis)
-    mat = similar(form)
-    @. mat = im * form + covar
-    eigs = real(eigvals(mat))
+    @. form = im * form + covar
+    eigs = real(eigvals(form))
     return all(i -> ((i >= 0) || isapprox(i, 0.0; atol = atol, rtol = rtol)), eigs)
 end
 function isgaussian(x::GaussianUnitary; atol::R1 = 0, rtol::R2 = atol) where {R1<:Real, R2<:Real} 
@@ -259,9 +258,8 @@ function isgaussian(x::GaussianChannel; atol::R1 = 0, rtol::R2 = atol) where {R1
     transform, noise = x.transform, x.noise
     basis = x.basis
     form = symplecticform(Matrix{ComplexF64}, basis)
-    mat = similar(form)
     prod = transform * form * transform'
-    @. mat = noise + im*form - im*prod
-    eigs = real(eigvals(mat))
+    @. form = noise + im*form - im*prod
+    eigs = real(eigvals(form))
     return all(i -> ((i >= 0) || isapprox(i, 0.0; atol = atol, rtol = rtol)), eigs)
 end
