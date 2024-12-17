@@ -13,7 +13,7 @@
 
         coh = coherentstate(basis, 1.0+im)
         cohs = coh ⊗ vac ⊗ coh ⊗ vac
-        epr = eprstate(basis + basis, 1.0, 3.0)
+        epr = eprstate(basis ⊕ basis, 1.0, 3.0)
         gd2 = Generaldyne(cohs, epr, [1, 4])
         out2 = output(gd2)
         @test isequal(out2, vac ⊗ coh)

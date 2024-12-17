@@ -573,12 +573,12 @@ end
 function tensor(::Type{Td}, ::Type{Ts}, op1::GaussianUnitary, op2::GaussianUnitary) where {Td,Ts}
     typeof(op1.basis) == typeof(op2.basis) || throw(ArgumentError(SYMPLECTIC_ERROR))
     disp, symplectic = _tensor(op1, op2)
-    return GaussianUnitary(op1.basis + op2.basis, Td(disp), Ts(symplectic))
+    return GaussianUnitary(op1.basis ⊕ op2.basis, Td(disp), Ts(symplectic))
 end
 tensor(::Type{T}, op1::GaussianUnitary, op2::GaussianUnitary) where {T} = tensor(T, T, op1, op2)
 function tensor(op1::GaussianUnitary, op2::GaussianUnitary)
     disp, symplectic = _tensor(op1, op2)
-    return GaussianUnitary(op1.basis + op2.basis, disp, symplectic)
+    return GaussianUnitary(op1.basis ⊕ op2.basis, disp, symplectic)
 end
 function _tensor(op1::GaussianUnitary{B1,D1,S1}, op2::GaussianUnitary{B2,D2,S2}) where {B1<:QuadPairBasis,B2<:QuadPairBasis,D1,D2,S1,S2}
     basis1, basis2 = op1.basis, op2.basis

@@ -10,6 +10,33 @@ Simply put, Gabs is a package for creating and transforming Gaussian bosonic sys
 mathematical explanations when appropriate. For comprehensive reviews of Gaussian
 quantum information, see the [suggested readings page](@ref References).
 
+## The Symplectic Formalism
+
+The underlying geometry of Gaussian informatics in the phase space is *symplectic*. From the basic canonical commutation
+relations (CCRs) of quantized continuous variable systems, manifestations of the symplectic group $\text{Sp}(2N, \mathbb{R})$
+appear everywhere. In Gabs, symplectic basis types must be defined from the beginning. Here's how they are laid out in this library:
+
+| canonical ordering | symplectic form | basis type |
+| :---: | :---: | :---: |
+| $(\hat{x}_1, \hat{p}_1, \cdots, \hat{x}_N, \hat{p}_N)$ | $\begin{pmatrix} 0 & 1 \\ - 1 & 0 \end{pmatrix} \otimes \mathbf{I}_N$ | [`QuadPairBasis`](@ref) |
+| $(\hat{x}_1, \cdots, \hat{x}_N, \hat{p}_1, \cdots, \hat{p}_N)$ | $\begin{pmatrix} 0 & \mathbf{I}_N \\ -\mathbf{I}_N & 0 \end{pmatrix}$ | [`QuadBlockBasis`](@ref) |
+
+Each symplectic basis type is wrapped around the number of bosonic modes $N$. We can compose a larger symplectic basis
+with [`directsum`](@ref) or `⊕`, the direct sum symbol which can be typed in the Julia REPL as `\oplus<TAB>`:
+
+```jldoctest
+julia> b = QuadPairBasis(2)
+QuadPairBasis(2)
+
+julia> b ⊕ b
+QuadPairBasis(4)
+```
+Of course, this type of behavior will occur implicitly when we take tensor products of Gaussian states and operators, as discussed
+in the following sections.
+
+!!! note
+    A matrix $\mathbf{S}$ of size $2N\times 2N$ is symplectic when it satisfies the relation $\mathbf{S} \mathbf{\Omega} \mathbf{S}^{\text{T}} = \mathbf{\Omega},$ where $\mathbf{\Omega}$ is an invertible skew-symmetric matrix known as the *symplectic form*.
+
 ## Gaussian States
 
 The star of this package is the [`GaussianState`](@ref) type, which allows us to initialize
@@ -59,10 +86,9 @@ covariance: 6×6 Matrix{Float64}:
  0.0  0.0  0.0  0.0  0.184235  0.748048
 ```
 
-Note that in the above example, we defined the symplectic basis of the Gaussian state to be [`QuadPairBasis`](@ref), which determines the arrangement of our quadrature field operators to be pairwise: $\mathbf{\hat{x}} = (q_1, p_1, q_2, p_2, q_3, p_3)^{\text{T}}$. If we wanted the field operators to be ordered blockwise, i.e.,
-$\mathbf{\hat{x}} = (q_1, q_2, q_3, p_1, p_2, p_3)^{\text{T}}$ then we would call [`QuadBlockBasis`](@ref) instead:
+Note that in the above example, we defined the symplectic basis to be of type [`QuadPairBasis`](@ref). If we wanted the canonical field operators to be ordered blockwise, then we would call [`QuadBlockBasis`](@ref) instead:
 
-```julia
+```jldoctest
 julia> basis = QuadBlockBasis(1);
 
 julia> coherentstate(basis, -1.0+im) ⊗ vacuumstate(basis) ⊗ squeezedstate(basis, 0.25, pi/4)
@@ -98,15 +124,6 @@ GaussianUnitary
 
 This is a rather clean way to characterize a large group of Gaussian transformations on
 an `N`-mode Gaussian bosonic system. As long as we have a displacement vector of size `2N` and symplectic matrix of size `2N x 2N`, we can create a Gaussian transformation. 
-
-!!! note
-    A matrix $\mathbf{S}$ of size $2N\times 2N$ is symplectic when it satisfies the following relation:
-
-    $$\mathbf{S} \mathbf{\Omega} \mathbf{S}^{\text{T}} = \mathbf{\Omega}.$$
-
-    In this library, we define symplectic matrices with respect to $\Omega$, the *symplectic form*, which satisfies the canonical
-    commutation relation $[\hat{x}_i, \hat{x}_j] = 2i\Omega_{ij}$, where $\hat{x}_i$ and $\hat{x}_j$
-    are quadrature field operators.
 
 This library has a number of predefined Gaussian unitaries, which are listed below:
 
