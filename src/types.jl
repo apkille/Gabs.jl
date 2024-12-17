@@ -217,3 +217,51 @@ function apply!(state::GaussianState, op::GaussianChannel)
     state.covar .= T * state.covar * transpose(T) .+ N
     return state
 end
+
+"""
+    isgaussian(x::GaussianState)
+    isgaussian(x::GaussianUnitary)
+    isgaussian(x::GaussianChannel)
+
+Check if `x` satisfies the corresponding Gaussian definition for its type.
+
+## Example
+
+```jldoctest
+julia> basis = QuadPairBasis(1);
+
+julia> op = displace(basis, 1.0-im)
+GaussianUnitary for 1 mode.
+  symplectic basis: QuadPairBasis
+displacement: 2-element Vector{Float64}:
+  1.4142135623730951
+ -1.4142135623730951
+symplectic: 2×2 Matrix{Float64}:
+ 1.0  0.0
+ 0.0  1.0
+
+julia> isgaussian(op)
+true
+"""
+function isgaussian(x::GaussianState; atol::R1 = 0, rtol::R2 = atol) where {R1<:Real, R2<:Real}
+    covar = x.covar
+    basis = x.basis
+    form = symplecticform(Matrix{ComplexF64}, basis)
+    mat = similar(form)
+    @. mat = im * form + covar
+    eigs = real(eigvals(mat))
+    return all(i -> ((i >= 0) || isapprox(i, 0.0; atol = atol, rtol = rtol)), eigs)
+end
+function isgaussian(x::GaussianUnitary; atol::R1 = 0, rtol::R2 = atol) where {R1<:Real, R2<:Real} 
+    return issymplectic(x.basis, x.symplectic; atol = atol, rtol = rtol)
+end
+function isgaussian(x::GaussianChannel; atol::R1 = 0, rtol::R2 = atol) where {R1<:Real, R2<:Real} 
+    transform, noise = x.transform, x.noise
+    basis = x.basis
+    form = symplecticform(Matrix{ComplexF64}, basis)
+    mat = similar(form)
+    prod = transform * form * transform'
+    @. mat = noise + im*form - im*prod
+    eigs = real(eigvals(mat))
+    return all(i -> ((i >= 0) || isapprox(i, 0.0; atol = atol, rtol = rtol)), eigs)
+end

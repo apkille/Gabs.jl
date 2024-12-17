@@ -646,6 +646,24 @@ function _tensor(op1::GaussianUnitary{B1,D1,S1}, op2::GaussianUnitary{B2,D2,S2})
     return disp′′, symp′′
 end
 
+"""
+    issymplectic(basis::SymplecticBasis, x::T)
+
+Check if input matrix satisfies symplectic definition.
+
+## Example
+
+```jldoctest
+julia> basis = QuadPairBasis(1);
+
+julia> issymplectic(basis, [1.0 0.0; 0.0 1.0])
+true
+"""
+function issymplectic(basis::SymplecticBasis, x::T; atol::R1 = 0, rtol::R2 = atol) where {T,R1<:Real,R2<:Real}
+    form = symplecticform(basis)
+    return isapprox(x * form * x', form; atol = atol, rtol = rtol)
+end
+
 function _changebasis(op::GaussianUnitary{B1,D,S}, ::Type{B2}) where {B1<:QuadPairBasis,B2<:QuadBlockBasis,D,S}
     if B1 == B2
         return op
