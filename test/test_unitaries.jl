@@ -16,6 +16,8 @@
         @test displace(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, alpha) isa GaussianUnitary
         @test displace(qblockbasis, alpha) == _changebasis(op, QuadBlockBasis)
         @test displace(qblockbasis, alphas) == _changebasis(displace(qpairbasis, alphas), QuadBlockBasis)
+        @test issymplectic(qpairbasis, op.symplectic, atol = 1e-4)
+        @test isgaussian(op, atol = 1e-4)
     end
 
     @testset "squeeze operator" begin
@@ -27,6 +29,8 @@
         @test squeeze(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, r, theta) isa GaussianUnitary
         @test squeeze(qblockbasis, r, theta) == _changebasis(op, QuadBlockBasis)
         @test squeeze(qblockbasis, rs, thetas) == _changebasis(squeeze(qpairbasis, rs, thetas), QuadBlockBasis)
+        @test issymplectic(qpairbasis, op.symplectic, atol = 1e-4)
+        @test isgaussian(op, atol = 1e-4)
     end
 
     @testset "two-mode squeeze operator" begin

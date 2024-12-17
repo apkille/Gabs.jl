@@ -79,27 +79,29 @@
     @testset "attenuator channel" begin
         theta = rand(Float64)
         thetas = rand(Float64, nmodes)
-        n = rand(Int64)
-        ns = rand(Int64, nmodes)
+        n = rand(1:10)
+        ns = rand(1:10, nmodes)
         op = attenuator(qpairbasis, theta, n)
         @test op isa GaussianChannel
         @test attenuator(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, theta, n) isa GaussianChannel
         @test attenuator(Array, qpairbasis, theta, n) isa GaussianChannel
         @test attenuator(qblockbasis, theta, n) == _changebasis(op, QuadBlockBasis)
         @test attenuator(qblockbasis, thetas, ns) == _changebasis(attenuator(qpairbasis, thetas, ns), QuadBlockBasis)
+        @test isgaussian(op, atol = 1e-4)
     end
 
     @testset "amplifier channel" begin
         r = rand(Float64)
         rs = rand(Float64, nmodes)
-        n = rand(Int64)
-        ns = rand(Float64, nmodes)
+        n = rand(1:10)
+        ns = rand(1:10, nmodes)
         op = amplifier(qpairbasis, r, n)
         @test op isa GaussianChannel
         @test amplifier(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, r, n) isa GaussianChannel
         @test amplifier(Array, qpairbasis, r, n) isa GaussianChannel
         @test amplifier(qblockbasis, r, n) == _changebasis(op, QuadBlockBasis)
         @test amplifier(qblockbasis, rs, ns) == _changebasis(amplifier(qpairbasis, rs, ns), QuadBlockBasis)
+        @test isgaussian(op, atol = 1e-4)
     end
     
     @testset "tensor products" begin
