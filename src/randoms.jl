@@ -12,7 +12,7 @@ function randstate(basis::SymplecticBasis{N}; pure = false) where {N<:Int}
     mean, covar = _randstate(basis, pure)
     return GaussianState(basis, mean, covar)
 end
-function _randstate(basis::SymplecticBasis{N}, pure) where {N<:Int}
+function _randstate(basis::QuadPairBasis{N}, pure) where {N<:Int}
     nmodes = basis.nmodes
     mean = randn(2*nmodes)
     covar = zeros(2*nmodes, 2*nmodes)
@@ -27,6 +27,24 @@ function _randstate(basis::SymplecticBasis{N}, pure) where {N<:Int}
     # William decomposition for mixed Gaussian states
     sympeigs = abs.(rand(nmodes)) .+ 1.0
     will = diagm(repeat(sympeigs, inner = 2))
+    mul!(covar, symp, mul!(buf, will, symp'))
+    return mean, covar
+end
+function _randstate(basis::QuadBlockBasis{N}, pure) where {N<:Int}
+    nmodes = basis.nmodes
+    mean = randn(2*nmodes)
+    covar = zeros(2*nmodes, 2*nmodes)
+    symp = randsymplectic(basis)
+    # generate pure Gaussian state
+    if pure
+        mul!(covar, symp, symp')
+        return mean, covar
+    end
+    # create buffer for matrix multiplication
+    buf = zeros(2*nmodes, 2*nmodes)
+    # William decomposition for mixed Gaussian states
+    sympeigs = abs.(rand(nmodes)) .+ 1.0
+    will = diagm(repeat(sympeigs, outer = 2))
     mul!(covar, symp, mul!(buf, will, symp'))
     return mean, covar
 end
