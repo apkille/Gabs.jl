@@ -39,15 +39,20 @@
         nmodes = rand(1:20)
         qpairbasis = QuadPairBasis(nmodes)
         qblockbasis = QuadBlockBasis(nmodes)
-        rs = randstate(qpairbasis)
+        rs_pair = randstate(qpairbasis)
+        rs_block = randstate(qblockbasis)
         rc = randchannel(qpairbasis)
         @test rc isa GaussianChannel
-        @test rc * rs isa GaussianState
-        @test isgaussian(rc, atol = 1e-5)
+        @test rc * rs_pair isa GaussianState
+        @test isgaussian(rs_pair, atol = 1e-5)
+        @test isgaussian(rs_block, atol = 1e-5)
 
-        rspure = randstate(qpairbasis, pure = true)
-        @test isgaussian(rspure, atol = 1e-5)
-        @test isapprox(purity(rspure), 1.0, atol = 1e-5)
+        rspure_pair = randstate(qpairbasis, pure = true)
+        rspure_block = randstate(qblockbasis, pure = true)
+        @test isgaussian(rspure_pair, atol = 1e-5)
+        @test isapprox(purity(rspure_pair), 1.0, atol = 1e-5)
+        @test isgaussian(rspure_block, atol = 1e-5)
+        @test isapprox(purity(rspure_block), 1.0, atol = 1e-5)
 
         rs_array = randstate(Array, qpairbasis)
         rc_array = randchannel(Array, qpairbasis)
