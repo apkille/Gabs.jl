@@ -3,6 +3,7 @@
 ## v1.2.1 - dev
 
 - Add `issymplectic` and `isgaussian` checks.
+- **(fix)** Generate correct Williamson matrix in `randstate` generation for `QuadBlockBasis`.
   
 ## v1.2.0 - 2024-12-16
 
