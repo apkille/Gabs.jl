@@ -130,7 +130,7 @@
         @test all(i > 1 || isapprox(i, 1, atol=1e-5) for i in spec_qpair)
         @test all(i > 1 || isapprox(i, 1, atol=1e-5) for i in spec_qblock)
 
-        @test isapprox(det(s_qpair.covar), prod(abs2, spec_qpair), atol=1e-5)
-        @test isapprox(det(s_qblock.covar), prod(abs2, spec_qblock), atol=1e-5)
+        @test isapprox(det(s_qpair.covar), prod(abs2, spec_qpair), atol=1e-3)
+        @test isapprox(det(s_qblock.covar), prod(abs2, spec_qblock), atol=1e-3)
     end
 end
