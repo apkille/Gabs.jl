@@ -24,7 +24,7 @@ export
     # wigner functions
     wigner, wignerchar,
     # symplectic form and checks
-    symplecticform, issymplectic, isgaussian,
+    symplecticform, issymplectic, isgaussian, sympspectrum,
     # metrics
     purity
 
