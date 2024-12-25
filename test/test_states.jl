@@ -2,6 +2,7 @@
     import Gabs: _changebasis
     using Gabs
     using StaticArrays
+    using LinearAlgebra: det
 
     nmodes = rand(1:5)
     qpairbasis = QuadPairBasis(nmodes)
