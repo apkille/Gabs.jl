@@ -1,6 +1,10 @@
 # News
 
-## v1.2.1 - dev
+## v1.2.2 - 2024-12-25
+
+- Add `sympspectrum` function to compute symplectic spectrum of `GaussianState` object.
+  
+## v1.2.1 - 2024-12-17
 
 - Add `issymplectic` and `isgaussian` checks.
 - **(fix)** Generate correct Williamson matrix in `randstate` generation for `QuadBlockBasis`.
