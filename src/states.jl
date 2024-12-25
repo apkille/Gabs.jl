@@ -712,3 +712,16 @@ function _changebasis(state::GaussianState{B1,M,V}, ::Type{B2}) where {B1<:QuadP
     covar = T * state.covar * transpose(T)
     return GaussianState(B2(nmodes), mean, covar)
 end
+
+"""
+    sympspectrum(state::GaussianState)
+
+Compute the symplectic spectrum of a Gaussian state.
+"""
+function sympspectrum(state::GaussianState)
+    basis = state.basis
+    form = symplecticform(basis)
+    M = form * state.covar
+    spectrum = filter(x -> x > 0, imag.(eigvals(M)))
+    return spectrum
+end

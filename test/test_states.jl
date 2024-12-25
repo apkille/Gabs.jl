@@ -114,4 +114,22 @@
         @test ptrace(SVector{2}, SMatrix{2,2}, state_qpair, 1) isa GaussianState
         @test ptrace(SVector{4}, SMatrix{4,4}, state_qpair, [1, 3]) isa GaussianState
     end
+
+    @testset "symplectic spectrum" begin
+        nmodes = rand(1:20)
+        qpairbasis = QuadPairBasis(nmodes)
+        qblockbasis = QuadBlockBasis(nmodes)
+
+        s_qpair = randstate(qpairbasis)
+        s_qblock = randstate(qblockbasis)
+
+        spec_qpair = sympspectrum(s_qpair)
+        spec_qblock = sympspectrum(s_qblock)
+
+        @test all(i > 1 || isapprox(i, 1, atol=1e-5) for i in spec_qpair)
+        @test all(i > 1 || isapprox(i, 1, atol=1e-5) for i in spec_qblock)
+
+        @test isapprox(det(s_qpair.covar), prod(abs2, spec_qpair), atol=1e-5)
+        @test isapprox(det(s_qblock.covar), prod(abs2, spec_qblock), atol=1e-5)
+    end
 end
