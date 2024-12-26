@@ -100,16 +100,17 @@ function attenuator(basis::SymplecticBasis{N}, theta::R, n::M) where {N<:Int,R,M
 end
 function _attenuator(basis::Union{QuadPairBasis{N},QuadBlockBasis{N}}, theta::R, n::M) where {N<:Int,R<:Real,M<:Int}
     nmodes = basis.nmodes
-    disp = zeros(2*nmodes) 
-    transform = Matrix{Float64}(cos(theta) * I, 2*nmodes, 2*nmodes)
-    noise = Matrix{Float64}((sin(theta))^2 * n * I, 2*nmodes, 2*nmodes)
+    disp = zeros(R, 2*nmodes) 
+    transform = Matrix{R}(cos(theta) * I, 2*nmodes, 2*nmodes)
+    noise = Matrix{R}((sin(theta))^2 * n * I, 2*nmodes, 2*nmodes)
     return disp, transform, noise
 end
 function _attenuator(basis::QuadPairBasis{N}, theta::R, n::M) where {N<:Int,R<:Vector,M<:Vector}
     nmodes = basis.nmodes
-    disp = zeros(2*nmodes) 
-    transform = zeros(2*nmodes, 2*nmodes)
-    noise = zeros(2*nmodes, 2*nmodes)
+    Rt = eltype(R)
+    disp = zeros(Rt, 2*nmodes) 
+    transform = zeros(Rt, 2*nmodes, 2*nmodes)
+    noise = zeros(Rt, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
         ct, st = cos(theta[i]), sin(theta[i])
         ni = n[i]
@@ -124,9 +125,10 @@ function _attenuator(basis::QuadPairBasis{N}, theta::R, n::M) where {N<:Int,R<:V
 end
 function _attenuator(basis::QuadBlockBasis{N}, theta::R, n::M) where {N<:Int,R<:Vector,M<:Vector}
     nmodes = basis.nmodes
-    disp = zeros(2*nmodes) 
-    transform = zeros(2*nmodes, 2*nmodes)
-    noise = zeros(2*nmodes, 2*nmodes)
+    Rt = eltype(R)
+    disp = zeros(Rt, 2*nmodes) 
+    transform = zeros(Rt, 2*nmodes, 2*nmodes)
+    noise = zeros(Rt, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
         ct, st = cos(theta[i]), sin(theta[i])
         ni = n[i]
@@ -188,16 +190,17 @@ function amplifier(basis::SymplecticBasis{N}, r::R, n::M) where {N<:Int,R,M}
 end
 function _amplifier(basis::Union{QuadPairBasis{N},QuadBlockBasis{N}}, r::R, n::M) where {N<:Int,R<:Real,M<:Int}
     nmodes = basis.nmodes
-    disp = zeros(2*nmodes) 
-    transform = Matrix{Float64}(cosh(r) * I, 2*nmodes, 2*nmodes)
-    noise = Matrix{Float64}((sinh(r))^2 * n * I, 2*nmodes, 2*nmodes)
+    disp = zeros(R, 2*nmodes) 
+    transform = Matrix{R}(cosh(r) * I, 2*nmodes, 2*nmodes)
+    noise = Matrix{R}((sinh(r))^2 * n * I, 2*nmodes, 2*nmodes)
     return disp, transform, noise
 end
 function _amplifier(basis::QuadPairBasis{N}, r::R, n::M) where {N<:Int,R<:Vector,M<:Vector}
     nmodes = basis.nmodes
-    disp = zeros(2*nmodes) 
-    transform = zeros(2*nmodes, 2*nmodes)
-    noise = zeros(2*nmodes, 2*nmodes)
+    Rt = eltype(R)
+    disp = zeros(Rt, 2*nmodes) 
+    transform = zeros(Rt, 2*nmodes, 2*nmodes)
+    noise = zeros(Rt, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
         cr, sr = cos(r[i]), sin(r[i])
         ni = n[i]
@@ -212,9 +215,10 @@ function _amplifier(basis::QuadPairBasis{N}, r::R, n::M) where {N<:Int,R<:Vector
 end
 function _amplifier(basis::QuadBlockBasis{N}, r::R, n::M) where {N<:Int,R<:Vector,M<:Vector}
     nmodes = basis.nmodes
-    disp = zeros(2*nmodes) 
-    transform = zeros(2*nmodes, 2*nmodes)
-    noise = zeros(2*nmodes, 2*nmodes)
+    Rt = eltype(R)
+    disp = zeros(Rt, 2*nmodes) 
+    transform = zeros(Rt, 2*nmodes, 2*nmodes)
+    noise = zeros(Rt, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
         cr, sr = cos(r[i]), sin(r[i])
         ni = n[i]
@@ -248,7 +252,8 @@ function _tensor(op1::GaussianChannel{B1,D1,T1}, op2::GaussianChannel{B2,D2,T2})
     block1, block2 = Base.OneTo(2*nmodes1), Base.OneTo(2*nmodes2)
     # initialize direct sum of displacement vectors
     disp1, disp2 = op1.disp, op2.disp
-    disp′ = zeros(2*nmodes)
+    Dt = promote_type(eltype(disp1), eltype(disp2))
+    disp′ = zeros(Dt, 2*nmodes)
     @inbounds for i in block1
         disp′[i] = disp1[i]
     end
@@ -257,9 +262,10 @@ function _tensor(op1::GaussianChannel{B1,D1,T1}, op2::GaussianChannel{B2,D2,T2})
     end
     # initialize direct sum of transform and noise matrices
     trans1, trans2 = op1.transform, op2.transform
-    transform′ = zeros(2*nmodes, 2*nmodes)
+    Tt = promote_type(eltype(trans1), eltype(trans2))
+    transform′ = zeros(Tt, 2*nmodes, 2*nmodes)
     noise1, noise2 = op1.noise, op2.noise
-    noise′ = zeros(2*nmodes, 2*nmodes)
+    noise′ = zeros(Tt, 2*nmodes, 2*nmodes)
     @inbounds for i in block1, j in block1
         transform′[i,j] = trans1[i,j]
         noise′[i,j] = noise1[i,j]
@@ -281,7 +287,8 @@ function _tensor(op1::GaussianChannel{B1,D1,T1}, op2::GaussianChannel{B2,D2,T2})
     block1, block2 = Base.OneTo(nmodes1), Base.OneTo(nmodes2)
     # initialize direct sum of displacement vectors
     disp1, disp2 = op1.disp, op2.disp
-    disp′ = zeros(2*nmodes)
+    Dt = promote_type(eltype(disp1), eltype(disp2))
+    disp′ = zeros(Dt, 2*nmodes)
     @inbounds for i in block1
         disp′[i] = disp1[i]
         disp′[i+nmodes] = disp1[i+nmodes1]
@@ -292,9 +299,10 @@ function _tensor(op1::GaussianChannel{B1,D1,T1}, op2::GaussianChannel{B2,D2,T2})
     end
     # initialize direct sum of transform and noise matrices
     trans1, trans2 = op1.transform, op2.transform
-    transform′ = zeros(2*nmodes, 2*nmodes)
+    Tt = promote_type(eltype(trans1), eltype(trans2))
+    transform′ = zeros(Tt, 2*nmodes, 2*nmodes)
     noise1, noise2 = op1.noise, op2.noise
-    noise′ = zeros(2*nmodes, 2*nmodes)
+    noise′ = zeros(Tt, 2*nmodes, 2*nmodes)
     @inbounds for i in block1, j in block1
         transform′[i,j] = trans1[i,j]
         transform′[i,j+nmodes] = trans1[i,j+nmodes1]
