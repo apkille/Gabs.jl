@@ -49,27 +49,29 @@ end
 function _displace(basis::QuadPairBasis{N}, alpha::A) where {N<:Int,A<:Number}
     nmodes = basis.nmodes
     disp = repeat([sqrt(2)*real(alpha), sqrt(2)*imag(alpha)], nmodes)
-    symplectic = Matrix{Float64}(I, 2*nmodes, 2*nmodes)
+    symplectic = Matrix{real(A)}(I, 2*nmodes, 2*nmodes)
     return disp, symplectic
 end
 function _displace(basis::QuadPairBasis{N}, alpha::A) where {N<:Int,A<:Vector}
     nmodes = basis.nmodes
-    disp = sqrt(2) * reinterpret(Float64, alpha)
-    symplectic = Matrix{Float64}(I, 2*nmodes, 2*nmodes)
+    Rt = real(eltype(A))
+    disp = sqrt(2) * reinterpret(Rt, alpha)
+    symplectic = Matrix{Rt}(I, 2*nmodes, 2*nmodes)
     return disp, symplectic
 end
 function _displace(basis::QuadBlockBasis{N}, alpha::A) where {N<:Int,A<:Number}
     nmodes = basis.nmodes
     disp = repeat([sqrt(2)*real(alpha), sqrt(2)*imag(alpha)], inner = nmodes)
-    symplectic = Matrix{Float64}(I, 2*nmodes, 2*nmodes)
+    symplectic = Matrix{real(A)}(I, 2*nmodes, 2*nmodes)
     return disp, symplectic
 end
 function _displace(basis::QuadBlockBasis{N}, alpha::A) where {N<:Int,A<:Vector}
     nmodes = basis.nmodes
-    re = reinterpret(Float64, alpha)
+    Rt = real(eltype(A))
+    re = reinterpret(Rt, alpha)
     disp = vcat(@view(re[1:2:end]), @view(re[2:2:end]))
     disp .*= sqrt(2)
-    symplectic = Matrix{Float64}(I, 2*nmodes, 2*nmodes)
+    symplectic = Matrix{Rt}(I, 2*nmodes, 2*nmodes)
     return disp, symplectic
 end
 
@@ -123,10 +125,10 @@ function squeeze(basis::SymplecticBasis{N}, r::R, theta::R) where {N<:Int, R}
 end
 function _squeeze(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Real}
     nmodes = basis.nmodes
-    disp = zeros(2*nmodes)
+    disp = zeros(R, 2*nmodes)
     cr, sr = cosh(r), sinh(r)
     ct, st = cos(theta), sin(theta)
-    symplectic = zeros(2*nmodes, 2*nmodes)
+    symplectic = zeros(R, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
         symplectic[2*i-1, 2*i-1] = cr - sr*ct
         symplectic[2*i-1, 2*i] = -sr * st
@@ -137,8 +139,9 @@ function _squeeze(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Real
 end
 function _squeeze(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Vector}
     nmodes = basis.nmodes
-    disp = zeros(2*nmodes)
-    symplectic = zeros(2*nmodes, 2*nmodes)
+    Rt = eltype(R)
+    disp = zeros(Rt, 2*nmodes)
+    symplectic = zeros(Rt, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
         cr, sr = cosh(r[i]), sinh(r[i])
         ct, st = cos(theta[i]), sin(theta[i])
@@ -151,10 +154,10 @@ function _squeeze(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Vect
 end
 function _squeeze(basis::QuadBlockBasis{N}, r::R, theta::R) where {N<:Int,R<:Real}
     nmodes = basis.nmodes
-    disp = zeros(2*nmodes)
+    disp = zeros(R, 2*nmodes)
     cr, sr = cosh(r), sinh(r)
     ct, st = cos(theta), sin(theta)
-    symplectic = zeros(2*nmodes, 2*nmodes)
+    symplectic = zeros(R, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
         symplectic[i, i] = cr - sr*ct
         symplectic[i, i+nmodes] = -sr * st
@@ -165,8 +168,9 @@ function _squeeze(basis::QuadBlockBasis{N}, r::R, theta::R) where {N<:Int,R<:Rea
 end
 function _squeeze(basis::QuadBlockBasis{N}, r::R, theta::R) where {N<:Int,R<:Vector}
     nmodes = basis.nmodes
-    disp = zeros(2*nmodes)
-    symplectic = zeros(2*nmodes, 2*nmodes)
+    Rt = eltype(R)
+    disp = zeros(Rt, 2*nmodes)
+    symplectic = zeros(Rt, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
         cr, sr = cosh(r[i]), sinh(r[i])
         ct, st = cos(theta[i]), sin(theta[i])
@@ -235,10 +239,10 @@ function twosqueeze(basis::SymplecticBasis{N}, r::R, theta::R) where {N<:Int,R}
 end
 function _twosqueeze(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Real}
     nmodes = basis.nmodes
-    disp = zeros(2*nmodes)
+    disp = zeros(R, 2*nmodes)
     cr, sr = cosh(r), sinh(r)
     ct, st = cos(theta), sin(theta)
-    symplectic = zeros(2*nmodes, 2*nmodes)
+    symplectic = zeros(R, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(Int(nmodes/2))
         symplectic[4*i-3, 4*i-3] = cr
         symplectic[4*i-3, 4*i-1] = -sr * ct
@@ -260,8 +264,9 @@ function _twosqueeze(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:R
 end
 function _twosqueeze(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Vector}
     nmodes = basis.nmodes
-    disp = zeros(2*nmodes)
-    symplectic = zeros(2*nmodes, 2*nmodes)
+    Rt = eltype(R)
+    disp = zeros(Rt, 2*nmodes)
+    symplectic = zeros(Rt, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(Int(nmodes/2))
         cr, sr = cosh(r[i]), sinh(r[i])
         ct, st = cos(theta[i]), sin(theta[i])
@@ -286,10 +291,10 @@ function _twosqueeze(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:V
 end
 function _twosqueeze(basis::QuadBlockBasis{N}, r::R, theta::R) where {N<:Int,R<:Real}
     nmodes = basis.nmodes
-    disp = zeros(2*nmodes)
+    disp = zeros(R, 2*nmodes)
     cr, sr = cosh(r), sinh(r)
     ct, st = cos(theta), sin(theta)
-    symplectic = zeros(2*nmodes, 2*nmodes)
+    symplectic = zeros(R, 2*nmodes, 2*nmodes)
     for i in Base.OneTo(Int(nmodes/2))
         symplectic[2*i-1, 2*i-1] = cr
         symplectic[2*i-1, 2*i] = -sr * ct
@@ -311,8 +316,9 @@ function _twosqueeze(basis::QuadBlockBasis{N}, r::R, theta::R) where {N<:Int,R<:
 end
 function _twosqueeze(basis::QuadBlockBasis{N}, r::R, theta::R) where {N<:Int,R<:Vector}
     nmodes = basis.nmodes
-    disp = zeros(2*nmodes)
-    symplectic = zeros(2*nmodes, 2*nmodes)
+    Rt = eltype(R)
+    disp = zeros(Rt, 2*nmodes)
+    symplectic = zeros(Rt, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(Int(nmodes/2))
         cr, sr = cosh(r[i]), sinh(r[i])
         ct, st = cos(theta[i]), sin(theta[i])
@@ -387,9 +393,9 @@ function phaseshift(basis::SymplecticBasis{N}, theta::R) where {N<:Int,R}
 end
 function _phaseshift(basis::QuadPairBasis{N}, theta::R) where {N<:Int,R<:Real}
     nmodes = basis.nmodes
-    disp = zeros(2*nmodes)
+    disp = zeros(R, 2*nmodes)
     ct, st = cos(theta), sin(theta)
-    symplectic = zeros(2*nmodes, 2*nmodes)
+    symplectic = zeros(R, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
         symplectic[2*i-1, 2*i-1] = ct
         symplectic[2*i-1, 2*i] = st
@@ -400,8 +406,9 @@ function _phaseshift(basis::QuadPairBasis{N}, theta::R) where {N<:Int,R<:Real}
 end
 function _phaseshift(basis::QuadPairBasis{N}, theta::R) where {N<:Int,R<:Vector}
     nmodes = basis.nmodes
-    disp = zeros(2*nmodes)
-    symplectic = zeros(2*nmodes, 2*nmodes)
+    Rt = eltype(R)
+    disp = zeros(Rt, 2*nmodes)
+    symplectic = zeros(Rt, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
         ct, st = cos(theta[i]), sin(theta[i])
         symplectic[2*i-1, 2*i-1] = ct
@@ -413,9 +420,9 @@ function _phaseshift(basis::QuadPairBasis{N}, theta::R) where {N<:Int,R<:Vector}
 end
 function _phaseshift(basis::QuadBlockBasis{N}, theta::R) where {N<:Int,R<:Real}
     nmodes = basis.nmodes
-    disp = zeros(2*nmodes)
+    disp = zeros(R, 2*nmodes)
     ct, st = cos(theta), sin(theta)
-    symplectic = zeros(2*nmodes, 2*nmodes)
+    symplectic = zeros(R, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
         symplectic[i, i] = ct
         symplectic[i, i+nmodes] = st
@@ -426,8 +433,9 @@ function _phaseshift(basis::QuadBlockBasis{N}, theta::R) where {N<:Int,R<:Real}
 end
 function _phaseshift(basis::QuadBlockBasis{N}, theta::R) where {N<:Int,R<:Vector}
     nmodes = basis.nmodes
-    disp = zeros(2*nmodes)
-    symplectic = zeros(2*nmodes, 2*nmodes)
+    Rt = eltype(R)
+    disp = zeros(Rt, 2*nmodes)
+    symplectic = zeros(Rt, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
         ct, st = cos(theta[i]), sin(theta[i])
         symplectic[i, i] = ct
@@ -494,9 +502,9 @@ function beamsplitter(basis::SymplecticBasis{N}, transmit::R) where {N<:Int,R}
 end
 function _beamsplitter(basis::QuadPairBasis{N}, transmit::R) where {N<:Int,R<:Real}
     nmodes = basis.nmodes
-    disp = zeros(2*nmodes)
+    disp = zeros(R, 2*nmodes)
     a1, a2 = sqrt(transmit), sqrt(1 - transmit)
-    symplectic = zeros(2*nmodes, 2*nmodes)
+    symplectic = zeros(R, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(Int(nmodes/2))
         symplectic[4*i-3, 4*i-3] = a2
         symplectic[4*i-3, 4*i-1] = a1
@@ -514,8 +522,9 @@ function _beamsplitter(basis::QuadPairBasis{N}, transmit::R) where {N<:Int,R<:Re
 end
 function _beamsplitter(basis::QuadPairBasis{N}, transmit::R) where {N<:Int,R<:Vector}
     nmodes = basis.nmodes
-    disp = zeros(2*nmodes)
-    symplectic = zeros(2*nmodes, 2*nmodes)
+    Rt = eltype(R)
+    disp = zeros(Rt, 2*nmodes)
+    symplectic = zeros(Rt, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(Int(nmodes/2))
         a1, a2 = sqrt(transmit[i]), sqrt(1 - transmit[i])
 
@@ -535,9 +544,9 @@ function _beamsplitter(basis::QuadPairBasis{N}, transmit::R) where {N<:Int,R<:Ve
 end
 function _beamsplitter(basis::QuadBlockBasis{N}, transmit::R) where {N<:Int,R<:Real}
     nmodes = basis.nmodes
-    disp = zeros(2*nmodes)
+    disp = zeros(R, 2*nmodes)
     a1, a2 = sqrt(transmit), sqrt(1 - transmit)
-    symplectic = zeros(2*nmodes, 2*nmodes)
+    symplectic = zeros(R, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
         symplectic[2*i-1, 2*i-1] = a2
         symplectic[2*i-1, 2*i] = a1
@@ -548,8 +557,9 @@ function _beamsplitter(basis::QuadBlockBasis{N}, transmit::R) where {N<:Int,R<:R
 end
 function _beamsplitter(basis::QuadBlockBasis{N}, transmit::R) where {N<:Int,R<:Vector}
     nmodes = basis.nmodes
-    disp = zeros(2*nmodes)
-    symplectic = zeros(2*nmodes, 2*nmodes)
+    Rt = eltype(R)
+    disp = zeros(Rt, 2*nmodes)
+    symplectic = zeros(Rt, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(Int(nmodes/2))
         a1, a2 = sqrt(transmit[i]), sqrt(1 - transmit[i])
 
@@ -587,7 +597,8 @@ function _tensor(op1::GaussianUnitary{B1,D1,S1}, op2::GaussianUnitary{B2,D2,S2})
     block1, block2 = Base.OneTo(2*nmodes1), Base.OneTo(2*nmodes2)
     # initialize direct sum of displacement vectors
     disp1, disp2 = op1.disp, op2.disp
-    disp′ = zeros(2*nmodes)
+    Dt = promote_type(eltype(disp1), eltype(disp2))
+    disp′ = zeros(Dt, 2*nmodes)
     @inbounds for i in block1
         disp′[i] = disp1[i]
     end
@@ -596,7 +607,8 @@ function _tensor(op1::GaussianUnitary{B1,D1,S1}, op2::GaussianUnitary{B2,D2,S2})
     end
     # initialize direct sum of symplectic matrices
     symp1, symp2 = op1.symplectic, op2.symplectic
-    symp′ = zeros(2*nmodes, 2*nmodes)
+    St = promote_type(eltype(symp1), eltype(symp2))
+    symp′ = zeros(St, 2*nmodes, 2*nmodes)
     @inbounds for i in block1, j in block1
         symp′[i,j] = symp1[i,j]
     end
@@ -616,7 +628,8 @@ function _tensor(op1::GaussianUnitary{B1,D1,S1}, op2::GaussianUnitary{B2,D2,S2})
     block1, block2 = Base.OneTo(nmodes1), Base.OneTo(nmodes2)
     # initialize direct sum of displacement vectors
     disp1, disp2 = op1.disp, op2.disp
-    disp′ = zeros(2*nmodes)
+    Dt = promote_type(eltype(disp1), eltype(disp2))
+    disp′ = zeros(Dt, 2*nmodes)
     @inbounds for i in block1
         disp′[i] = disp1[i]
         disp′[i+nmodes] = disp1[i+nmodes1]
@@ -627,7 +640,8 @@ function _tensor(op1::GaussianUnitary{B1,D1,S1}, op2::GaussianUnitary{B2,D2,S2})
     end
     # initialize direct sum of symplectic matrices
     symp1, symp2 = op1.symplectic, op2.symplectic
-    symp′ = zeros(2*nmodes, 2*nmodes)
+    St = promote_type(eltype(symp1), eltype(symp2))
+    symp′ = zeros(St, 2*nmodes, 2*nmodes)
     @inbounds for i in block1, j in block1
         symp′[i,j] = symp1[i,j]
         symp′[i,j+nmodes] = symp1[i,j+nmodes1]

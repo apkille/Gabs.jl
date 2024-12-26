@@ -158,27 +158,29 @@ end
 function _coherentstate(basis::QuadPairBasis{N}, alpha::A) where {N<:Int,A<:Number}
     nmodes = basis.nmodes
     mean = repeat([sqrt(2)*real(alpha), sqrt(2)*imag(alpha)], nmodes)
-    covar = Matrix{Float64}(I, 2*nmodes, 2*nmodes)
+    covar = Matrix{real(A)}(I, 2*nmodes, 2*nmodes)
     return mean, covar
 end
 function _coherentstate(basis::QuadPairBasis{N}, alpha::A) where {N<:Int,A<:Vector}
     nmodes = basis.nmodes
-    mean = sqrt(2) * reinterpret(Float64, alpha)
-    covar = Matrix{Float64}(I, 2*nmodes, 2*nmodes)
+    Rt = real(eltype(A))
+    mean = sqrt(2) * reinterpret(Rt, alpha)
+    covar = Matrix{Rt}(I, 2*nmodes, 2*nmodes)
     return mean, covar
 end
 function _coherentstate(basis::QuadBlockBasis{N}, alpha::A) where {N<:Int,A<:Number}
     nmodes = basis.nmodes
     mean = repeat([sqrt(2)*real(alpha), sqrt(2)*imag(alpha)], inner = nmodes)
-    covar = Matrix{Float64}(I, 2*nmodes, 2*nmodes)
+    covar = Matrix{real(A)}(I, 2*nmodes, 2*nmodes)
     return mean, covar
 end
 function _coherentstate(basis::QuadBlockBasis{N}, alpha::A) where {N<:Int,A<:Vector}
     nmodes = basis.nmodes
-    re = reinterpret(Float64, alpha)
+    Rt = real(eltype(A))
+    re = reinterpret(Rt, alpha)
     mean = vcat(@view(re[1:2:end]), @view(re[2:2:end]))
     mean .*= sqrt(2)
-    covar = Matrix{Float64}(I, 2*nmodes, 2*nmodes)
+    covar = Matrix{Rt}(I, 2*nmodes, 2*nmodes)
     return mean, covar
 end
 
@@ -228,8 +230,8 @@ function squeezedstate(basis::SymplecticBasis{N}, r::R, theta::R) where {N<:Int,
 end
 function _squeezedstate(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Real}
     nmodes = basis.nmodes
-    mean = zeros(2*nmodes)
-    covar = zeros(2*nmodes, 2*nmodes)
+    mean = zeros(R, 2*nmodes)
+    covar = zeros(R, 2*nmodes, 2*nmodes)
     cr, sr = cosh(2*r), sinh(2*r)
     ct, st = cos(theta), sin(theta)
     @inbounds for i in Base.OneTo(nmodes)
@@ -242,8 +244,9 @@ function _squeezedstate(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R
 end
 function _squeezedstate(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Vector}
     nmodes = basis.nmodes
-    mean = zeros(2*nmodes)
-    covar = zeros(2*nmodes, 2*nmodes)
+    Rt = eltype(R)
+    mean = zeros(Rt, 2*nmodes)
+    covar = zeros(Rt, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
         cr, sr = cosh(2*r[i]), sinh(2*r[i])
         ct, st = cos(theta[i]), sin(theta[i])
@@ -256,8 +259,8 @@ function _squeezedstate(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R
 end
 function _squeezedstate(basis::QuadBlockBasis{N}, r::R, theta::R) where {N<:Int,R<:Real}
     nmodes = basis.nmodes
-    mean = zeros(2*nmodes)
-    covar = zeros(2*nmodes, 2*nmodes)
+    mean = zeros(R, 2*nmodes)
+    covar = zeros(R, 2*nmodes, 2*nmodes)
     cr, sr = cosh(2*r), sinh(2*r)
     ct, st = cos(theta), sin(theta)
     @inbounds for i in Base.OneTo(nmodes)
@@ -270,8 +273,9 @@ function _squeezedstate(basis::QuadBlockBasis{N}, r::R, theta::R) where {N<:Int,
 end
 function _squeezedstate(basis::QuadBlockBasis{N}, r::R, theta::R) where {N<:Int,R<:Vector}
     nmodes = basis.nmodes
-    mean = zeros(2*nmodes)
-    covar = zeros(2*nmodes, 2*nmodes)
+    Rt = eltype(R)
+    mean = zeros(Rt, 2*nmodes)
+    covar = zeros(Rt, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
         cr, sr = cosh(2*r[i]), sinh(2*r[i])
         ct, st = cos(theta[i]), sin(theta[i])
@@ -335,10 +339,10 @@ function eprstate(basis::SymplecticBasis{N}, r::R, theta::R) where {N<:Int,R}
 end
 function _eprstate(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Real}
     nmodes = basis.nmodes
-    mean = zeros(2*nmodes)
+    mean = zeros(R, 2*nmodes)
     cr, sr = (1/2)*cosh(2*r), (1/2)*sinh(2*r)
     ct, st = cos(theta), sin(theta)
-    covar = zeros(2*nmodes, 2*nmodes)
+    covar = zeros(R, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(Int(nmodes/2))
         covar[4*i-3, 4*i-3] = cr
         covar[4*i-3, 4*i-1] = -sr * ct
@@ -360,8 +364,9 @@ function _eprstate(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Rea
 end
 function _eprstate(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Vector}
     nmodes = basis.nmodes
-    mean = zeros(2*nmodes)
-    covar = zeros(2*nmodes, 2*nmodes)
+    Rt = eltype(R)
+    mean = zeros(Rt, 2*nmodes)
+    covar = zeros(Rt, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(Int(nmodes/2))
         cr, sr = (1/2)*cosh(2*r[i]), (1/2)*sinh(2*r[i])
         ct, st = cos(theta[i]), sin(theta[i])
@@ -386,10 +391,10 @@ function _eprstate(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Vec
 end
 function _eprstate(basis::QuadBlockBasis{N}, r::R, theta::R) where {N<:Int,R<:Real}
     nmodes = basis.nmodes
-    mean = zeros(2*nmodes)
+    mean = zeros(R, 2*nmodes)
     cr, sr = (1/2)*cosh(2*r), (1/2)*sinh(2*r)
     ct, st = cos(theta), sin(theta)
-    covar = zeros(2*nmodes, 2*nmodes)
+    covar = zeros(R, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(Int(nmodes/2))
         covar[2*i-1, 2*i-1] = cr
         covar[2*i-1, 2*i] = -sr * ct
@@ -411,8 +416,9 @@ function _eprstate(basis::QuadBlockBasis{N}, r::R, theta::R) where {N<:Int,R<:Re
 end
 function _eprstate(basis::QuadBlockBasis{N}, r::R, theta::R) where {N<:Int,R<:Vector}
     nmodes = basis.nmodes
-    mean = zeros(2*nmodes)
-    covar = zeros(2*nmodes, 2*nmodes)
+    Rt = eltype(R)
+    mean = zeros(Rt, 2*nmodes)
+    covar = zeros(Rt, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(Int(nmodes/2))
         cr, sr = (1/2)*cosh(2*r[i]), (1/2)*sinh(2*r[i])
         ct, st = cos(theta[i]), sin(theta[i])
@@ -477,12 +483,13 @@ function tensor(state1::GaussianState, state2::GaussianState)
 end
 function _tensor(state1::GaussianState{B1,M1,V1}, state2::GaussianState{B2,M2,V2}) where {B1<:QuadPairBasis,B2<:QuadPairBasis,M1,M2,V1,V2}
     mean1, mean2 = state1.mean, state2.mean
+    Mt = promote_type(eltype(mean1), eltype(mean2))
     basis1, basis2 = state1.basis, state2.basis
     nmodes1, nmodes2 = basis1.nmodes, basis2.nmodes
     nmodes = nmodes1 + nmodes2
     block1, block2 = Base.OneTo(2*nmodes1), Base.OneTo(2*nmodes2)
     # initialize direct sum of mean vectors
-    mean′ = zeros(2*nmodes)
+    mean′ = zeros(Mt, 2*nmodes)
     @inbounds for i in block1
         mean′[i] = mean1[i]
     end
@@ -491,7 +498,8 @@ function _tensor(state1::GaussianState{B1,M1,V1}, state2::GaussianState{B2,M2,V2
     end
     # initialize direct sum of covariance matrices
     covar1, covar2 = state1.covar, state2.covar
-    covar′ = zeros(2*nmodes, 2*nmodes)
+    Vt = promote_type(eltype(covar1), eltype(covar2))
+    covar′ = zeros(Vt, 2*nmodes, 2*nmodes)
     @inbounds for i in block1, j in block1
         covar′[i,j] = covar1[i,j]
     end
@@ -505,13 +513,14 @@ function _tensor(state1::GaussianState{B1,M1,V1}, state2::GaussianState{B2,M2,V2
 end
 function _tensor(state1::GaussianState{B1,M1,V1}, state2::GaussianState{B2,M2,V2}) where {B1<:QuadBlockBasis,B2<:QuadBlockBasis,M1,M2,V1,V2}
     mean1, mean2 = state1.mean, state2.mean
+    Mt = promote_type(eltype(mean1), eltype(mean2))
     basis1, basis2 = state1.basis, state2.basis
     nmodes1, nmodes2 = basis1.nmodes, basis2.nmodes
     nmodes = nmodes1 + nmodes2
     block1, block2 = Base.OneTo(nmodes1), Base.OneTo(nmodes2)
     # initialize direct sum of mean vectors
     mean1, mean2 = state1.mean, state2.mean
-    mean′ = zeros(2*nmodes)
+    mean′ = zeros(Mt, 2*nmodes)
     @inbounds for i in block1
         mean′[i] = mean1[i]
         mean′[i+nmodes] = mean1[i+nmodes1]
@@ -522,7 +531,8 @@ function _tensor(state1::GaussianState{B1,M1,V1}, state2::GaussianState{B2,M2,V2
     end
     # initialize direct sum of covariance matrices
     covar1, covar2 = state1.covar, state2.covar
-    covar′ = zeros(2*nmodes, 2*nmodes)
+    Vt = promote_type(eltype(covar1), eltype(covar2))
+    covar′ = zeros(Vt, 2*nmodes, 2*nmodes)
     @inbounds for i in block1, j in block1
         covar′[i,j] = covar1[i,j]
         covar′[i,j+nmodes] = covar1[i,j+nmodes1]
@@ -629,16 +639,18 @@ end
 function _ptrace(state::GaussianState{B,M,V}, indices::T) where {B<:QuadPairBasis,M,V,T<:AbstractVector}
     idxlength = length(indices)
     mean = state.mean
+    Mt = eltype(mean)
     covar = state.covar
+    Vt = eltype(covar)
     # initialize partial trace of mean vector
-    mean′ = zeros(2*idxlength)
+    mean′ = zeros(Mt, 2*idxlength)
     @inbounds for i in eachindex(indices)
         idx = indices[i]
         mean′[2*i-1] = mean[2*idx-1]
         mean′[2*i] = mean[2*idx]
     end
     # initialize partial trace of covariance matrix
-    covar′ = zeros(2*idxlength, 2*idxlength)
+    covar′ = zeros(Vt, 2*idxlength, 2*idxlength)
     @inbounds for i in eachindex(indices)
         idx = indices[i]
         covar′[2*i-1, 2*i-1] = covar[2*idx-1, 2*idx-1]
@@ -669,16 +681,18 @@ function _ptrace(state::GaussianState{B,M,V}, indices::T) where {B<:QuadBlockBas
     nmodes = basis.nmodes
     idxlength = length(indices)
     mean = state.mean
+    Mt = eltype(mean)
     covar = state.covar
+    Vt = eltype(covar)
     # initialize partial trace of mean vector
-    mean′ = zeros(2*idxlength)
+    mean′ = zeros(Mt, 2*idxlength)
     @inbounds for i in eachindex(indices)
         idx = indices[i]
         mean′[i] = mean[idx]
         mean′[i+idxlength] = mean[idx+nmodes]
     end
     # initialize partial trace of covariance matrix
-    covar′ = zeros(2*idxlength, 2*idxlength)
+    covar′ = zeros(Vt, 2*idxlength, 2*idxlength)
     @inbounds for i in Base.OneTo(idxlength)
         idx = indices[i]
         @inbounds for j in i:idxlength
