@@ -33,164 +33,61 @@ using Gabs
 Now, the entire library is loaded into the current workspace, with access to its
 high-level interface and predefined objects.
 
-## Examples
-### Gaussian States
-
-<details>
- <summaryClick me! ></summary>
-<p>
-
-A wide variety of predefined methods to create a specific instance of the [`GaussianState`](https://apkille.github.io/Gabs.jl/dev/API/#Gabs.GaussianState) type are available. For a full description of the API for Gaussian states, see the [State Zoo section](https://apkille.github.io/Gabs.jl/dev/zoos/#State-Zoo) of the documentation. Let's examine a few well-known examples with the Julia REPL:
+## Example Usage
 
 ```julia
-julia> using Gabs
-
-julia> sympbasis = QuadPairBasis(1)
+julia> basis = QuadPairBasis(1)
 QuadPairBasis(1)
 
-julia> s1 = vacuumstate(sympbasis)
-GaussianState for 1 mode.
-  symplectic basis: QuadPairBasis
-mean: 2-element Vector{Float64}:
- 0.0
- 0.0
-covariance: 2×2 Matrix{Float64}:
- 1.0  0.0
- 0.0  1.0
-
-julia> s2 = coherentstate(sympbasis, rand(ComplexF64))
-GaussianState for 1 mode.
-  symplectic basis: QuadPairBasis
-mean: 2-element Vector{Float64}:
- 1.1000447533324929
- 0.38900397266196973
-covariance: 2×2 Matrix{Float64}:
- 1.0  0.0
- 0.0  1.0
-
-julia> s3 = squeezedstate(sympbasis, rand(Float64), rand(Float64))
-GaussianState for 1 mode.
-  symplectic basis: QuadPairBasis
-mean: 2-element Vector{Float64}:
- 0.0
- 0.0
-covariance: 2×2 Matrix{Float64}:
- 0.414711   0.0537585
- 0.0537585  0.609798
-```
-
-Tensor products of Gaussian states are called with `⊗` or `tensor`:
-
-```julia
-julia> tp = s1 ⊗ s2 ⊗ s3
-GaussianState for 3 modes.
-  symplectic basis: QuadPairBasis
-mean: 6-element Vector{Float64}:
- 0.0
- 0.0
- 1.1000447533324929
- 0.38900397266196973
- 0.0
- 0.0
-covariance: 6×6 Matrix{Float64}:
- 1.0  0.0  0.0  0.0  0.0        0.0
- 0.0  1.0  0.0  0.0  0.0        0.0
- 0.0  0.0  1.0  0.0  0.0        0.0
- 0.0  0.0  0.0  1.0  0.0        0.0
- 0.0  0.0  0.0  0.0  0.414711   0.0537585
- 0.0  0.0  0.0  0.0  0.0537585  0.609798
-```
-
-Partial traces of Gaussian states are called with `ptrace`:
-
-```julia
-julia> ptrace(tp, [1, 3])
+julia> state = vacuumstate(basis) ⊗ coherentstate(basis, 1.0-im)
 GaussianState for 2 modes.
   symplectic basis: QuadPairBasis
 mean: 4-element Vector{Float64}:
- 0.0
- 0.0
- 0.0
- 0.0
+  0.0
+  0.0
+  1.4142135623730951
+ -1.4142135623730951
 covariance: 4×4 Matrix{Float64}:
- 1.0  0.0  0.0        0.0
- 0.0  1.0  0.0        0.0
- 0.0  0.0  0.414711   0.0537585
- 0.0  0.0  0.0537585  0.609798
-```
-</p>
-</details>
+ 1.0  0.0  0.0  0.0
+ 0.0  1.0  0.0  0.0
+ 0.0  0.0  1.0  0.0
+ 0.0  0.0  0.0  1.0
 
-### Gaussian Operators
-
-<details>
- <summaryClick me! ></summary>
-<p>
-
-Gabs.jl contains many predefined methods to create instances of [`GaussianUnitary`](https://apkille.github.io/Gabs.jl/dev/API/#Gabs.GaussianUnitary) and [`GaussianChannel`](https://apkille.github.io/Gabs.jl/dev/API/#Gabs.GaussianChannel) types. For a full description of the API for Gaussian operators, see the [Operator Zoo section](https://apkille.github.io/Gabs.jl/dev/zoos/#Operator-Zoo) of the documentation. Let's see a few well-known examples:
-
-```julia
-julia> using Gabs
-
-julia> sympbasis = QuadBlockBasis(1)
-QuadBlockBasis(1)
-
-julia> un = displace(sympbasis, rand(ComplexF64))
-GaussianUnitary for 1 mode.
-  symplectic basis: QuadBlockBasis
-displacement: 2-element Vector{Float64}:
- 1.0534226538602067
- 0.16968892481522801
-symplectic: 2×2 Matrix{Float64}:
- 1.0  0.0
- 0.0  1.0
-
-julia> ch = amplifier(sympbasis, rand(Float64), rand(Int64))
-GaussianChannel for 1 mode.
-  symplectic basis: QuadBlockBasis
-displacement: 2-element Vector{Float64}:
+julia> op = beamsplitter(basis ⊕ basis, 0.75)
+GaussianUnitary for 2 modes.
+  symplectic basis: QuadPairBasis
+displacement: 4-element Vector{Float64}:
  0.0
  0.0
-transform: 2×2 Matrix{Float64}:
- 1.05403  0.0
- 0.0      1.05403
-noise: 2×2 Matrix{Float64}:
- 5.93927e17  0.0
- 0.0         5.93927e17
-```
+ 0.0
+ 0.0
+symplectic: 4×4 Matrix{Float64}:
+  0.5        0.0       0.866025  0.0
+  0.0        0.5       0.0       0.866025
+ -0.866025   0.0       0.5       0.0
+  0.0       -0.866025  0.0       0.5
 
-Applications of these operators on states can be called in-place with `apply!` and out-of-place with `*`:
+julia> apply!(state, op)
+GaussianState for 2 modes.
+  symplectic basis: QuadPairBasis
+mean: 4-element Vector{Float64}:
+  1.2247448713915892
+ -1.2247448713915892
+  0.7071067811865476
+ -0.7071067811865476
+covariance: 4×4 Matrix{Float64}:
+ 1.0  0.0  0.0  0.0
+ 0.0  1.0  0.0  0.0
+ 0.0  0.0  1.0  0.0
+ 0.0  0.0  0.0  1.0
 
-```julia
-julia> s = vacuumstate(sympbasis);
-
-julia> apply!(s, un); s
+julia> ptrace(state, 1)
 GaussianState for 1 mode.
-  symplectic basis: QuadBlockBasis
+  symplectic basis: QuadPairBasis
 mean: 2-element Vector{Float64}:
- 1.0534226538602067
- 0.16968892481522801
+  1.2247448713915892
+ -1.2247448713915892
 covariance: 2×2 Matrix{Float64}:
  1.0  0.0
  0.0  1.0
-
-julia> tp = (ch ⊗ ch ⊗ ch) * (s ⊗ s ⊗ s)
-GaussianState for 3 modes.
-  symplectic basis: QuadBlockBasis
-mean: 6-element Vector{Float64}:
- 1.1103377371945864
- 1.1103377371945864
- 1.1103377371945864
- 0.17885700114374567
- 0.17885700114374567
- 0.17885700114374567
-covariance: 6×6 Matrix{Float64}:
- 5.93927e17  0.0         0.0         0.0         0.0         0.0
- 0.0         5.93927e17  0.0         0.0         0.0         0.0
- 0.0         0.0         5.93927e17  0.0         0.0         0.0
- 0.0         0.0         0.0         5.93927e17  0.0         0.0
- 0.0         0.0         0.0         0.0         5.93927e17  0.0
- 0.0         0.0         0.0         0.0         0.0         5.93927e17
 ```
-</p>
-</details>
