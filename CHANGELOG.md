@@ -1,5 +1,10 @@
 # News
 
+## v1.2.3 - 2024-12-26
+
+- Enable propagation of dual types in Gabs custom types.
+- Validate ForwardDiff and FiniteDiff support with tests.
+
 ## v1.2.2 - 2024-12-25
 
 - Add `sympspectrum` function to compute symplectic spectrum of `GaussianState` object.
