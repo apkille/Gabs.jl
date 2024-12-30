@@ -1,5 +1,9 @@
 # News
 
+## v1.2.4 - 2024-12-30
+
+- **(fix)** Preserve mode correlations in `ptrace``.
+  
 ## v1.2.3 - 2024-12-26
 
 - Enable propagation of dual types in Gabs custom types.
