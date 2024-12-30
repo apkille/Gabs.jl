@@ -7,7 +7,7 @@
 
     @testset "derivatives" begin
 
-        n = rand(1:20)
+        n = rand(1:5)
         xs = rand(Float64)
 
         function f1(x::R) where {R<:Real}

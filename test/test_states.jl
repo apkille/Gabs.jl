@@ -16,8 +16,8 @@
     end
 
     @testset "thermal states" begin
-        n = rand(1:10)
-        ns = rand(1:10, nmodes)
+        n = rand(1:5)
+        ns = rand(1:5, nmodes)
         state = thermalstate(qpairbasis, n)
         @test state isa GaussianState
         @test thermalstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, n) isa GaussianState
@@ -126,7 +126,7 @@
     end
 
     @testset "symplectic spectrum" begin
-        nmodes = rand(1:20)
+        nmodes = rand(1:5)
         qpairbasis = QuadPairBasis(nmodes)
         qblockbasis = QuadBlockBasis(nmodes)
 

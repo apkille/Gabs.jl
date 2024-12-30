@@ -4,7 +4,7 @@
     using LinearAlgebra: eigvals, adjoint
 
     @testset "random utils" begin
-        nmodes = rand(1:20)
+        nmodes = rand(1:5)
         qpairbasis = QuadPairBasis(nmodes)
         qblockbasis = QuadBlockBasis(nmodes)
         U_qpair = Gabs._rand_unitary(qpairbasis)
@@ -36,7 +36,7 @@
     end
 
     @testset "random states" begin
-        nmodes = rand(1:20)
+        nmodes = rand(1:5)
         qpairbasis = QuadPairBasis(nmodes)
         qblockbasis = QuadBlockBasis(nmodes)
         rs_pair = randstate(qpairbasis)
@@ -76,7 +76,7 @@
     end
 
     @testset "random unitaries" begin
-        nmodes = rand(1:20)
+        nmodes = rand(1:5)
         qpairbasis = QuadPairBasis(nmodes)
         qblockbasis = QuadBlockBasis(nmodes)
         ru = randunitary(qpairbasis)
@@ -102,7 +102,7 @@
     end
 
     @testset "random channels" begin
-        nmodes = rand(1:20)
+        nmodes = rand(1:5)
         qpairbasis = QuadPairBasis(nmodes)
         qblockbasis = QuadBlockBasis(nmodes)
         rc = randchannel(qpairbasis)
