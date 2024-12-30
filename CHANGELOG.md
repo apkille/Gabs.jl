@@ -3,6 +3,7 @@
 ## v1.2.4 - 2024-12-30
 
 - **(fix)** Preserve mode correlations in `ptrace``.
+- Change maximum number of modes from 20 to 5 in random multimode system tests to reduce numerical instabilies.
   
 ## v1.2.3 - 2024-12-26
 
