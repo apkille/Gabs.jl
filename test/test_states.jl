@@ -114,6 +114,15 @@
 
         @test ptrace(SVector{2}, SMatrix{2,2}, state_qpair, 1) isa GaussianState
         @test ptrace(SVector{4}, SMatrix{4,4}, state_qpair, [1, 3]) isa GaussianState
+
+        qpairbasis4 = QuadPairBasis(4)
+        qblockbasis4 = QuadBlockBasis(4)
+
+        eprstates_qpair = eprstate(qpairbasis4, r, theta)
+        eprstates_qblock = eprstate(qblockbasis4, r, theta)
+
+        @test ptrace(eprstates_qpair, [1, 2]) == eprstate(QuadPairBasis(2), r, theta)
+        @test ptrace(eprstates_qblock, [1, 2]) == eprstate(QuadBlockBasis(2), r, theta)
     end
 
     @testset "symplectic spectrum" begin

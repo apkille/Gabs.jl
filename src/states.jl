@@ -653,10 +653,17 @@ function _ptrace(state::GaussianState{B,M,V}, indices::T) where {B<:QuadPairBasi
     covar′ = zeros(Vt, 2*idxlength, 2*idxlength)
     @inbounds for i in eachindex(indices)
         idx = indices[i]
-        covar′[2*i-1, 2*i-1] = covar[2*idx-1, 2*idx-1]
-        covar′[2*i-1, 2*i] = covar[2*idx-1, 2*idx]
-        covar′[2*i, 2*i-1] = covar[2*idx, 2*idx-1]
-        covar′[2*i, 2*i] = covar[2*idx, 2*idx]
+        @inbounds for j in i:idxlength
+            otheridx = indices[j]
+            covar′[2*i-1, 2*j-1] = covar[2*idx-1, 2*otheridx-1]
+            covar′[2*i-1, 2*j] = covar[2*idx-1, 2*otheridx]
+            covar′[2*i, 2*j-1] = covar[2*idx, 2*otheridx-1]
+            covar′[2*i, 2*j] = covar[2*idx, 2*otheridx]
+            covar′[2*j-1, 2*i-1] = covar[2*otheridx-1, 2*idx-1]
+            covar′[2*j-1, 2*i] = covar[2*otheridx-1, 2*idx]
+            covar′[2*j, 2*i-1] = covar[2*otheridx, 2*idx-1]
+            covar′[2*j, 2*i] = covar[2*otheridx, 2*idx]
+        end
     end 
     mean′′ = _promote_output_vector(typeof(mean), mean′, 2*idxlength)
     covar′′ = _promote_output_matrix(typeof(covar), covar′, 2*idxlength)
@@ -700,7 +707,9 @@ function _ptrace(state::GaussianState{B,M,V}, indices::T) where {B<:QuadBlockBas
             covar′[i,j] = covar[idx,otheridx]
             covar′[j,i] = covar[otheridx,idx]
             covar′[i+idxlength,j] = covar[idx+nmodes,otheridx]
+            covar′[i,j+idxlength] = covar[idx,otheridx+nmodes]
             covar′[j,i+idxlength] = covar[otheridx,idx+nmodes]
+            covar′[j+idxlength,i] = covar[otheridx+nmodes,idx]
             covar′[i+idxlength,j+idxlength] = covar[idx+nmodes, otheridx+nmodes]
             covar′[j+idxlength,i+idxlength] = covar[otheridx+nmodes, idx+nmodes]
         end
