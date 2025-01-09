@@ -7,8 +7,8 @@ using LinearAlgebra: I, det, mul!, diagm, diag, qr, eigvals
 
 import QuantumInterface: StateVector, AbstractOperator, apply!, tensor, ⊗, directsum, ⊕
 
-import SymplecticFactorizations: williamson, Williamson, randsymplectic, symplecticform, issymplectic
-using SymplecticFactorizations: williamson, Williamson, BlockForm, PairForm
+import SymplecticFactorizations: williamson, Williamson, polar, Polar, randsymplectic, symplecticform, issymplectic
+using SymplecticFactorizations: williamson, Williamson, polar, Polar, BlockForm, PairForm
 
 export 
     # types
@@ -29,7 +29,7 @@ export
     # symplectic form and checks
     symplecticform, issymplectic, isgaussian, sympspectrum,
     # factorizations
-    williamson, Williamson,
+    williamson, Williamson, polar, Polar,
     # metrics
     purity
 
