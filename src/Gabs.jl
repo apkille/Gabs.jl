@@ -29,7 +29,7 @@ export
     # symplectic form and checks
     symplecticform, issymplectic, isgaussian, sympspectrum,
     # factorizations
-    williamson, Williamson,
+    williamson, Williamson, polar, Polar,
     # metrics
     purity
 

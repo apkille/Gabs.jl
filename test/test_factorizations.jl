@@ -35,7 +35,7 @@
 
         F_pair = polar(uni_pair)
         O_pair, P_pair = F_pair
-        F_block = williamson(uni_block)
+        F_block = polar(uni_block)
         O_block, P_block = F_block
 
         @test O_pair == F_pair.O && P_pair == F_pair.P
