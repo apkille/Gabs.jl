@@ -1,5 +1,10 @@
 # News
 
+## v1.2.5 - 2025-01-09
+
+- Add SymplecticFactorizations as a dependency.
+- Import and use `polar` and `williamson` decompositions from SymplecticFactorizations.jl.
+
 ## v1.2.4 - 2024-12-30
 
 - **(fix)** Preserve mode correlations in `ptrace``.
