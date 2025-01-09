@@ -2,7 +2,7 @@
 
 julia_version = "1.11.1"
 manifest_format = "2.0"
-project_hash = "4d7978a460a97fe04f5d614beab28f82e1b00349"
+project_hash = "c1e6611d21e5dc634399ea9f014269781c88195a"
 
 [[deps.ArrayLayouts]]
 deps = ["FillArrays", "LinearAlgebra"]
@@ -93,6 +93,12 @@ version = "1.11.0"
 deps = ["Artifacts", "Libdl", "libblastrampoline_jll"]
 uuid = "bea87d4a-7f5b-5778-9afe-8cc45184846c"
 version = "7.7.0+0"
+
+[[deps.SymplecticFactorizations]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "031f23f31ca69b5e9a42771fe6bd29f1e366b86d"
+uuid = "7425e8e4-4cde-4e45-9b2f-a15679260f9b"
+version = "0.1.1"
 
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl"]

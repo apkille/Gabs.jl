@@ -7,6 +7,9 @@ using LinearAlgebra: I, det, mul!, diagm, diag, qr, eigvals
 
 import QuantumInterface: StateVector, AbstractOperator, apply!, tensor, ⊗, directsum, ⊕
 
+import SymplecticFactorizations: williamson, Williamson, randsymplectic, symplecticform, issymplectic
+using SymplecticFactorizations: williamson, Williamson, BlockForm, PairForm
+
 export 
     # types
     GaussianState, GaussianUnitary, GaussianChannel, Generaldyne,
@@ -25,6 +28,8 @@ export
     wigner, wignerchar,
     # symplectic form and checks
     symplecticform, issymplectic, isgaussian, sympspectrum,
+    # factorizations
+    williamson, Williamson,
     # metrics
     purity
 
@@ -43,6 +48,8 @@ include("unitaries.jl")
 include("channels.jl")
 
 include("randoms.jl")
+
+include("factorizations.jl")
 
 include("measurements.jl")
 
