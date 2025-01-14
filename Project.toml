@@ -20,7 +20,7 @@ StaticArraysExt = "StaticArrays"
 [compat]
 BlockArrays = "1.1.1"
 LinearAlgebra = "1.9"
-Makie = "0.21"
+Makie = "0.21, 0.22"
 QuantumInterface = "0.3.4"
 StaticArrays = "1.9.7"
 SymplecticFactorizations = "0.1.1"
