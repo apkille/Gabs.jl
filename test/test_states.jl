@@ -1,5 +1,4 @@
 @testitem "States" begin
-    import Gabs: _changebasis
     using Gabs
     using StaticArrays
     using LinearAlgebra: det
@@ -12,29 +11,35 @@
         state = vacuumstate(qpairbasis)
         @test state isa GaussianState
         @test vacuumstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis) isa GaussianState
-        @test vacuumstate(qblockbasis) == _changebasis(state, QuadBlockBasis)
+        @test vacuumstate(qblockbasis) == changebasis(QuadBlockBasis, state)
     end
 
     @testset "thermal states" begin
         n = rand(1:5)
         ns = rand(1:5, nmodes)
-        state = thermalstate(qpairbasis, n)
-        @test state isa GaussianState
+        state_pair = thermalstate(qpairbasis, n)
+        state_block = thermalstate(qblockbasis, n)
+        @test state_pair isa GaussianState && state_block isa GaussianState
         @test thermalstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, n) isa GaussianState
-        @test thermalstate(qblockbasis, n) == _changebasis(state, QuadBlockBasis)
-        @test thermalstate(qblockbasis, ns) == _changebasis(thermalstate(qpairbasis, ns), QuadBlockBasis)
-        @test isgaussian(state, atol = 1e-4)
+        @test thermalstate(qblockbasis, n) == changebasis(QuadBlockBasis, state_pair)
+        @test state_pair == changebasis(QuadPairBasis, state_block) && state_block == changebasis(QuadBlockBasis, state_pair)
+        @test state_pair == changebasis(QuadPairBasis, state_pair)
+        @test thermalstate(qblockbasis, ns) == changebasis(QuadBlockBasis, thermalstate(qpairbasis, ns))
+        @test isgaussian(state_pair, atol = 1e-4)
     end
 
     @testset "coherent states" begin
         alpha = rand(ComplexF64)
         alphas = rand(ComplexF64, nmodes)
-        state = coherentstate(qpairbasis, alpha)
-        @test state isa GaussianState
+        state_pair = coherentstate(qpairbasis, alpha)
+        state_block = coherentstate(qblockbasis, alpha)
+        @test state_pair isa GaussianState && state_block isa GaussianState
         @test coherentstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, alpha) isa GaussianState
-        @test coherentstate(qblockbasis, alpha) == _changebasis(state, QuadBlockBasis)
-        @test coherentstate(qblockbasis, alphas) == _changebasis(coherentstate(qpairbasis, alphas), QuadBlockBasis)
-        @test isgaussian(state, atol = 1e-4)
+        @test coherentstate(qblockbasis, alpha) == changebasis(QuadBlockBasis, state_pair)
+        @test state_pair == changebasis(QuadPairBasis, state_block) && state_block == changebasis(QuadBlockBasis, state_pair)
+        @test state_pair == changebasis(QuadPairBasis, state_pair)
+        @test coherentstate(qblockbasis, alphas) == changebasis(QuadBlockBasis, coherentstate(qpairbasis, alphas))
+        @test isgaussian(state_pair, atol = 1e-4)
     end
 
     @testset "squeezed states" begin
@@ -43,8 +48,8 @@
         state = squeezedstate(qpairbasis, r, theta)
         @test state isa GaussianState
         @test squeezedstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, r, theta) isa GaussianState
-        @test squeezedstate(qblockbasis, r, theta) == _changebasis(state, QuadBlockBasis)
-        @test squeezedstate(qblockbasis, rs, thetas) == _changebasis(squeezedstate(qpairbasis, rs, thetas), QuadBlockBasis)
+        @test squeezedstate(qblockbasis, r, theta) == changebasis(QuadBlockBasis, state)
+        @test squeezedstate(qblockbasis, rs, thetas) == changebasis(QuadBlockBasis, squeezedstate(qpairbasis, rs, thetas))
     end
 
     @testset "epr states" begin
@@ -53,8 +58,8 @@
         state = eprstate(2*qpairbasis, r, theta)
         @test state isa GaussianState
         @test eprstate(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, 2*qpairbasis, r, theta) isa GaussianState
-        @test eprstate(2*qblockbasis, r, theta) == _changebasis(state, QuadBlockBasis)
-        @test eprstate(2*qblockbasis, rs, thetas) == _changebasis(eprstate(2*qpairbasis, rs, thetas), QuadBlockBasis)
+        @test eprstate(2*qblockbasis, r, theta) == changebasis(QuadBlockBasis, state)
+        @test eprstate(2*qblockbasis, rs, thetas) == changebasis(QuadBlockBasis, eprstate(2*qpairbasis, rs, thetas))
     end
 
     @testset "tensor products" begin
