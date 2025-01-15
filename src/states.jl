@@ -719,22 +719,74 @@ function _ptrace(state::GaussianState{B,M,V}, indices::T) where {B<:QuadBlockBas
     return mean′′, covar′′
 end
 
-function _changebasis(state::GaussianState{B1,M,V}, ::Type{B2}) where {B1<:QuadPairBasis,B2<:QuadBlockBasis,M,V}
-    if B1 == B2
-        return state
-    end
+"""
+    changebasis(::SymplecticBasis, state::GaussianState)
+
+Change the symplectic basis of a Gaussian state.
+
+# Example
+
+```jldoctest
+julia> st = squeezedstate(QuadBlockBasis(2), 1.0, 2.0)
+GaussianState for 2 modes.
+  symplectic basis: QuadBlockBasis
+mean: 4-element Vector{Float64}:
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+covariance: 4×4 Matrix{Float64}:
+ 2.63575  0.0      1.64895  0.0
+ 0.0      2.63575  0.0      1.64895
+ 1.64895  0.0      1.12644  0.0
+ 0.0      1.64895  0.0      1.12644
+
+julia> changebasis(QuadPairBasis, st)
+GaussianState for 2 modes.
+  symplectic basis: QuadPairBasis
+mean: 4-element Vector{Float64}:
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+covariance: 4×4 Matrix{Float64}:
+ 2.63575  1.64895  0.0      0.0
+ 1.64895  1.12644  0.0      0.0
+ 0.0      0.0      2.63575  1.64895
+ 0.0      0.0      1.64895  1.12644
+```
+"""
+function changebasis(::Type{B1}, state::GaussianState{B2,M,V}) where {B1<:QuadBlockBasis,B2<:QuadPairBasis,M,V}
     basis = state.basis
     nmodes = basis.nmodes
-    T = zeros(2*nmodes, 2*nmodes)
+    T = zeros(eltype(V), 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(2*nmodes), j in Base.OneTo(2*nmodes)
         if (j == 2*i-1) || (j + 2*nmodes == 2*i)
-            T[i,j] = 1
+            T[i,j] = 1.0
         end
     end
+    T = typeof(T) == V ? T : V(T)
     mean = T * state.mean
     covar = T * state.covar * transpose(T)
-    return GaussianState(B2(nmodes), mean, covar)
+    return GaussianState(B1(nmodes), mean, covar)
 end
+function changebasis(::Type{B1}, state::GaussianState{B2,M,V}) where {B1<:QuadPairBasis,B2<:QuadBlockBasis,M,V}
+    basis = state.basis
+    nmodes = basis.nmodes
+    T = zeros(eltype(V), 2*nmodes, 2*nmodes)
+    @inbounds for i in Base.OneTo(2*nmodes), j in Base.OneTo(2*nmodes)
+        if (i == 2*j-1) || (i + 2*nmodes == 2*j)
+            T[i,j] = 1.0
+        end
+    end
+    T = typeof(T) == V ? T : V(T)
+    mean = T * state.mean
+    covar = T * state.covar * transpose(T)
+    return GaussianState(B1(nmodes), mean, covar)
+end
+changebasis(::Type{<:QuadBlockBasis}, state::GaussianState{<:QuadBlockBasis,M,V}) where {M,V} = state
+changebasis(::Type{<:QuadPairBasis}, state::GaussianState{<:QuadPairBasis,M,V}) where {M,V} = state
+
 
 """
     sympspectrum(state::GaussianState)

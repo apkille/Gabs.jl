@@ -14,7 +14,7 @@ export
     # types
     GaussianState, GaussianUnitary, GaussianChannel, Generaldyne,
     # symplectic representations
-    QuadPairBasis, QuadBlockBasis,
+    QuadPairBasis, QuadBlockBasis, changebasis,
     # operations
     tensor, ⊗, directsum, ⊕, apply!, ptrace, output, prob,
     # predefined Gaussian states
