@@ -77,7 +77,7 @@
         ds = tensor(d1, d2)
         @test ds isa GaussianUnitary
         @test ds == d1 ⊗ d2
-        @test isapprox(ds, d1 ⊗ d2)
+        @test isapprox(ds, d1 ⊗ d2, atol = 1e-10)
         @test tensor(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, d1, d2) isa GaussianUnitary
 
         r, theta = rand(Float64), rand(Float64)

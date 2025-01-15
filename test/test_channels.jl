@@ -117,6 +117,7 @@
         ds = tensor(d1, d2)
         @test ds isa GaussianChannel
         @test ds == d1 ⊗ d2
+        @test isapprox(ds, d1 ⊗ d2, atol = 1e-10)
         @test tensor(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, d1, d2) isa GaussianChannel
 
         r, theta = rand(Float64), rand(Float64)
@@ -145,7 +146,7 @@
         v = vacuumstate(qpairbasis)
         c = coherentstate(qpairbasis, alpha)
         @test d * v == c
-        @test isapprox(d * v, c)
+        @test isapprox(d * v, c, atol = 1e-10)
         @test apply!(v, d) == c
 
         v1, v2 = vacuumstate(qpairbasis), vacuumstate(qpairbasis)
