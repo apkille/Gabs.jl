@@ -1,9 +1,10 @@
 # News
 
-## v1.2.6 - dev
+## v1.2.6 - 2025-01-14
 
 - Add `changebasis` for changing symplectic bases of Gaussian types.
 - Add kwargs to `isapprox` defined on Gaussian types.
+- Add symplectic analysis section to the documentation manual.
 
 ## v1.2.5 - 2025-01-09
 
