@@ -39,7 +39,7 @@ struct GaussianState{B<:SymplecticBasis,M,V} <: StateVector{M,V}
 end
 
 Base.:(==)(x::GaussianState, y::GaussianState) = x.basis == y.basis && x.mean == y.mean && x.covar == y.covar
-Base.isapprox(x::GaussianState, y::GaussianState) = x.basis == y.basis && isapprox(x.mean,y.mean) && isapprox(x.covar,y.covar)
+Base.isapprox(x::GaussianState, y::GaussianState; kwargs...) = x.basis == y.basis && isapprox(x.mean, y.mean; kwargs...) && isapprox(x.covar, y.covar; kwargs...)
 function Base.show(io::IO, mime::MIME"text/plain", x::GaussianState)
     Base.summary(io, x)
     print(io, "\n  symplectic basis: ")
@@ -99,7 +99,7 @@ struct GaussianUnitary{B<:SymplecticBasis,D,S} <: AbstractOperator{D,S}
 end
 
 Base.:(==)(x::GaussianUnitary, y::GaussianUnitary) = x.basis == y.basis && x.disp == y.disp && x.symplectic == y.symplectic
-Base.isapprox(x::GaussianUnitary, y::GaussianUnitary) = x.basis == y.basis && isapprox(x.disp, y.disp) && isapprox(x.symplectic, y.symplectic)
+Base.isapprox(x::GaussianUnitary, y::GaussianUnitary; kwargs...) = x.basis == y.basis && isapprox(x.disp, y.disp; kwargs...) && isapprox(x.symplectic, y.symplectic; kwargs...)
 function Base.show(io::IO, mime::MIME"text/plain", x::GaussianUnitary)
     Base.summary(io, x)
     print(io, "\n  symplectic basis: ")
@@ -180,7 +180,7 @@ struct GaussianChannel{B<:SymplecticBasis,D,T} <: AbstractOperator{D,T}
 end
 
 Base.:(==)(x::GaussianChannel, y::GaussianChannel) = x.basis == y.basis && x.disp == y.disp && x.transform == y.transform && x.noise == y.noise
-Base.isapprox(x::GaussianChannel, y::GaussianChannel) = x.basis == y.basis && isapprox(x.disp, y.disp) && isapprox(x.transform, y.transform) && isapprox(x.noise, y.noise)
+Base.isapprox(x::GaussianChannel, y::GaussianChannel; kwargs...) = x.basis == y.basis && isapprox(x.disp, y.disp; kwargs...) && isapprox(x.transform, y.transform; kwargs...) && isapprox(x.noise, y.noise; kwargs...)
 function Base.show(io::IO, mime::MIME"text/plain", x::GaussianChannel)
     Base.summary(io, x)
     print(io, "\n  symplectic basis: ")

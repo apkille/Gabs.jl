@@ -138,7 +138,7 @@
         v = vacuumstate(qpairbasis)
         c = coherentstate(qpairbasis, alpha)
         @test d * v == c
-        @test isapprox(d * v, c)
+        @test isapprox(d * v, c, atol = 1e-10)
         @test apply!(v, d) == c
 
         v1, v2 = vacuumstate(qpairbasis), vacuumstate(qpairbasis)

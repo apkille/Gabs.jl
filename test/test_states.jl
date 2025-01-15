@@ -63,7 +63,7 @@
         @test vs isa GaussianState
         @test tensor(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, v, v) isa GaussianState
         @test vs == v ⊗ v
-        @test isapprox(vs, v ⊗ v)
+        @test isapprox(vs, v ⊗ v, atol = 1e-10)
 
         alpha = rand(ComplexF64)
         c = coherentstate(qpairbasis, alpha)
