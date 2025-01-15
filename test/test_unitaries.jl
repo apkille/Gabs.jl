@@ -15,7 +15,7 @@
         @test displace(Array, qpairbasis, alpha) isa GaussianUnitary
         @test displace(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, alpha) isa GaussianUnitary
         @test op_pair == changebasis(QuadPairBasis, op_block) && op_block == changebasis(QuadBlockBasis, op_pair)
-        @test op_pair == changebasis(QuadPairBasis, op_pair)
+        @test op_pair == changebasis(QuadPairBasis, op_pair) && op_block == changebasis(QuadBlockBasis, op_block)
         @test displace(qblockbasis, alpha) == changebasis(QuadBlockBasis, op_pair)
         @test displace(qblockbasis, alphas) == changebasis(QuadBlockBasis, displace(qpairbasis, alphas))
         @test issymplectic(qpairbasis, op_pair.symplectic, atol = 1e-4)
@@ -31,7 +31,7 @@
         @test squeeze(Array, qpairbasis, r, theta) isa GaussianUnitary
         @test squeeze(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, r, theta) isa GaussianUnitary
         @test op_pair == changebasis(QuadPairBasis, op_block) && op_block == changebasis(QuadBlockBasis, op_pair)
-        @test op_pair == changebasis(QuadPairBasis, op_pair)
+        @test op_pair == changebasis(QuadPairBasis, op_pair) && op_block == changebasis(QuadBlockBasis, op_block)
         @test squeeze(qblockbasis, r, theta) == changebasis(QuadBlockBasis, op_pair)
         @test squeeze(qblockbasis, rs, thetas) == changebasis(QuadBlockBasis, squeeze(qpairbasis, rs, thetas))
         @test issymplectic(qpairbasis, op_pair.symplectic, atol = 1e-4)

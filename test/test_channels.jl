@@ -88,7 +88,7 @@
         @test attenuator(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, theta, n) isa GaussianChannel
         @test attenuator(Array, qpairbasis, theta, n) isa GaussianChannel
         @test op_pair == changebasis(QuadPairBasis, op_block) && op_block == changebasis(QuadBlockBasis, op_pair)
-        @test op_pair == changebasis(QuadPairBasis, op_pair)
+        @test op_pair == changebasis(QuadPairBasis, op_pair) && op_block == changebasis(QuadBlockBasis, op_block)
         @test attenuator(qblockbasis, theta, n) == changebasis(QuadBlockBasis, op_pair)
         @test attenuator(qblockbasis, thetas, ns) == changebasis(QuadBlockBasis, attenuator(qpairbasis, thetas, ns))
         @test isgaussian(op_pair, atol = 1e-4)
@@ -105,7 +105,7 @@
         @test amplifier(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, r, n) isa GaussianChannel
         @test amplifier(Array, qpairbasis, r, n) isa GaussianChannel
         @test op_pair == changebasis(QuadPairBasis, op_block) && op_block == changebasis(QuadBlockBasis, op_pair)
-        @test op_pair == changebasis(QuadPairBasis, op_pair)
+        @test op_pair == changebasis(QuadPairBasis, op_pair) && op_block == changebasis(QuadBlockBasis, op_block)
         @test amplifier(qblockbasis, r, n) == changebasis(QuadBlockBasis, op_pair)
         @test amplifier(qblockbasis, rs, ns) == changebasis(QuadBlockBasis, amplifier(qpairbasis, rs, ns))
         @test isgaussian(op_pair, atol = 1e-4)

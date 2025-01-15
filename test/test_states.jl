@@ -23,7 +23,7 @@
         @test thermalstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, n) isa GaussianState
         @test thermalstate(qblockbasis, n) == changebasis(QuadBlockBasis, state_pair)
         @test state_pair == changebasis(QuadPairBasis, state_block) && state_block == changebasis(QuadBlockBasis, state_pair)
-        @test state_pair == changebasis(QuadPairBasis, state_pair)
+        @test state_pair == changebasis(QuadPairBasis, state_pair) && state_block == changebasis(QuadBlockBasis, state_block)
         @test thermalstate(qblockbasis, ns) == changebasis(QuadBlockBasis, thermalstate(qpairbasis, ns))
         @test isgaussian(state_pair, atol = 1e-4)
     end
@@ -37,7 +37,7 @@
         @test coherentstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, alpha) isa GaussianState
         @test coherentstate(qblockbasis, alpha) == changebasis(QuadBlockBasis, state_pair)
         @test state_pair == changebasis(QuadPairBasis, state_block) && state_block == changebasis(QuadBlockBasis, state_pair)
-        @test state_pair == changebasis(QuadPairBasis, state_pair)
+        @test state_pair == changebasis(QuadPairBasis, state_pair) && state_block == changebasis(QuadBlockBasis, state_block)
         @test coherentstate(qblockbasis, alphas) == changebasis(QuadBlockBasis, coherentstate(qpairbasis, alphas))
         @test isgaussian(state_pair, atol = 1e-4)
     end
