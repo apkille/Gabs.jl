@@ -679,19 +679,70 @@ function issymplectic(basis::SymplecticBasis, x::T; atol::R1 = 0, rtol::R2 = ato
     return isapprox(x * form * x', form; atol = atol, rtol = rtol)
 end
 
-function _changebasis(op::GaussianUnitary{B1,D,S}, ::Type{B2}) where {B1<:QuadPairBasis,B2<:QuadBlockBasis,D,S}
-    if B1 == B2
-        return op
-    end
+"""
+    changebasis(::SymplecticBasis, state::GaussianUnitary)
+
+Change the symplectic basis of a Gaussian unitary.
+
+## Example
+
+```jldoctest
+julia> op = displace(QuadBlockBasis(2), 1.0-im)
+GaussianUnitary for 2 modes.
+  symplectic basis: QuadBlockBasis
+displacement: 4-element Vector{Float64}:
+  1.4142135623730951
+  1.4142135623730951
+ -1.4142135623730951
+ -1.4142135623730951
+symplectic: 4×4 Matrix{Float64}:
+ 1.0  0.0  0.0  0.0
+ 0.0  1.0  0.0  0.0
+ 0.0  0.0  1.0  0.0
+ 0.0  0.0  0.0  1.0
+
+julia> changebasis(QuadPairBasis, op)
+GaussianUnitary for 2 modes.
+  symplectic basis: QuadPairBasis
+displacement: 4-element Vector{Float64}:
+  1.4142135623730951
+ -1.4142135623730951
+  1.4142135623730951
+ -1.4142135623730951
+symplectic: 4×4 Matrix{Float64}:
+ 1.0  0.0  0.0  0.0
+ 0.0  1.0  0.0  0.0
+ 0.0  0.0  1.0  0.0
+ 0.0  0.0  0.0  1.0
+```
+"""
+function changebasis(::Type{B1}, op::GaussianUnitary{B2,D,S}) where {B1<:QuadBlockBasis,B2<:QuadPairBasis,D,S}
     basis = op.basis
     nmodes = basis.nmodes
-    T = zeros(2*nmodes, 2*nmodes)
+    T = zeros(eltype(S), 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(2*nmodes), j in Base.OneTo(2*nmodes)
         if (j == 2*i-1) || (j + 2*nmodes == 2*i)
-            T[i,j] = 1
+            T[i,j] = 1.0
         end
     end
+    T = typeof(T) == S ? T : S(T)
     disp = T * op.disp
     symp = T * op.symplectic * transpose(T)
-    return GaussianUnitary(B2(nmodes), disp, symp)
+    return GaussianUnitary(B1(nmodes), disp, symp)
 end
+function changebasis(::Type{B1}, op::GaussianUnitary{B2,D,S}) where {B1<:QuadPairBasis,B2<:QuadBlockBasis,D,S}
+    basis = op.basis
+    nmodes = basis.nmodes
+    T = zeros(eltype(S), 2*nmodes, 2*nmodes)
+    @inbounds for i in Base.OneTo(2*nmodes), j in Base.OneTo(2*nmodes)
+        if (i == 2*j-1) || (i + 2*nmodes == 2*j)
+            T[i,j] = 1.0
+        end
+    end
+    T = typeof(T) == S ? T : S(T)
+    disp = T * op.disp
+    symp = T * op.symplectic * transpose(T)
+    return GaussianUnitary(B1(nmodes), disp, symp)
+end
+changebasis(::Type{<:QuadBlockBasis}, op::GaussianUnitary{<:QuadBlockBasis,D,S}) where {D,S} = op
+changebasis(::Type{<:QuadPairBasis}, op::GaussianUnitary{<:QuadPairBasis,D,S}) where {D,S} = op
