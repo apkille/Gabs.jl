@@ -338,3 +338,91 @@ covariance: 4×4 Matrix{Float64}:
  0.0  0.0  13.6541   0.0
  0.0  0.0   0.0     13.6541
 ```
+
+## Symplectic Analysis
+
+Gabs provides different tools for analyzing symplectic transformations and properties
+of Gaussian states and operators. Under the hood, the aforementioned types such 
+as [`GaussianState`](@ref), [`GaussianUnitary`](@ref), and [`GaussianChannel`](@ref)
+keep track of symplectic bases, i.e., ordering of bosonic mode operators. To change
+symplectic bases, simply call [`changebasis`](@ref). As an example, consider the phase shift operator, defined by the quadrature transformations
+```math
+\hat{x} \to \cos(\theta) \hat{x} + \sin(\theta) \hat{p}, \qquad \hat{p} \to -\sin(\theta) \hat{x} + \cos(\theta) \hat{p}.
+```
+The symplectic transformation corresponding to the action of a tensor product of phase shift operators
+on a bosonic system is dependent on the ordering of the bosonic mode observables, so it is useful to swap
+symplectic bases. Consider a simple example for a two-mode system:
+```jldoctest
+julia> op = phaseshift(QuadBlockBasis(2), 0.5)
+GaussianUnitary for 2 modes.
+  symplectic basis: QuadBlockBasis
+displacement: 4-element Vector{Float64}:
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+symplectic: 4×4 Matrix{Float64}:
+  0.877583   0.0       0.479426  0.0
+  0.0        0.877583  0.0       0.479426
+ -0.479426   0.0       0.877583  0.0
+  0.0       -0.479426  0.0       0.877583
+
+julia> changebasis(QuadPairBasis, op)
+GaussianUnitary for 2 modes.
+  symplectic basis: QuadPairBasis
+displacement: 4-element Vector{Float64}:
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+symplectic: 4×4 Matrix{Float64}:
+  0.877583  0.479426   0.0       0.0
+ -0.479426  0.877583   0.0       0.0
+  0.0       0.0        0.877583  0.479426
+  0.0       0.0       -0.479426  0.877583
+```
+Various symplectic decompositions are supported in Gabs through the symplectic linear algebra package [SymplecticFactorizations.jl](https://github.com/apkille/SymplecticFactorizations.jl). Particularly important
+ones are the Williamson decomposition ([`williamson`](@ref)) and symplectic polar decomposition ([`polar`](@ref)):
+```@docs; canonical = false
+williamson
+```
+```@docs; canonical = false
+polar
+```
+Let's see an example with the Williamson decomposition:
+```julia
+julia> using LinearAlgebra
+
+julia> state = randstate(QuadBlockBasis(1))
+GaussianState for 1 mode.
+  symplectic basis: QuadBlockBasis
+mean: 2-element Vector{Float64}:
+ -0.7574999241497772
+  0.2508265276681603
+covariance: 2×2 Matrix{Float64}:
+ 0.352188   0.0172204
+ 0.0172204  5.78747
+
+julia> F = williamson(state)
+Williamson{Float64, Matrix{Float64}, Vector{Float64}}
+S factor:
+2×2 Matrix{Float64}:
+ -2.01346      0.00480559
+  0.00480559  -0.496669
+symplectic spectrum:
+1-element Vector{Float64}:
+ 1.4275781708830115
+
+julia> isapprox(Diagonal(repeat(F.spectrum, 2)), F.S * state.covar * F.S', atol = 1e-12)
+true
+
+julia> S, spectrum = F; # destructuring via iteration
+  
+julia> S == F.S && spectrum == F.spectrum
+true
+
+julia> issymplectic(QuadBlockBasis(1), S, atol = 1e-12)
+true
+```
+In the last line of code, we used the symplectic check [`issymplectic`](@ref). In general, we can
+check if a state or operator is Gaussian with [`isgaussian`](@ref).
