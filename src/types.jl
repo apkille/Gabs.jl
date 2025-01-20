@@ -117,6 +117,11 @@ function Base.:(*)(op::GaussianUnitary, state::GaussianState)
     covar′ = S * state.covar * transpose(S)
     return GaussianState(state.basis, mean′, covar′)
 end
+"""
+    apply!(state::GaussianState, op::GaussianUnitary)
+
+In-place application of a Gaussian unitary `op` on a Gaussian state `state`.
+"""
 function apply!(state::GaussianState, op::GaussianUnitary)
     op.basis == state.basis || throw(DimensionMismatch(ACTION_ERROR))
     d, S = op.disp, op.symplectic
@@ -210,6 +215,11 @@ function Base.:(*)(op::GaussianChannel, state::GaussianState)
     covar′ = T * state.covar * transpose(T) .+ N
     return GaussianState(state.basis, mean′, covar′)
 end
+"""
+    apply!(state::GaussianState, op::GaussianChannel)
+
+In-place application of a Gaussian channel `op` on a Gaussian state `state`.
+"""
 function apply!(state::GaussianState, op::GaussianChannel)
     op.basis == state.basis || throw(DimensionMismatch(ACTION_ERROR))
     d, T, N = op.disp, op.transform, op.noise

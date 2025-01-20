@@ -58,7 +58,7 @@ Listed below are supported predefined Gaussian states:
 Detailed discussions and mathematical descriptions for each of these states are given in the
 [Gaussian Zoos](@ref) page.
 
-### Gaussian Unitaries
+## Gaussian Unitaries
 
 To transform Gaussian states into Gaussian states, we need Gaussian maps. Let's begin with the simplest Gaussian transformation, a unitary transformation, which can be created with the [`GaussianUnitary`](@ref) type:
 
@@ -114,6 +114,76 @@ Listed below are a list of predefined Gaussian channels supported by Gabs:
      1.0  -2.0
      4.0  -3.0
     ```
+
+## Actions
+
+Out-of-place actions of Gaussian unitaries and Gaussian channels on Gaussian states
+are called with `*`, while in-place ones are called with [`apply!`](@ref):
+
+```jldoctest
+julia> basis = QuadBlockBasis(2); state = vacuumstate(basis);
+
+julia> un = squeeze(basis, 1.0, 2.0)
+GaussianUnitary for 2 modes.
+  symplectic basis: QuadBlockBasis
+displacement: 4-element Vector{Float64}:
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+symplectic: 4×4 Matrix{Float64}:
+  2.03214   0.0      -1.06861   0.0
+  0.0       2.03214   0.0      -1.06861
+ -1.06861   0.0       1.05402   0.0
+  0.0      -1.06861   0.0       1.05402
+
+julia> un * state
+GaussianState for 2 modes.
+  symplectic basis: QuadBlockBasis
+mean: 4-element Vector{Float64}:
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+covariance: 4×4 Matrix{Float64}:
+  5.2715    0.0      -3.29789   0.0
+  0.0       5.2715    0.0      -3.29789
+ -3.29789   0.0       2.25289   0.0
+  0.0      -3.29789   0.0       2.25289
+
+julia> ch = attenuator(basis, 0.25, 5)
+GaussianChannel for 2 modes.
+  symplectic basis: QuadBlockBasis
+displacement: 4-element Vector{Float64}:
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+transform: 4×4 Matrix{Float64}:
+ 0.968912  0.0       0.0       0.0
+ 0.0       0.968912  0.0       0.0
+ 0.0       0.0       0.968912  0.0
+ 0.0       0.0       0.0       0.968912
+noise: 4×4 Matrix{Float64}:
+ 0.306044  0.0       0.0       0.0
+ 0.0       0.306044  0.0       0.0
+ 0.0       0.0       0.306044  0.0
+ 0.0       0.0       0.0       0.306044
+
+julia> apply!(state, ch)
+GaussianState for 2 modes.
+  symplectic basis: QuadBlockBasis
+mean: 4-element Vector{Float64}:
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+covariance: 4×4 Matrix{Float64}:
+ 1.24483  0.0      0.0      0.0
+ 0.0      1.24483  0.0      0.0
+ 0.0      0.0      1.24483  0.0
+ 0.0      0.0      0.0      1.24483
+```
 
 ## Tensor Products
 
