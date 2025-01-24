@@ -11,10 +11,12 @@ SymplecticFactorizations = "7425e8e4-4cde-4e45-9b2f-a15679260f9b"
 
 [weakdeps]
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+QuantumOpticsBase = "4f57444f-1401-5e15-980d-4471b28d5678"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [extensions]
 MakieExt = "Makie"
+QuantumOpticsExt = "QuantumOpticsBase"
 StaticArraysExt = "StaticArrays"
 
 [compat]
@@ -22,6 +24,7 @@ BlockArrays = "1.1.1"
 LinearAlgebra = "1.9"
 Makie = "0.21, 0.22"
 QuantumInterface = "0.3.4"
+QuantumOpticsBase = "0.5.4"
 StaticArrays = "1.9.7"
 SymplecticFactorizations = "0.1.1"
 julia = "1.6.7, 1.10.0"
@@ -30,4 +33,4 @@ julia = "1.6.7, 1.10.0"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "Makie", "StaticArrays"]
+test = ["Test", "Makie", "QuantumOpticsBase", "StaticArrays"]
