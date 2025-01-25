@@ -1,5 +1,9 @@
 # News
 
+## v1.2.7 - 2025-01-25
+
+- Use `blochmessiah` decomposition from SymplecticFactorizations.jl.
+
 ## v1.2.6 - 2025-01-14
 
 - Add `changebasis` for changing symplectic bases of Gaussian types.

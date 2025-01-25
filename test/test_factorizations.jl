@@ -50,4 +50,33 @@
         @test isapprox(P_block, transpose(P_block), atol = 1e-5) && all(i > 0 for i in eigvals(P_block))
         @test isapprox(P_pair, transpose(P_pair), atol = 1e-5) && all(i > 0 for i in eigvals(P_pair))
     end
+
+    @testset "Bloch-Messiah/Euler" begin
+        nmodes = rand(1:5)
+        qpairbasis = QuadPairBasis(nmodes)
+        qblockbasis = QuadBlockBasis(nmodes)
+        
+        uni_pair = randunitary(qpairbasis)
+        S_pair = uni_pair.symplectic
+        uni_block = randunitary(qblockbasis)
+        S_block = uni_block.symplectic
+
+        F_pair = blochmessiah(uni_pair)
+        O_pair, vals_pair, Q_pair = F_pair
+        F_block = blochmessiah(uni_block)
+        O_block, vals_block, Q_block = F_block
+
+        @test F_block.O == O_block && F_block.values == vals_block && F_block.Q == Q_block
+        @test F_pair.O == O_pair && F_pair.values == vals_pair && F_pair.Q == Q_pair
+        @test issymplectic(qpairbasis, O_pair, atol = 1e-5) && issymplectic(qblockbasis, O_block, atol = 1e-5)
+        @test issymplectic(qpairbasis, Q_pair, atol = 1e-5) && issymplectic(qblockbasis, Q_block, atol = 1e-5)
+        @test isapprox(inv(O_pair), transpose(O_pair), atol = 1e-5) && isapprox(inv(O_block), transpose(O_block), atol = 1e-5)
+        @test isapprox(inv(Q_pair), transpose(Q_pair), atol = 1e-5) && isapprox(inv(Q_block), transpose(Q_block), atol = 1e-5)
+
+        @test all(x -> x > 0.0, vals_block) && all(x -> x > 0.0, vals_pair)
+        D_block = Diagonal(vcat(vals_block, vals_block .^ (-1)))
+        D_pair = Diagonal(collect(Iterators.flatten(zip(vals_pair, vals_pair .^ (-1)))))
+        @test isapprox(O_block * D_block * Q_block, S_block, atol = 1e-5)
+        @test isapprox(O_pair * D_pair * Q_pair, S_pair, atol = 1e-5)
+    end
 end

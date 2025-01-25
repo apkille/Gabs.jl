@@ -2,7 +2,7 @@
     williamson(state::GaussianState) -> Williamson
 
 Compute the williamson decomposition of the `covar` field
-of a `Gaussian state` object and return a `Williamson` object.
+of a `GaussianState` object and return a `Williamson` object.
 
 A symplectic matrix `S` and symplectic spectrum `spectrum` can be obtained
 via `F.S` and `F.spectrum`.
@@ -21,10 +21,10 @@ function williamson(x::GaussianState{<:QuadPairBasis,M,V}) where {M,V}
 end
 
 """
-    polar(state::GaussianState) -> Polar
+    polar(state::GaussianUnitary) -> Polar
 
 Compute the Polar decomposition of the `symplectic` field
-of a `Gaussian unitary` object and return a `Polar` object.
+of a `GaussianUnitary` object and return a `Polar` object.
 
 `O` and `P` can be obtained from the factorization `F` via `F.O` and `F.P`, such that `S = O * P`.
 For the symplectic polar decomposition case, `O` is an orthogonal symplectic matrix and `P` is a positive-definite
@@ -32,11 +32,24 @@ symmetric symplectic matrix.
 
 Iterating the decomposition produces the components `O` and `P`.
 """
-function polar(x::GaussianUnitary{<:QuadBlockBasis,D,S}) where {D,S}
+polar(x::GaussianUnitary{B,D,S}) where {B<:SymplecticBasis,D,S} = polar(x.symplectic)
+
+"""
+    blochmessiah(state::GaussianUnitary) -> BlochMessiah
+
+Compute the Bloch-Messiah/Euler decomposition of the `symplectic` field
+of a `GaussianUnitary` and return a `BlockMessiah` object.
+
+The orthogonal symplectic matrices `O` and `Q` as well as the singular values `values` can be obtained
+via `F.O`, `F.Q`, and `F.values`, respectively.
+
+Iterating the decomposition produces the components `O`, `values`, and `Q`, in that order.
+"""
+function blochmessiah(x::GaussianUnitary{<:QuadBlockBasis,D,S}) where {D,S}
     basis = x.basis
-    return polar(x.symplectic)
+    return blochmessiah(BlockForm(basis.nmodes), x.symplectic)
 end
-function polar(x::GaussianUnitary{<:QuadPairBasis,D,S}) where {D,S}
+function blochmessiah(x::GaussianUnitary{<:QuadPairBasis,D,S}) where {D,S}
     basis = x.basis
-    return polar(x.symplectic)
+    return blochmessiah(PairForm(basis.nmodes), x.symplectic)
 end
