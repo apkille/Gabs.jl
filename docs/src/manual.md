@@ -452,9 +452,12 @@ symplectic: 4×4 Matrix{Float64}:
   0.0       0.0       -0.479426  0.877583
 ```
 Various symplectic decompositions are supported in Gabs through the symplectic linear algebra package [SymplecticFactorizations.jl](https://github.com/apkille/SymplecticFactorizations.jl). Particularly important
-ones are the Williamson decomposition ([`williamson`](@ref)) and symplectic polar decomposition ([`polar`](@ref)):
+ones are the Williamson decomposition ([`williamson`](@ref)), Bloch-Messiah/Euler decomposition ([`blochmessiah`](@ref)), and the symplectic polar decomposition ([`polar`](@ref)):
 ```@docs; canonical = false
 williamson
+```
+```@docs; canonical = false
+blochmessiah
 ```
 ```@docs; canonical = false
 polar
