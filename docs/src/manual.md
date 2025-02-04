@@ -507,11 +507,11 @@ Create Gaussian states with symbolic variables using `Symbolics.jl`:
 ```julia
 julia> using Symbolics, Latexify
 
-julia> @variables r θ τ  # Define symbolic variables
+julia> @variables r θ τ
 
 julia> b = QuadBlockBasis(2);
 
-julia>  st = eprstate(b, r, θ);
+julia> st = eprstate(b, r, θ);
 
 julia> op = beamsplitter(b, τ);
 
