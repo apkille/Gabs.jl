@@ -27,7 +27,7 @@
         @test all(isequal.(newst.covar, expected_covariance))
     end
 
-    @testset "EPR states with Symbolics" begin
+    @testset "Symbolic EPR states" begin
         @variables r θ
         nmodes = rand(1:5)
         @variables rs[1:nmodes] thetas[1:nmodes]
@@ -42,5 +42,14 @@
         state_block = eprstate(2*qblockbasis, collect(rs), collect(thetas))
         @test iszero(simplify(state_block.covar - changebasis(QuadBlockBasis, state_pair).covar))
         @test iszero(simplify(state_block.mean - changebasis(QuadBlockBasis, state_pair).mean))
+    end
+
+    @testset "Symbolic squeezed states" begin
+        @variables r theta
+        @variables rs[1:nmodes] thetas[1:nmodes]
+        state = squeezedstate(qpairbasis, r, theta)
+        @test state isa GaussianState
+        @test squeezedstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, r, theta) isa GaussianState
+        @test all(isequal.(squeezedstate(qblockbasis, r, theta).covar, changebasis(QuadBlockBasis, state).covar))
     end
 end
