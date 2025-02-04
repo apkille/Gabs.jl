@@ -1,6 +1,5 @@
 @testitem "States" begin
     using Gabs
-    using Symbolics
     using StaticArrays
     using LinearAlgebra: det
 
