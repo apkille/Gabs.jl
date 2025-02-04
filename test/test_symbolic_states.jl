@@ -7,7 +7,8 @@
     nmodes = rand(1:5)
     qpairbasis = QuadPairBasis(nmodes)
     qblockbasis = QuadBlockBasis(nmodes)
-    @testset " Symbolic Partial Trace of Beamsplitter-EPR State" begin
+
+    @testset "Symbolic Partial Trace of Beamsplitter-EPR State" begin
         @variables r θ τ
         b = QuadBlockBasis(2)
         st = eprstate(b, r, θ)
@@ -51,5 +52,17 @@
         @test state isa GaussianState
         @test squeezedstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, r, theta) isa GaussianState
         @test all(isequal.(squeezedstate(qblockbasis, r, theta).covar, changebasis(QuadBlockBasis, state).covar))
+        @test all(isequal.(squeezedstate(qblockbasis, r, theta).mean, changebasis(QuadBlockBasis, state).mean))
+    end
+
+    @testset "Symbolic coherent states" begin
+        @variables α
+        @variables alphas[1:nmodes]
+        state_pair = coherentstate(qpairbasis, α)
+        state_block = coherentstate(qblockbasis, α)
+        @test state_pair isa GaussianState && state_block isa GaussianState
+        @test coherentstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, α) isa GaussianState
+        @test coherentstate(qblockbasis, α).covar == changebasis(QuadBlockBasis, state_pair).covar
+        @test isequal(coherentstate(qblockbasis, α).mean, changebasis(QuadBlockBasis, state_pair).mean)
     end
 end
