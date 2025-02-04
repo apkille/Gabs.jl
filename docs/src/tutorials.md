@@ -144,7 +144,7 @@ L"\begin{equation}
 ```
 
 ```math
-\begin{equation}
+\\begin{equation}
 \\left[
 \\begin{array}{cc}
 \\left( 0.5 \\cosh\\left( 2 r \\right) \\sqrt{1 - \\tau} - 0.5 \\cos\\left( \\theta \\right) \\sinh\\left( 2 r \\right) \\sqrt{\\tau} \\right) \\sqrt{1 - \\tau} + \\left( 0.5 \\sqrt{\\tau} \\cosh\\left( 2 r \\right) - 0.5 \\cos\\left( \\theta \\right) \\sinh\\left( 2 r \\right) \\sqrt{1 - \\tau} \\right) \\sqrt{\\tau} &  - \\sinh\\left( 2 r \\right) \\sin\\left( \\theta \\right) \\sqrt{\\tau} \\sqrt{1 - \\tau} \\\\
