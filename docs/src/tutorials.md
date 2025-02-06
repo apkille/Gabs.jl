@@ -123,11 +123,19 @@ julia> using Symbolics, Latexify
 
 julia> @variables r θ τ
 
-julia> b = QuadBlockBasis(2);
-
-julia> st = eprstate(b, r, θ);
-
-julia> op = beamsplitter(b, τ);
+julia> b = QuadBlockBasis(2); st = eprstate(b, r, θ); op = beamsplitter(b, τ)
+GaussianUnitary for 2 modes.
+  symplectic basis: QuadBlockBasis
+displacement: 4-element Vector{Num}:
+ 0
+ 0
+ 0
+ 0
+symplectic: 4×4 Matrix{Num}:
+ sqrt(1 - τ)      sqrt(τ)            0            0
+    -sqrt(τ)  sqrt(1 - τ)            0            0
+           0            0  sqrt(1 - τ)      sqrt(τ)
+           0            0     -sqrt(τ)  sqrt(1 - τ)
 
 julia> newst = ptrace(op * st, 1);
 
