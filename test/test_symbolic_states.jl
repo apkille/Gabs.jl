@@ -9,23 +9,21 @@
     qblockbasis = QuadBlockBasis(nmodes)
 
     @testset "Symbolic Partial Trace of Beamsplitter-EPR State" begin
-        @variables r θ τ
-        b = QuadBlockBasis(2)
-        st = eprstate(b, r, θ)
-        op = beamsplitter(b, τ)
-        newst = ptrace(op * st, 1)
-        expected_mean = zeros(2)
-        τ_sqrt = sqrt(τ)
-        one_minus_τ_sqrt = sqrt(1 - τ)
-        expected_covariance = [
-            (0.5cosh(2r) * one_minus_τ_sqrt - 0.5cos(θ) * sinh(2r) * τ_sqrt) * one_minus_τ_sqrt +
-            (0.5τ_sqrt * cosh(2r) - 0.5cos(θ) * sinh(2r) * one_minus_τ_sqrt) * τ_sqrt  -sinh(2r) * sin(θ) * τ_sqrt * one_minus_τ_sqrt;
-            -sinh(2r) * sin(θ) * τ_sqrt * one_minus_τ_sqrt  (0.5cosh(2r) * one_minus_τ_sqrt + 0.5cos(θ) * sinh(2r) * τ_sqrt) * one_minus_τ_sqrt +
-            (0.5τ_sqrt * cosh(2r) + 0.5cos(θ) * sinh(2r) * one_minus_τ_sqrt) * τ_sqrt
-        ]
-        @test newst isa GaussianState
-        @test newst.mean == expected_mean
-        @test all(isequal.(newst.covar, expected_covariance))
+        @variables r θ
+        @variables rs[1:nmodes] thetas[1:nmodes]
+        state = eprstate(2 * qpairbasis, r, θ)
+        @test state isa GaussianState
+        state_array = eprstate(2 * qpairbasis, collect(rs), collect(thetas))
+        @test state_array isa GaussianState
+        @test iszero(simplify(eprstate(2 * qblockbasis, r, θ).covar - changebasis(QuadBlockBasis, state).covar))
+        @test iszero(simplify(eprstate(2 * qblockbasis, r, θ).mean - changebasis(QuadBlockBasis, state).mean))
+        state_pair = eprstate(2 * qpairbasis, collect(rs), collect(thetas))
+        state_block = eprstate(2 * qblockbasis, collect(rs), collect(thetas))
+        @test iszero(simplify(state_block.covar - changebasis(QuadBlockBasis, state_pair).covar))
+        @test iszero(simplify(state_block.mean - changebasis(QuadBlockBasis, state_pair).mean))
+        @test eprstate(2 * qpairbasis, collect(rs), collect(thetas)) isa GaussianState
+        @test all(isequal.(eprstate(2 * qblockbasis, collect(rs), collect(thetas)).covar, changebasis(QuadBlockBasis, state_pair).covar))
+        @test all(isequal.(eprstate(2 * qblockbasis, collect(rs), collect(thetas)).mean, changebasis(QuadBlockBasis, state_pair).mean))
     end
 
     @testset "Symbolic EPR states" begin
