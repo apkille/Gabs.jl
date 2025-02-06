@@ -87,14 +87,14 @@ function thermalstate(basis::SymplecticBasis{N}, photons::P) where {N<:Int,P}
 end
 function _thermalstate(basis::Union{QuadPairBasis{N},QuadBlockBasis{N}}, photons::P) where {N<:Int,P<:Number}
     nmodes = basis.nmodes
-    Rt = eltype(P)
+    Rt = float(eltype(P))
     mean = zeros(Rt, 2*nmodes)
     covar = Matrix{Rt}((photons + 1/2) * I, 2*nmodes, 2*nmodes)
     return mean, covar
 end
 function _thermalstate(basis::QuadPairBasis{N}, photons::P) where {N<:Int,P<:Vector}
     nmodes = basis.nmodes
-    Rt = eltype(P)
+    Rt = float(eltype(P))
     mean = zeros(Rt, 2*nmodes)
     covar = zeros(Rt, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
@@ -106,7 +106,7 @@ function _thermalstate(basis::QuadPairBasis{N}, photons::P) where {N<:Int,P<:Vec
 end
 function _thermalstate(basis::QuadBlockBasis{N}, photons::P) where {N<:Int,P<:Vector}
     nmodes = basis.nmodes
-    Rt = eltype(P)
+    Rt = float(eltype(P))
     mean = zeros(Rt, 2*nmodes)
     covar = zeros(Rt, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
