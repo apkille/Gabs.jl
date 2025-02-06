@@ -53,6 +53,12 @@
         @test squeezedstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, r, theta) isa GaussianState
         @test all(isequal.(squeezedstate(qblockbasis, r, theta).covar, changebasis(QuadBlockBasis, state).covar))
         @test all(isequal.(squeezedstate(qblockbasis, r, theta).mean, changebasis(QuadBlockBasis, state).mean))
+        rs_vec = collect(rs)
+        thetas_vec = collect(thetas)
+        state = squeezedstate(qpairbasis, rs_vec, thetas_vec)
+        @test state isa GaussianState
+        @test all(isequal.(squeezedstate(qblockbasis, rs_vec, thetas_vec).covar, changebasis(QuadBlockBasis, state).covar))
+        @test all(isequal.(squeezedstate(qblockbasis, rs_vec, thetas_vec).mean, changebasis(QuadBlockBasis, state).mean))
     end
 
     @testset "Symbolic coherent states" begin
