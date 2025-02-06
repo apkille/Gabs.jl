@@ -118,12 +118,32 @@ Importantly, methods that create or manipulate a Gaussian state, such as [`tenso
 
 Create Gaussian states with symbolic variables using [Symbolics.jl](https://github.com/JuliaSymbolics/Symbolics.jl):
 
-```julia
-julia> using Symbolics, Latexify
+```jldoctest
+julia> using Symbolics; import Latexify: latexify
 
 julia> @variables r θ τ
+3-element Vector{Num}:
+ r
+ θ
+ τ
 
-julia> b = QuadBlockBasis(2); st = eprstate(b, r, θ); op = beamsplitter(b, τ)
+julia> b = QuadBlockBasis(2);
+
+julia> st = eprstate(b, r, θ)
+GaussianState for 2 modes.
+  symplectic basis: QuadBlockBasis
+mean: 4-element Vector{Num}:
+ 0
+ 0
+ 0
+ 0
+covariance: 4×4 Matrix{Num}:
+         0.5cosh(2r)  -0.5cos(θ)*sinh(2r)  …  -0.5sinh(2r)*sin(θ)
+ -0.5cos(θ)*sinh(2r)          0.5cosh(2r)                       0
+                   0  -0.5sinh(2r)*sin(θ)      0.5cos(θ)*sinh(2r)
+ -0.5sinh(2r)*sin(θ)                    0             0.5cosh(2r)
+
+julia> op = beamsplitter(b, τ)
 GaussianUnitary for 2 modes.
   symplectic basis: QuadBlockBasis
 displacement: 4-element Vector{Num}:
