@@ -72,4 +72,24 @@
         @test all.(isequal(coherentstate(qblockbasis, alphas_vec).mean, changebasis(QuadBlockBasis, coherentstate(qpairbasis, alphas_vec)).mean))
         @test all.(isequal(coherentstate(qblockbasis, alphas_vec).covar, changebasis(QuadBlockBasis, coherentstate(qpairbasis, alphas_vec)).covar))
     end
+
+    @testset "Symbolic tensor products" begin
+        @variables α r θ
+        @variables rs[1:nmodes] thetas[1:nmodes]
+        state1 = coherentstate(qpairbasis, α)
+        state2 = squeezedstate(qpairbasis, r, θ)
+        tensor_state = tensor(state1, state2)
+        simplified_tensor = simplify(tensor_state.covar)
+        simplified_mean = simplify(tensor_state.mean)
+        @test iszero(simplified_tensor - tensor_state.covar)
+        @test iszero(simplified_mean - tensor_state.mean)
+        rs_vec = collect(rs)
+        thetas_vec = collect(thetas)
+        state_vec = squeezedstate(qpairbasis, rs_vec, thetas_vec)
+        tensor_state_arr = tensor(state1, state_vec)
+        simplified_tensor_arr = simplify(tensor_state_arr.covar)
+        simplified_mean_arr = simplify(tensor_state_arr.mean)
+        @test iszero(simplified_tensor_arr - tensor_state_arr.covar)
+        @test iszero(simplified_mean_arr - tensor_state_arr.mean)
+    end
 end
