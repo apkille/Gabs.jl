@@ -70,5 +70,8 @@
         @test coherentstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, α) isa GaussianState
         @test coherentstate(qblockbasis, α).covar == changebasis(QuadBlockBasis, state_pair).covar
         @test isequal(coherentstate(qblockbasis, α).mean, changebasis(QuadBlockBasis, state_pair).mean)
+        alphas_vec = vcat([real(alphas[i]) for i in 1:nmodes], [imag(alphas[i]) for i in 1:nmodes])
+        @test all.(isequal(coherentstate(qblockbasis, alphas_vec).mean, changebasis(QuadBlockBasis, coherentstate(qpairbasis, alphas_vec)).mean))
+        @test all.(isequal(coherentstate(qblockbasis, alphas_vec).covar, changebasis(QuadBlockBasis, coherentstate(qpairbasis, alphas_vec)).covar))
     end
 end
