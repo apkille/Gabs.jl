@@ -116,7 +116,7 @@ Importantly, methods that create or manipulate a Gaussian state, such as [`tenso
 
 ## Creating Symbolic Gaussian States
 
-Create Gaussian states with symbolic variables using `Symbolics.jl`:
+Create Gaussian states with symbolic variables using [Symbolics.jl](https://github.com/JuliaSymbolics/Symbolics.jl):
 
 ```julia
 julia> using Symbolics, Latexify
