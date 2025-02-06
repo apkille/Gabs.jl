@@ -92,4 +92,22 @@
         @test iszero(simplified_tensor_arr - tensor_state_arr.covar)
         @test iszero(simplified_mean_arr - tensor_state_arr.mean)
     end
+
+    @testset "Symbolic thermal states" begin
+        @variables n
+        state_pair = thermalstate(qpairbasis, n)
+        state_block = thermalstate(qblockbasis, n)
+        @test state_pair isa GaussianState && state_block isa GaussianState
+        @test thermalstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, n) isa GaussianState
+        @test isequal(thermalstate(qblockbasis, n).covar, changebasis(QuadBlockBasis, state_pair).covar)
+        @test isequal(thermalstate(qblockbasis, n).mean, changebasis(QuadBlockBasis, state_pair).mean)
+        @variables ns[1:nmodes]
+        n_vec = [n for _ in 1:nmodes]
+        state_pair = thermalstate(qpairbasis, n_vec)
+        state_block = thermalstate(qblockbasis, n_vec)
+        @test state_pair isa GaussianState && state_block isa GaussianState
+        @test thermalstate(SVector{2*nmodes}, SMatrix{2*nmodes, 2*nmodes}, qpairbasis, n_vec) isa GaussianState
+        @test all.(isequal(thermalstate(qblockbasis, n_vec).mean, changebasis(QuadBlockBasis, thermalstate(qpairbasis, n_vec)).mean))
+        @test all.(isequal(thermalstate(qblockbasis, n_vec).covar, changebasis(QuadBlockBasis, thermalstate(qpairbasis, n_vec)).covar))
+    end
 end
