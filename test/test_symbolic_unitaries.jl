@@ -79,4 +79,31 @@
             @test all.(isequal(op_func(factor * qblockbasis, thetas_vec).symplectic, changebasis(QuadBlockBasis, op_arr).symplectic))
         end
     end
+
+    @testset "Symbolic Tensor Products" begin
+        @variables alpha1 alpha2
+        d1, d2 = displace(qpairbasis, alpha1), displace(qpairbasis, alpha2)
+        ds = tensor(d1, d2)
+        @test ds isa GaussianUnitary
+        @test all.(isequal(ds.disp, (d1 ⊗ d2).disp))
+        @test all.(isequal(ds.symplectic, (d1 ⊗ d2).symplectic))
+        @test isapprox(ds, d1 ⊗ d2, atol = 1e-10)
+        @test tensor(SVector{4*nmodes}, SMatrix{4*nmodes, 4*nmodes}, d1, d2) isa GaussianUnitary
+        @variables theta
+        p = phaseshift(qpairbasis, theta)
+        @test all.(isequal(tensor(p, tensor(d1, d2)).disp, (p ⊗ d1 ⊗ d2).disp))
+        @test all.(isequal(tensor(p, tensor(d1, d2)).symplectic, (p ⊗ d1 ⊗ d2).symplectic))
+        p_block = phaseshift(qblockbasis, theta)
+        @variables thetas[1:2*nmodes]
+        p_blocks = phaseshift(2 * qblockbasis, collect(thetas))
+        @test all.(isequal((p_block ⊗ p_block).disp, p_blocks.disp))
+        @test all(isequal.(simplify((p_block ⊗ p_block).symplectic), simplify(substitute(p_blocks.symplectic, Dict(thetas[i] => theta for i in eachindex(thetas))))))
+        dstatic = displace(SVector{2*nmodes}, SMatrix{2*nmodes, 2*nmodes}, qpairbasis, alpha1)
+        tpstatic = dstatic ⊗ dstatic ⊗ dstatic
+        @test tpstatic.disp isa SVector{6*nmodes}
+        @test tpstatic.symplectic isa SMatrix{6*nmodes, 6*nmodes}
+        tp = dstatic ⊗ d1 ⊗ dstatic
+        @test tp.disp isa Vector
+        @test tp.symplectic isa Matrix
+    end
 end
