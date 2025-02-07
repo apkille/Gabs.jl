@@ -163,14 +163,14 @@ julia> newst = ptrace(op * st, 1);
 Use [Latexify](https://github.com/korsbo/Latexify.jl) to render the covariance matrix of `newst` in LaTeX using `Latexify.latexify(newst.covar)`:
 
 ```math
-\\begin{equation}
-\\left[
-\\begin{array}{cc}
-\\left( 0.5 \\cosh\\left( 2 r \\right) \\sqrt{1 - \\tau} - 0.5 \\cos\\left( \\theta \\right) \\sinh\\left( 2 r \\right) \\sqrt{\\tau} \\right) \\sqrt{1 - \\tau} + \\left( 0.5 \\sqrt{\\tau} \\cosh\\left( 2 r \\right) - 0.5 \\cos\\left( \\theta \\right) \\sinh\\left( 2 r \\right) \\sqrt{1 - \\tau} \\right) \\sqrt{\\tau} &  - \\sinh\\left( 2 r \\right) \\sin\\left( \\theta \\right) \\sqrt{\\tau} \\sqrt{1 - \\tau} \\\\
- - \\sinh\\left( 2 r \\right) \\sin\\left( \\theta \\right) \\sqrt{\\tau} \\sqrt{1 - \\tau} & \\left( 0.5 \\cosh\\left( 2 r \\right) \\sqrt{1 - \\tau} + 0.5 \\cos\\left( \\theta \\right) \\sinh\\left( 2 r \\right) \\sqrt{\\tau} \\right) \\sqrt{1 - \\tau} + \\left( 0.5 \\sqrt{\\tau} \\cosh\\left( 2 r \\right) + 0.5 \\cos\\left( \\theta \\right) \\sinh\\left( 2 r \\right) \\sqrt{1 - \\tau} \\right) \\sqrt{\\tau} \\\\
-\\end{array}
-\\right]
-\\end{equation}
+\begin{equation}
+\left[
+\begin{array}{cc}
+\left( 0.5 \cosh\left( 2 r \right) \sqrt{1 - \tau} - 0.5 \cos\left( \theta \right) \sinh\left( 2 r \right) \sqrt{\tau} \right) \sqrt{1 - \tau} + \left( 0.5 \sqrt{\tau} \cosh\left( 2 r \right) - 0.5 \cos\left( \theta \right) \sinh\left( 2 r \right) \sqrt{1 - \tau} \right) \sqrt{\tau} &  - \sinh\left( 2 r \right) \sin\left( \theta \right) \sqrt{\tau} \sqrt{1 - \tau} \\
+ - \sinh\left( 2 r \right) \sin\left( \theta \right) \sqrt{\tau} \sqrt{1 - \tau} & \left( 0.5 \cosh\left( 2 r \right) \sqrt{1 - \tau} + 0.5 \cos\left( \theta \right) \sinh\left( 2 r \right) \sqrt{\tau} \right) \sqrt{1 - \tau} + \left( 0.5 \sqrt{\tau} \cosh\left( 2 r \right) + 0.5 \cos\left( \theta \right) \sinh\left( 2 r \right) \sqrt{1 - \tau} \right) \sqrt{\tau} \\
+\end{array}
+\right]
+\end{equation}
 ```
 
 ## GPU Acceleration
