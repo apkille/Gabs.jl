@@ -114,6 +114,65 @@ Importantly, methods that create or manipulate a Gaussian state, such as [`tenso
      0.0  1.0
     ```
 
+## Creating Symbolic Gaussian States
+
+Create Gaussian states with symbolic variables using [Symbolics.jl](https://github.com/JuliaSymbolics/Symbolics.jl):
+
+```jldoctest
+julia> using Symbolics
+
+julia> @variables r θ τ
+3-element Vector{Num}:
+ r
+ θ
+ τ
+
+julia> b = QuadBlockBasis(2);
+
+julia> st = eprstate(b, r, θ)
+GaussianState for 2 modes.
+  symplectic basis: QuadBlockBasis
+mean: 4-element Vector{Num}:
+ 0
+ 0
+ 0
+ 0
+covariance: 4×4 Matrix{Num}:
+         0.5cosh(2r)  -0.5cos(θ)*sinh(2r)  …  -0.5sinh(2r)*sin(θ)
+ -0.5cos(θ)*sinh(2r)          0.5cosh(2r)                       0
+                   0  -0.5sinh(2r)*sin(θ)      0.5cos(θ)*sinh(2r)
+ -0.5sinh(2r)*sin(θ)                    0             0.5cosh(2r)
+
+julia> op = beamsplitter(b, τ)
+GaussianUnitary for 2 modes.
+  symplectic basis: QuadBlockBasis
+displacement: 4-element Vector{Num}:
+ 0
+ 0
+ 0
+ 0
+symplectic: 4×4 Matrix{Num}:
+ sqrt(1 - τ)      sqrt(τ)            0            0
+    -sqrt(τ)  sqrt(1 - τ)            0            0
+           0            0  sqrt(1 - τ)      sqrt(τ)
+           0            0     -sqrt(τ)  sqrt(1 - τ)
+
+julia> newst = ptrace(op * st, 1);
+```
+
+Use [Latexify](https://github.com/korsbo/Latexify.jl) to render the covariance matrix of `newst` in LaTeX using `Latexify.latexify(newst.covar)`:
+
+```math
+\\begin{equation}
+\\left[
+\\begin{array}{cc}
+\\left( 0.5 \\cosh\\left( 2 r \\right) \\sqrt{1 - \\tau} - 0.5 \\cos\\left( \\theta \\right) \\sinh\\left( 2 r \\right) \\sqrt{\\tau} \\right) \\sqrt{1 - \\tau} + \\left( 0.5 \\sqrt{\\tau} \\cosh\\left( 2 r \\right) - 0.5 \\cos\\left( \\theta \\right) \\sinh\\left( 2 r \\right) \\sqrt{1 - \\tau} \\right) \\sqrt{\\tau} &  - \\sinh\\left( 2 r \\right) \\sin\\left( \\theta \\right) \\sqrt{\\tau} \\sqrt{1 - \\tau} \\\\
+ - \\sinh\\left( 2 r \\right) \\sin\\left( \\theta \\right) \\sqrt{\\tau} \\sqrt{1 - \\tau} & \\left( 0.5 \\cosh\\left( 2 r \\right) \\sqrt{1 - \\tau} + 0.5 \\cos\\left( \\theta \\right) \\sinh\\left( 2 r \\right) \\sqrt{\\tau} \\right) \\sqrt{1 - \\tau} + \\left( 0.5 \\sqrt{\\tau} \\cosh\\left( 2 r \\right) + 0.5 \\cos\\left( \\theta \\right) \\sinh\\left( 2 r \\right) \\sqrt{1 - \\tau} \\right) \\sqrt{\\tau} \\\\
+\\end{array}
+\\right]
+\\end{equation}
+```
+
 ## GPU Acceleration
 
 ## Multithreading

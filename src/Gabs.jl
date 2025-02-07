@@ -10,7 +10,7 @@ import QuantumInterface: StateVector, AbstractOperator, apply!, tensor, ⊗, dir
 import SymplecticFactorizations: williamson, Williamson, polar, Polar, blochmessiah, BlochMessiah, randsymplectic, symplecticform, issymplectic
 using SymplecticFactorizations: williamson, Williamson, polar, Polar, blochmessiah, BlochMessiah, BlockForm, PairForm
 
-export 
+export
     # types
     GaussianState, GaussianUnitary, GaussianChannel, Generaldyne,
     # symplectic representations
