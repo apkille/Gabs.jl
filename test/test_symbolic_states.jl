@@ -17,6 +17,8 @@
         state = eprstate(2 * qpairbasis, r, θ)
         @test state isa GaussianState
         @test eprstate(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, 2*qpairbasis, r, θ) isa GaussianState
+        @test all(isequal.(eprstate(2 * qblockbasis, collect(rs), collect(thetas)).covar, changebasis(QuadBlockBasis, state_pair).covar))
+        @test all(isequal.(eprstate(2 * qblockbasis, collect(rs), collect(thetas)).mean, changebasis(QuadBlockBasis, state_pair).mean))
         @test iszero(simplify(eprstate(2*qblockbasis, r, θ).covar - changebasis(QuadBlockBasis, state).covar))
         @test iszero(simplify(eprstate(2*qblockbasis, r, θ).mean - changebasis(QuadBlockBasis, state).mean))
         state_pair = eprstate(2*qpairbasis, collect(rs), collect(thetas))
