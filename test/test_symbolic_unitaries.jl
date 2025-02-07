@@ -8,7 +8,7 @@
     qpairbasis = QuadPairBasis(nmodes)
     qblockbasis = QuadBlockBasis(nmodes)
 
-    @testset "displacement operator" begin
+    @testset "Symbolic displacement operator" begin
         @variables α alphas[1:5]
         op_pair = displace(qpairbasis, α)
         op_block = displace(qblockbasis, α)
@@ -54,5 +54,25 @@
         @test squeeze(SVector{2*nmodes}, SMatrix{2*nmodes, 2*nmodes}, qpairbasis, rs_vec, thetas_vec) isa GaussianUnitary
         @test all.(isequal(squeeze(qblockbasis, rs_vec, thetas_vec).disp, changebasis(QuadBlockBasis, op_pair_arr).disp))
         @test all.(isequal(squeeze(qblockbasis, rs_vec, thetas_vec).symplectic, changebasis(QuadBlockBasis, op_pair_arr).symplectic))
+    end
+
+    @testset "Symbolic two-mode squeeze operator" begin
+        @variables r theta
+        op = twosqueeze(2 * qpairbasis, r, theta)
+        @test op isa GaussianUnitary
+        @test twosqueeze(Array, 2 * qpairbasis, r, theta) isa GaussianUnitary
+        @test twosqueeze(SVector{4*nmodes}, SMatrix{4*nmodes, 4*nmodes}, 2 * qpairbasis, r, theta) isa GaussianUnitary
+        @test all.(isequal(twosqueeze(2 * qblockbasis, r, theta).disp, changebasis(QuadBlockBasis, op).disp))
+        @test all.(isequal(twosqueeze(2 * qblockbasis, r, theta).symplectic, changebasis(QuadBlockBasis, op).symplectic))
+        @variables rs[1:nmodes] thetas[1:nmodes]
+        rs_vec = collect(rs)
+        thetas_vec = collect(thetas)
+        op_arr = twosqueeze(2 * qpairbasis, rs_vec, thetas_vec)
+        op_block_arr = twosqueeze(2 * qblockbasis, rs_vec, thetas_vec)
+        @test op_arr isa GaussianUnitary && op_block_arr isa GaussianUnitary
+        @test twosqueeze(Array, 2 * qpairbasis, rs_vec, thetas_vec) isa GaussianUnitary
+        @test twosqueeze(SVector{4*nmodes}, SMatrix{4*nmodes, 4*nmodes}, 2 * qpairbasis, rs_vec, thetas_vec) isa GaussianUnitary
+        @test all.(isequal(twosqueeze(2 * qblockbasis, rs_vec, thetas_vec).disp, changebasis(QuadBlockBasis, op_arr).disp))
+        @test all.(isequal(twosqueeze(2 * qblockbasis, rs_vec, thetas_vec).symplectic, changebasis(QuadBlockBasis, op_arr).symplectic))
     end
 end
