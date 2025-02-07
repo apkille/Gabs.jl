@@ -5,7 +5,7 @@ using Documenter
 using DocumenterCitations
 using Gabs
 using QuantumInterface
-import Latexify
+import Latexify: latexify
 using Symbolics
 
 DocMeta.setdocmeta!(Gabs, :DocTestSetup, :(using Gabs, QuantumInterface); recursive=true)
