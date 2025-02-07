@@ -48,8 +48,9 @@ function displace(basis::SymplecticBasis{N}, alpha::A) where {N<:Int,A}
 end
 function _displace(basis::QuadPairBasis{N}, alpha::A) where {N<:Int,A<:Number}
     nmodes = basis.nmodes
+    Rt = real(eltype(A))
     disp = repeat([sqrt(2)*real(alpha), sqrt(2)*imag(alpha)], nmodes)
-    symplectic = Matrix{real(A)}(I, 2*nmodes, 2*nmodes)
+    symplectic = Matrix{Rt}(I, 2*nmodes, 2*nmodes)
     return disp, symplectic
 end
 function _displace(basis::QuadPairBasis{N}, alpha::A) where {N<:Int,A<:Vector}
@@ -61,8 +62,9 @@ function _displace(basis::QuadPairBasis{N}, alpha::A) where {N<:Int,A<:Vector}
 end
 function _displace(basis::QuadBlockBasis{N}, alpha::A) where {N<:Int,A<:Number}
     nmodes = basis.nmodes
+    Rt = real(eltype(A))
     disp = repeat([sqrt(2)*real(alpha), sqrt(2)*imag(alpha)], inner = nmodes)
-    symplectic = Matrix{real(A)}(I, 2*nmodes, 2*nmodes)
+    symplectic = Matrix{Rt}(I, 2*nmodes, 2*nmodes)
     return disp, symplectic
 end
 function _displace(basis::QuadBlockBasis{N}, alpha::A) where {N<:Int,A<:Vector}
@@ -125,6 +127,7 @@ function squeeze(basis::SymplecticBasis{N}, r::R, theta::R) where {N<:Int, R}
 end
 function _squeeze(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Real}
     nmodes = basis.nmodes
+    Rt = real(eltype(R))
     disp = zeros(R, 2*nmodes)
     cr, sr = cosh(r), sinh(r)
     ct, st = cos(theta), sin(theta)
@@ -154,6 +157,7 @@ function _squeeze(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Vect
 end
 function _squeeze(basis::QuadBlockBasis{N}, r::R, theta::R) where {N<:Int,R<:Real}
     nmodes = basis.nmodes
+    Rt = real(eltype(R))
     disp = zeros(R, 2*nmodes)
     cr, sr = cosh(r), sinh(r)
     ct, st = cos(theta), sin(theta)
