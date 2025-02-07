@@ -1,5 +1,10 @@
 # News
 
+## v1.2.8 - 2025-02-06
+
+- Improve performance of `blochmessiah` by 2x.
+- Validate and document the creation of Gaussian states with symbolic variables from Symbolics.jl.
+
 ## v1.2.7 - 2025-01-25
 
 - Use `blochmessiah` decomposition from SymplecticFactorizations.jl.
