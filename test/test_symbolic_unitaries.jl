@@ -35,45 +35,28 @@
         @test isgaussian(op_pair, atol = 1e-4)
     end
 
-    @testset "Symbolic squeeze operator" begin
-        @variables r theta
-        op_pair = squeeze(qpairbasis, r, theta)
-        op_block = squeeze(qblockbasis, r, theta)
-        @test op_pair isa GaussianUnitary && op_block isa GaussianUnitary
-        @test squeeze(Array, qpairbasis, r, theta) isa GaussianUnitary
-        @test squeeze(SVector{2*nmodes}, SMatrix{2*nmodes, 2*nmodes}, qpairbasis, r, theta) isa GaussianUnitary
-        @test all.(isequal(squeeze(qblockbasis, r, theta).disp, changebasis(QuadBlockBasis, op_pair).disp))
-        @test all.(isequal(squeeze(qblockbasis, r, theta).symplectic, changebasis(QuadBlockBasis, op_pair).symplectic))
-        @variables rs[1:nmodes] thetas[1:nmodes]
-        rs_vec = collect(rs)
-        thetas_vec = collect(thetas)
-        op_pair_arr = squeeze(qpairbasis, rs_vec, thetas_vec)
-        op_block_arr = squeeze(qblockbasis, rs_vec, thetas_vec)
-        @test op_pair_arr isa GaussianUnitary && op_block_arr isa GaussianUnitary
-        @test squeeze(Array, qpairbasis, rs_vec, thetas_vec) isa GaussianUnitary
-        @test squeeze(SVector{2*nmodes}, SMatrix{2*nmodes, 2*nmodes}, qpairbasis, rs_vec, thetas_vec) isa GaussianUnitary
-        @test all.(isequal(squeeze(qblockbasis, rs_vec, thetas_vec).disp, changebasis(QuadBlockBasis, op_pair_arr).disp))
-        @test all.(isequal(squeeze(qblockbasis, rs_vec, thetas_vec).symplectic, changebasis(QuadBlockBasis, op_pair_arr).symplectic))
-    end
 
-    @testset "Symbolic two-mode squeeze operator" begin
-        @variables r theta
-        op = twosqueeze(2 * qpairbasis, r, theta)
-        @test op isa GaussianUnitary
-        @test twosqueeze(Array, 2 * qpairbasis, r, theta) isa GaussianUnitary
-        @test twosqueeze(SVector{4*nmodes}, SMatrix{4*nmodes, 4*nmodes}, 2 * qpairbasis, r, theta) isa GaussianUnitary
-        @test all.(isequal(twosqueeze(2 * qblockbasis, r, theta).disp, changebasis(QuadBlockBasis, op).disp))
-        @test all.(isequal(twosqueeze(2 * qblockbasis, r, theta).symplectic, changebasis(QuadBlockBasis, op).symplectic))
-        @variables rs[1:nmodes] thetas[1:nmodes]
-        rs_vec = collect(rs)
-        thetas_vec = collect(thetas)
-        op_arr = twosqueeze(2 * qpairbasis, rs_vec, thetas_vec)
-        op_block_arr = twosqueeze(2 * qblockbasis, rs_vec, thetas_vec)
-        @test op_arr isa GaussianUnitary && op_block_arr isa GaussianUnitary
-        @test twosqueeze(Array, 2 * qpairbasis, rs_vec, thetas_vec) isa GaussianUnitary
-        @test twosqueeze(SVector{4*nmodes}, SMatrix{4*nmodes, 4*nmodes}, 2 * qpairbasis, rs_vec, thetas_vec) isa GaussianUnitary
-        @test all.(isequal(twosqueeze(2 * qblockbasis, rs_vec, thetas_vec).disp, changebasis(QuadBlockBasis, op_arr).disp))
-        @test all.(isequal(twosqueeze(2 * qblockbasis, rs_vec, thetas_vec).symplectic, changebasis(QuadBlockBasis, op_arr).symplectic))
+    for (name, op_func, factor) in [("squeeze", squeeze, 1), ("two-mode squeeze", twosqueeze, 2)]
+        @testset "Symbolic $name operator" begin
+            @variables r theta
+            op_pair = op_func(factor * qpairbasis, r, theta)
+            op_block = op_func(factor * qblockbasis, r, theta)
+            @test op_pair isa GaussianUnitary && op_block isa GaussianUnitary
+            @test op_func(Array, factor * qpairbasis, r, theta) isa GaussianUnitary
+            @test op_func(SVector{factor * 2 * nmodes}, SMatrix{factor * 2 * nmodes, factor * 2 * nmodes}, factor * qpairbasis, r, theta) isa GaussianUnitary
+            @test all.(isequal(op_func(factor * qblockbasis, r, theta).disp, changebasis(QuadBlockBasis, op_pair).disp))
+            @test all.(isequal(op_func(factor * qblockbasis, r, theta).symplectic, changebasis(QuadBlockBasis, op_pair).symplectic))
+            @variables rs[1:nmodes] thetas[1:nmodes]
+            rs_vec = collect(rs)
+            thetas_vec = collect(thetas)
+            op_pair_arr = op_func(factor * qpairbasis, rs_vec, thetas_vec)
+            op_block_arr = op_func(factor * qblockbasis, rs_vec, thetas_vec)
+            @test op_pair_arr isa GaussianUnitary && op_block_arr isa GaussianUnitary
+            @test op_func(Array, factor * qpairbasis, rs_vec, thetas_vec) isa GaussianUnitary
+            @test op_func(SVector{factor * 2 * nmodes}, SMatrix{factor * 2 * nmodes, factor * 2 * nmodes}, factor * qpairbasis, rs_vec, thetas_vec) isa GaussianUnitary
+            @test all.(isequal(op_func(factor * qblockbasis, rs_vec, thetas_vec).disp, changebasis(QuadBlockBasis, op_pair_arr).disp))
+            @test all.(isequal(op_func(factor * qblockbasis, rs_vec, thetas_vec).symplectic, changebasis(QuadBlockBasis, op_pair_arr).symplectic))
+        end
     end
 
     for (name, op_func, factor) in [("phase-shift", phaseshift, 1), ("beamsplitter", beamsplitter, 2)]
