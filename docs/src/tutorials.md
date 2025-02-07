@@ -168,7 +168,7 @@ covariance: 2×2 Matrix{Num}:
                                                                                                 -sinh(2r)*sin(θ)*sqrt(τ)*sqrt(1 - τ)     (0.5cosh(2r)*sqrt(1 - τ) + 0.5cos(θ)*sinh(2r)*sqrt(τ))*sqrt(1 - τ) + (0.5sqrt(τ)*cosh(2r) + 0.5cos(θ)*sinh(2r)*sqrt(1 - τ))*sqrt(τ)
 ```
 
-Use [Latexify](https://github.com/korsbo/Latexify.jl) to render `newst.covar` in LaTeX using `Latexify.latexify(newst.covar)`:
+Use [Latexify](https://github.com/korsbo/Latexify.jl) to render the covariance matrix of `newst` in LaTeX using `Latexify.latexify(newst.covar)`:
 
 ```math
 \\begin{equation}
