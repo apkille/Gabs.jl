@@ -8,24 +8,6 @@
     qpairbasis = QuadPairBasis(nmodes)
     qblockbasis = QuadBlockBasis(nmodes)
 
-    @testset "Symbolic Partial Trace of Beamsplitter-EPR State" begin
-        @variables r θ
-        @variables rs[1:nmodes] thetas[1:nmodes]
-        state = eprstate(2 * qpairbasis, r, θ)
-        @test state isa GaussianState
-        state_array = eprstate(2 * qpairbasis, collect(rs), collect(thetas))
-        @test state_array isa GaussianState
-        @test iszero(simplify(eprstate(2 * qblockbasis, r, θ).covar - changebasis(QuadBlockBasis, state).covar))
-        @test iszero(simplify(eprstate(2 * qblockbasis, r, θ).mean - changebasis(QuadBlockBasis, state).mean))
-        state_pair = eprstate(2 * qpairbasis, collect(rs), collect(thetas))
-        state_block = eprstate(2 * qblockbasis, collect(rs), collect(thetas))
-        @test iszero(simplify(state_block.covar - changebasis(QuadBlockBasis, state_pair).covar))
-        @test iszero(simplify(state_block.mean - changebasis(QuadBlockBasis, state_pair).mean))
-        @test eprstate(2 * qpairbasis, collect(rs), collect(thetas)) isa GaussianState
-        @test all(isequal.(eprstate(2 * qblockbasis, collect(rs), collect(thetas)).covar, changebasis(QuadBlockBasis, state_pair).covar))
-        @test all(isequal.(eprstate(2 * qblockbasis, collect(rs), collect(thetas)).mean, changebasis(QuadBlockBasis, state_pair).mean))
-    end
-
     @testset "Symbolic EPR states" begin
         @variables r θ
         nmodes = rand(1:5)
@@ -41,6 +23,8 @@
         state_block = eprstate(2*qblockbasis, collect(rs), collect(thetas))
         @test iszero(simplify(state_block.covar - changebasis(QuadBlockBasis, state_pair).covar))
         @test iszero(simplify(state_block.mean - changebasis(QuadBlockBasis, state_pair).mean))
+        @test all(isequal.(eprstate(2 * qblockbasis, collect(rs), collect(thetas)).covar, changebasis(QuadBlockBasis, state_pair).covar))
+        @test all(isequal.(eprstate(2 * qblockbasis, collect(rs), collect(thetas)).mean, changebasis(QuadBlockBasis, state_pair).mean))
     end
 
     @testset "Symbolic squeezed states" begin
