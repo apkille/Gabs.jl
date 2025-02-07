@@ -40,7 +40,6 @@
         op_pair = squeeze(qpairbasis, r, theta)
         op_block = squeeze(qblockbasis, r, theta)
         @test op_pair isa GaussianUnitary && op_block isa GaussianUnitary
-        @test op_pair_array isa GaussianUnitary && op_block_array isa GaussianUnitary
         @test squeeze(Array, qpairbasis, r, theta) isa GaussianUnitary
         @test squeeze(SVector{2*nmodes}, SMatrix{2*nmodes, 2*nmodes}, qpairbasis, r, theta) isa GaussianUnitary
         @test all.(isequal(squeeze(qblockbasis, r, theta).disp, changebasis(QuadBlockBasis, op_pair).disp))
