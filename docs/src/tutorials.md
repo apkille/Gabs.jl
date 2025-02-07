@@ -157,7 +157,7 @@ symplectic: 4×4 Matrix{Num}:
            0            0  sqrt(1 - τ)      sqrt(τ)
            0            0     -sqrt(τ)  sqrt(1 - τ)
 
-julia> newst = ptrace(op * st, 1)
+julia> newst = ptrace(op * st, 1);
 GaussianState for 1 mode.
   symplectic basis: QuadBlockBasis
 mean: 2-element Vector{Num}:
