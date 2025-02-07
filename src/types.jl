@@ -1,5 +1,3 @@
-using Symbolics
-
 """
 Defines a Gaussian state for an N-mode bosonic system over a 2N-dimensional phase space.
 
@@ -276,13 +274,3 @@ function isgaussian(x::GaussianChannel; atol::R1 = 0, rtol::R2 = atol) where {R1
     eigs = real(eigvals(form))
     return all(i -> ((i >= 0) || isapprox(i, 0.0; atol = atol, rtol = rtol)), eigs)
 end
-
-# Promote Rule
-
-promote_rule(::Type{GaussianState{QuadPairBasis, Vector{Float64}, Matrix{Float64}}},
-             ::Type{GaussianState{QuadPairBasis, Vector{Num}, Matrix{Num}}}) =
-    GaussianState{QuadPairBasis, Vector{Num}, Matrix{Num}}
-
-convert(::Type{GaussianState{QuadPairBasis, Vector{Num}, Matrix{Num}}},
-        state::GaussianState{QuadPairBasis, Vector{Float64}, Matrix{Float64}}) =
-    GaussianState(state.basis, Num.(state.mean), Num.(state.covar))
