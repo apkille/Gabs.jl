@@ -101,4 +101,14 @@
         @test tp.disp isa Vector
         @test tp.symplectic isa Matrix
     end
+
+    @testset "Symbolic actions" begin
+        @variables α1 α2
+        d1, d2 = displace(qpairbasis, α1), displace(qpairbasis, α2)
+        v1, v2 = vacuumstate(Num, qpairbasis), vacuumstate(Num, qpairbasis)
+        c1, c2 = coherentstate(qpairbasis, α1), coherentstate(qpairbasis, α2)
+        @test simplify(d1 * v1) ≈ simplify(c1)
+        @test all.(isequal(simplify(apply!(v1, d1)).mean, simplify(c1).mean))
+        @test all.(isequal(simplify(apply!(v1, d1)).covar, simplify(c1).covar))
+    end
 end

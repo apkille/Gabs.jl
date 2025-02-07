@@ -32,11 +32,15 @@ covariance: 2×2 Matrix{Float64}:
 """
 function vacuumstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}) where {Tm,Tc,N<:Int}
     mean, covar = _vacuumstate(basis)
-    return GaussianState(basis, Tm(mean), Tc(covar))
+    if Tm == Num || Tc == Num
+        return GaussianState(basis, Num.(mean), Num.(covar))
+    else
+        return GaussianState(basis, Tm(mean), Tc(covar))
+    end
 end
 vacuumstate(::Type{T}, basis::SymplecticBasis{N}) where {T,N<:Int} = vacuumstate(T, T, basis)
 function vacuumstate(basis::SymplecticBasis{N}) where {N<:Int}
-    mean, covar = _vacuumstate(basis)
+    mean, covar = _vacuumstate(Float64, basis)
     return GaussianState(basis, mean, covar)
 end
 function _vacuumstate(basis::SymplecticBasis{N}) where {N<:Int}
