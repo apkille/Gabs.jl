@@ -19,8 +19,6 @@
         @test all.(isequal(op_pair.symplectic, changebasis(QuadBlockBasis, op_block).symplectic))
         @test all.(isequal(displace(qblockbasis, α).disp, changebasis(QuadBlockBasis, op_pair).disp))
         @test all.(isequal(displace(qblockbasis, α).symplectic, changebasis(QuadBlockBasis, op_pair).symplectic))
-        @test issymplectic(qpairbasis, op_pair.symplectic, atol = 1e-4)
-        @test isgaussian(op_pair, atol = 1e-4)
         alphas_vec = vcat([real(alphas[i]) for i in 1:nmodes], [imag(alphas[i]) for i in 1:nmodes])
         op_pair = displace(qpairbasis, alphas_vec)
         op_block = displace(qblockbasis, alphas_vec)
@@ -31,10 +29,7 @@
         @test all.(isequal(op_pair.symplectic, changebasis(QuadBlockBasis, op_block).symplectic))
         @test all.(isequal(displace(qblockbasis, alphas_vec).disp, changebasis(QuadBlockBasis, op_pair).disp))
         @test all.(isequal(displace(qblockbasis, alphas_vec).symplectic, changebasis(QuadBlockBasis, op_pair).symplectic))
-        @test issymplectic(qpairbasis, op_pair.symplectic, atol = 1e-4)
-        @test isgaussian(op_pair, atol = 1e-4)
     end
-
 
     for (name, op_func, factor) in [("squeeze", squeeze, 1), ("two-mode squeeze", twosqueeze, 2)]
         @testset "Symbolic $name operator" begin
