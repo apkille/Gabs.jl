@@ -160,7 +160,7 @@ symplectic: 4×4 Matrix{Num}:
 julia> newst = ptrace(op * st, 1);
 ```
 
-Use [Latexify](https://github.com/korsbo/Latexify.jl) to render the covariance matrix of `newst` in LaTeX using `Latexify.latexify(newst.covar)`:
+Use [Latexify](https://github.com/korsbo/Latexify.jl) to render the covariance matrix of `newst` in LaTeX with the command `latexify(newst.covar) |> print`:
 
 ```math
 \begin{equation}
