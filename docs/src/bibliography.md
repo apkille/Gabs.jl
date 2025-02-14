@@ -40,6 +40,26 @@ jankowski2024
 goldberg2020
 ```
 
+## Seminal Papers related to Gaussian Quantum Information
+
+```@bibliography
+Pages = []
+Canonical = false
+
+simon1988
+lloyd1999
+duan2000
+bartlett2002
+eisert2002a
+fiurasek2002
+eisert2002b
+giedke2002
+grosshans2002
+giedke2003
+wenger2004
+braunstein2005
+```
+
 ## Publications on Gaussian Quantum Measurements
 
 ```@bibliography

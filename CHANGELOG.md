@@ -1,5 +1,9 @@
 # News
 
+## v1.2.9 - dev
+
+- Add seminal papers section to documentation.
+
 ## v1.2.8 - 2025-02-06
 
 - Improve performance of `blochmessiah` by 2x.
