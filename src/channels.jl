@@ -61,16 +61,10 @@ by beam splitter rotation angle `theta` and thermal noise `n`.
 
 ## Mathematical description of an attenuator channel
 
-An attenuator channel, ``\\mathcal{E}_{\\theta}^{n_{\\text{th}}}``, where ``\\theta`` is
-the beam splitter rotation parameter and ``n_{\\text{th}} \\geq 1`` is the thermal noise parameter,
-is characterized by the displacement vector ``\\mathbf{d}``, transformation matrix ``\\mathbf{T}``,
-and noise matrix ``\\mathbf{N}``, expressed respectively as follows:
-
-```math
-\\mathbf{d} = \\mathbf{0},
-\\quad \\mathbf{T} = \\cos\\theta\\mathbf{I},
-\\qquad \\mathbf{N} = (\\sin\\theta)^2 n_{\\text{th}} \\mathbf{I}.
-```
+An attenuator channel, `E(θ, nₜₕ)`, where `θ` is
+the beam splitter rotation parameter and `nₜₕ ≥ 1` is the thermal noise parameter,
+is characterized by the zero displacement vector, transformation matrix `cos(θ)I`,
+and noise matrix `nₜₕsin²(θ)I`.
 
 ## Example
 
@@ -89,14 +83,14 @@ noise: 2×2 Matrix{Float64}:
  0.0   0.75
 ```
 """
-function attenuator(::Type{Td}, ::Type{Tt}, basis::SymplecticBasis{N}, theta::R, n::M) where {Td,Tt,N<:Int,R,M}
+function attenuator(::Type{Td}, ::Type{Tt}, basis::SymplecticBasis{N}, theta::R, n::M; ħ = 2) where {Td,Tt,N<:Int,R,M}
     disp, transform, noise = _attenuator(basis, theta, n)
-    return GaussianChannel(basis, Td(disp), Tt(transform), Tt(noise))
+    return GaussianChannel(basis, Td(disp), Tt(transform), Tt(noise); ħ = ħ)
 end
-attenuator(::Type{T}, basis::SymplecticBasis{N}, theta::R, n::M) where {T,N<:Int,R,M} = attenuator(T, T, basis, theta, n)
-function attenuator(basis::SymplecticBasis{N}, theta::R, n::M) where {N<:Int,R,M}
+attenuator(::Type{T}, basis::SymplecticBasis{N}, theta::R, n::M; ħ = 2) where {T,N<:Int,R,M} = attenuator(T, T, basis, theta, n; ħ = ħ)
+function attenuator(basis::SymplecticBasis{N}, theta::R, n::M; ħ = 2) where {N<:Int,R,M}
     disp, transform, noise = _attenuator(basis, theta, n)
-    return GaussianChannel(basis, disp, transform, noise)
+    return GaussianChannel(basis, disp, transform, noise; ħ = ħ)
 end
 function _attenuator(basis::Union{QuadPairBasis{N},QuadBlockBasis{N}}, theta::R, n::M) where {N<:Int,R<:Real,M<:Int}
     nmodes = basis.nmodes
@@ -151,16 +145,10 @@ by squeezing amplitude parameter `r` and thermal noise `n`.
 
 ## Mathematical description of an amplifier channel
 
-An amplifier channel, ``\\mathcal{A}_{\\theta}^{n_{\\text{th}}}``, where ``r`` is
-the squeezing amplitude parameter and ``n_{\\text{th}} \\geq 1`` is the thermal noise parameter,
-is characterized by the displacement vector ``\\mathbf{d}``, transformation matrix ``\\mathbf{T}``,
-and noise matrix ``\\mathbf{N}``, expressed respectively as follows:
-
-```math
-\\mathbf{d} = \\mathbf{0},
-\\quad \\mathbf{T} = \\cosh r\\mathbf{I},
-\\qquad \\mathbf{N} = (\\sinh r)^2 n_{\\text{th}} \\mathbf{I}.
-```
+An amplifier channel, `A(r, nₜₕ)`, where `r` is
+the squeezing amplitude parameter and `nₜₕ ≥ 1` is the thermal noise parameter,
+is characterized by the zero displacement vector, transformation matrix `cosh(r)I`,
+and noise matrix `nₜₕsinh²(r)I`.
 
 ## Example
 
@@ -179,14 +167,14 @@ noise: 2×2 Matrix{Float64}:
   0.0     39.4623
 ```
 """
-function amplifier(::Type{Td}, ::Type{Tt}, basis::SymplecticBasis{N}, r::R, n::M) where {Td,Tt,N<:Int,R,M}
+function amplifier(::Type{Td}, ::Type{Tt}, basis::SymplecticBasis{N}, r::R, n::M; ħ = 2) where {Td,Tt,N<:Int,R,M}
     disp, transform, noise = _amplifier(basis, r, n)
-    return GaussianChannel(basis, Td(disp), Tt(transform), Tt(noise))
+    return GaussianChannel(basis, Td(disp), Tt(transform), Tt(noise); ħ = ħ)
 end
-amplifier(::Type{T}, basis::SymplecticBasis{N}, r::R, n::M) where {T,N<:Int,R,M} = amplifier(T, T, basis, r, n)
-function amplifier(basis::SymplecticBasis{N}, r::R, n::M) where {N<:Int,R,M}
+amplifier(::Type{T}, basis::SymplecticBasis{N}, r::R, n::M; ħ = 2) where {T,N<:Int,R,M} = amplifier(T, T, basis, r, n; ħ = ħ)
+function amplifier(basis::SymplecticBasis{N}, r::R, n::M; ħ = 2) where {N<:Int,R,M}
     disp, transform, noise = _amplifier(basis, r, n)
-    return GaussianChannel(basis, disp, transform, noise)
+    return GaussianChannel(basis, disp, transform, noise; ħ = ħ)
 end
 function _amplifier(basis::Union{QuadPairBasis{N},QuadBlockBasis{N}}, r::R, n::M) where {N<:Int,R<:Real,M<:Int}
     nmodes = basis.nmodes

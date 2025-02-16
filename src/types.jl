@@ -6,13 +6,7 @@ Defines a Gaussian state for an N-mode bosonic system over a 2N-dimensional phas
 - `basis`: Symplectic basis for Gaussian state.
 - `mean`: The mean vector of length 2N.
 - `covar`: The covariance matrix of size 2N x 2N.
-
-## Mathematical description of a Gaussian state
-
-An ``N``-mode Gaussian state, ``\\hat{\\rho}(\\mathbf{\\bar{x}}, \\mathbf{V})``, is a density
-operator characterized by two statistical moments: a mean vector ``\\mathbf{\\bar{x}}`` of
-length ``2N`` and covariance matrix ``\\mathbf{V}`` of size ``2N\\times 2N``. By definition,
-the Wigner representation of a Gaussian state is a Gaussian function.
+- `ħ = 2`: Reduced Planck's constant.
 
 ## Example
 
@@ -28,13 +22,14 @@ covariance: 2×2 Matrix{Float64}:
  0.0  1.0
 ```
 """
-struct GaussianState{B<:SymplecticBasis,M,V} <: StateVector{M,V}
+@kwdef struct GaussianState{B<:SymplecticBasis,M,V} <: StateVector{M,V}
     basis::B
     mean::M
     covar::V
-    function GaussianState(b::B, m::M, v::V) where {B,M,V}
+    ħ::Number = 2
+    function GaussianState(b::B, m::M, v::V; ħ::Number = 2) where {B,M,V}
         all(size(v) .== length(m) .== 2*(b.nmodes)) || throw(DimensionMismatch(STATE_ERROR))
-        return new{B,M,V}(b, m, v)
+        return new{B,M,V}(b, m, v, ħ)
     end
 end
 
@@ -59,20 +54,16 @@ Defines a Gaussian unitary for an N-mode bosonic system over a 2N-dimensional ph
 - `basis`: Symplectic basis for Gaussian unitary.
 - `disp`: The displacement vector of length 2N.
 - `symplectic`: The symplectic matrix of size 2N x 2N.
+- `ħ = 2`: Reduced Planck's constant.
 
 ## Mathematical description of a Gaussian unitary
 
-An ``N``-mode Gaussian unitary, ``U(\\mathbf{d}, \\mathbf{S})``, is a unitary
-operator characterized by a displacement vector ``\\mathbf{d}`` of length ``2N`` and symplectic
-matrix ``\\mathbf{S}`` of size ``2N\\times 2N``, such that its action on a Gaussian state
+An `N`-mode Gaussian unitary, is a unitary
+operator characterized by a displacement vector `d` of length `2N` and symplectic
+matrix `S` of size `2N x 2N`, such that its action on a Gaussian state
 results in a Gaussian state. More specifically, a Gaussian unitary transformation on a
-Gaussian state ``\\hat{\\rho}(\\mathbf{\\bar{x}}, \\mathbf{V})`` is described by its maps on
-the statistical moments of the Gaussian state:
-
-```math
-\\mathbf{\\bar{x}} \\to \\mathbf{S} \\mathbf{\\bar{x}} + \\mathbf{d}, \\quad
-\\mathbf{V} \\to \\mathbf{S} \\mathbf{V} \\mathbf{S}^{\\text{T}}.
-```
+Gaussian state is described by its maps on
+the statistical moments `x̄` and `V` of the Gaussian state: `x̄ → Sx̄ + d` and `V → SVSᵀ`.
 
 ## Example
 
@@ -88,13 +79,14 @@ symplectic: 2×2 Matrix{Float64}:
  0.0  1.0
 ```
 """
-struct GaussianUnitary{B<:SymplecticBasis,D,S} <: AbstractOperator{D,S}
+@kwdef struct GaussianUnitary{B<:SymplecticBasis,D,S} <: AbstractOperator{D,S}
     basis::B
     disp::D
     symplectic::S
-    function GaussianUnitary(b::B, d::D, s::S) where {B,D,S}
+    ħ::Number = 2
+    function GaussianUnitary(b::B, d::D, s::S; ħ::Number = 2) where {B,D,S}
         all(size(s) .== length(d) .== 2*(b.nmodes)) || throw(DimensionMismatch(UNITARY_ERROR))
-        return new{B,D,S}(b, d, s)
+        return new{B,D,S}(b, d, s, ħ)
     end
 end
 
@@ -139,6 +131,7 @@ Defines a Gaussian channel for an N-mode bosonic system over a 2N-dimensional ph
 - `disp`: The displacement vector of length 2N.
 - `transform`: The transformation matrix of size 2N x 2N.
 - `noise`: The noise matrix of size 2N x 2N.
+- `ħ = 2`: Reduced Planck's constant.
 
 ## Mathematical description of a Gaussian channel
 
@@ -173,14 +166,15 @@ noise: 2×2 Matrix{Float64}:
  4.0   2.0
 ```
 """
-struct GaussianChannel{B<:SymplecticBasis,D,T} <: AbstractOperator{D,T}
+@kwdef struct GaussianChannel{B<:SymplecticBasis,D,T} <: AbstractOperator{D,T}
     basis::B
     disp::D
     transform::T
     noise::T
-    function GaussianChannel(b::B, d::D, t::T, n::T) where {B,D,T}
+    ħ::Number = 2
+    function GaussianChannel(b::B, d::D, t::T, n::T; ħ::Number = 2) where {B,D,T}
         all(length(d) .== size(t) .== size(n) .== 2*(b.nmodes)) || throw(DimensionMismatch(CHANNEL_ERROR))
-        return new{B,D,T}(b, d, t, n)
+        return new{B,D,T}(b, d, t, n, ħ)
     end
 end
 
@@ -209,7 +203,7 @@ function Base.summary(io::IO, x::Union{GaussianState,GaussianUnitary,GaussianCha
 end
 
 function Base.:(*)(op::GaussianChannel, state::GaussianState)
-    op.basis == state.basis || throw(DimensionMismatch(ACTION_ERROR))
+    op.basis == state.basis && op.ħ == state.ħ || throw(DimensionMismatch(ACTION_ERROR))
     d, T, N = op.disp, op.transform, op.noise
     mean′ = T * state.mean .+ d
     covar′ = T * state.covar * transpose(T) .+ N
@@ -221,7 +215,7 @@ end
 In-place application of a Gaussian channel `op` on a Gaussian state `state`.
 """
 function apply!(state::GaussianState, op::GaussianChannel)
-    op.basis == state.basis || throw(DimensionMismatch(ACTION_ERROR))
+    op.basis == state.basis && op.ħ == state.ħ || throw(DimensionMismatch(ACTION_ERROR))
     d, T, N = op.disp, op.transform, op.noise
     state.mean .= T * state.mean .+ d
     state.covar .= T * state.covar * transpose(T) .+ N
@@ -258,7 +252,7 @@ function isgaussian(x::GaussianState; atol::R1 = 0, rtol::R2 = atol) where {R1<:
     covar = x.covar
     basis = x.basis
     form = symplecticform(Matrix{ComplexF64}, basis)
-    @. form = im * form + covar
+    @. form = im * (x.ħ/2) * form + covar
     eigs = real(eigvals(form))
     return all(i -> ((i >= 0) || isapprox(i, 0.0; atol = atol, rtol = rtol)), eigs)
 end
