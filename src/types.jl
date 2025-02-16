@@ -104,6 +104,7 @@ end
 
 function Base.:(*)(op::GaussianUnitary, state::GaussianState)
     op.basis == state.basis || throw(DimensionMismatch(ACTION_ERROR))
+    op.ħ == state.ħ || throw(DimensionMismatch(HBAR_ERROR))
     d, S, = op.disp, op.symplectic
     mean′ = S * state.mean .+ d
     covar′ = S * state.covar * transpose(S)
@@ -116,6 +117,7 @@ In-place application of a Gaussian unitary `op` on a Gaussian state `state`.
 """
 function apply!(state::GaussianState, op::GaussianUnitary)
     op.basis == state.basis || throw(DimensionMismatch(ACTION_ERROR))
+    op.ħ == state.ħ || throw(DimensionMismatch(HBAR_ERROR))
     d, S = op.disp, op.symplectic
     state.mean .= S * state.mean .+ d
     state.covar .= S * state.covar * transpose(S)
@@ -203,7 +205,8 @@ function Base.summary(io::IO, x::Union{GaussianState,GaussianUnitary,GaussianCha
 end
 
 function Base.:(*)(op::GaussianChannel, state::GaussianState)
-    op.basis == state.basis && op.ħ == state.ħ || throw(DimensionMismatch(ACTION_ERROR))
+    op.basis == state.basis || throw(DimensionMismatch(ACTION_ERROR))
+    op.ħ == state.ħ || throw(DimensionMismatch(HBAR_ERROR))
     d, T, N = op.disp, op.transform, op.noise
     mean′ = T * state.mean .+ d
     covar′ = T * state.covar * transpose(T) .+ N
@@ -215,7 +218,8 @@ end
 In-place application of a Gaussian channel `op` on a Gaussian state `state`.
 """
 function apply!(state::GaussianState, op::GaussianChannel)
-    op.basis == state.basis && op.ħ == state.ħ || throw(DimensionMismatch(ACTION_ERROR))
+    op.basis == state.basis || throw(DimensionMismatch(ACTION_ERROR))
+    op.ħ == state.ħ || throw(DimensionMismatch(HBAR_ERROR))
     d, T, N = op.disp, op.transform, op.noise
     state.mean .= T * state.mean .+ d
     state.covar .= T * state.covar * transpose(T) .+ N
