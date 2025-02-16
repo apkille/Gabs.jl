@@ -33,8 +33,8 @@ covariance: 2×2 Matrix{Float64}:
     end
 end
 
-Base.:(==)(x::GaussianState, y::GaussianState) = x.basis == y.basis && x.mean == y.mean && x.covar == y.covar
-Base.isapprox(x::GaussianState, y::GaussianState; kwargs...) = x.basis == y.basis && isapprox(x.mean, y.mean; kwargs...) && isapprox(x.covar, y.covar; kwargs...)
+Base.:(==)(x::GaussianState, y::GaussianState) = x.basis == y.basis && x.mean == y.mean && x.covar == y.covar && x.ħ == y.h
+Base.isapprox(x::GaussianState, y::GaussianState; kwargs...) = x.basis == y.basis && isapprox(x.mean, y.mean; kwargs...) && isapprox(x.covar, y.covar; kwargs...) && x.ħ == y.h
 function Base.show(io::IO, mime::MIME"text/plain", x::GaussianState)
     Base.summary(io, x)
     print(io, "\n  symplectic basis: ")
@@ -90,8 +90,8 @@ symplectic: 2×2 Matrix{Float64}:
     end
 end
 
-Base.:(==)(x::GaussianUnitary, y::GaussianUnitary) = x.basis == y.basis && x.disp == y.disp && x.symplectic == y.symplectic
-Base.isapprox(x::GaussianUnitary, y::GaussianUnitary; kwargs...) = x.basis == y.basis && isapprox(x.disp, y.disp; kwargs...) && isapprox(x.symplectic, y.symplectic; kwargs...)
+Base.:(==)(x::GaussianUnitary, y::GaussianUnitary) = x.basis == y.basis && x.disp == y.disp && x.symplectic == y.symplectic && x.ħ == y.h
+Base.isapprox(x::GaussianUnitary, y::GaussianUnitary; kwargs...) = x.basis == y.basis && isapprox(x.disp, y.disp; kwargs...) && isapprox(x.symplectic, y.symplectic; kwargs...) && x.ħ == y.h
 function Base.show(io::IO, mime::MIME"text/plain", x::GaussianUnitary)
     Base.summary(io, x)
     print(io, "\n  symplectic basis: ")
@@ -108,7 +108,7 @@ function Base.:(*)(op::GaussianUnitary, state::GaussianState)
     d, S, = op.disp, op.symplectic
     mean′ = S * state.mean .+ d
     covar′ = S * state.covar * transpose(S)
-    return GaussianState(state.basis, mean′, covar′)
+    return GaussianState(state.basis, mean′, covar′; ħ = state.ħ)
 end
 """
     apply!(state::GaussianState, op::GaussianUnitary)
@@ -180,8 +180,8 @@ noise: 2×2 Matrix{Float64}:
     end
 end
 
-Base.:(==)(x::GaussianChannel, y::GaussianChannel) = x.basis == y.basis && x.disp == y.disp && x.transform == y.transform && x.noise == y.noise
-Base.isapprox(x::GaussianChannel, y::GaussianChannel; kwargs...) = x.basis == y.basis && isapprox(x.disp, y.disp; kwargs...) && isapprox(x.transform, y.transform; kwargs...) && isapprox(x.noise, y.noise; kwargs...)
+Base.:(==)(x::GaussianChannel, y::GaussianChannel) = x.basis == y.basis && x.disp == y.disp && x.transform == y.transform && x.noise == y.noise && x.ħ == y.h
+Base.isapprox(x::GaussianChannel, y::GaussianChannel; kwargs...) = x.basis == y.basis && isapprox(x.disp, y.disp; kwargs...) && isapprox(x.transform, y.transform; kwargs...) && isapprox(x.noise, y.noise; kwargs...) && x.ħ == y.h
 function Base.show(io::IO, mime::MIME"text/plain", x::GaussianChannel)
     Base.summary(io, x)
     print(io, "\n  symplectic basis: ")
@@ -210,7 +210,7 @@ function Base.:(*)(op::GaussianChannel, state::GaussianState)
     d, T, N = op.disp, op.transform, op.noise
     mean′ = T * state.mean .+ d
     covar′ = T * state.covar * transpose(T) .+ N
-    return GaussianState(state.basis, mean′, covar′)
+    return GaussianState(state.basis, mean′, covar′; ħ = state.ħ)
 end
 """
     apply!(state::GaussianState, op::GaussianChannel)

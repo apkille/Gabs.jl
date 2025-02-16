@@ -543,14 +543,14 @@ function tensor(::Type{Td}, ::Type{Ts}, op1::GaussianUnitary, op2::GaussianUnita
     typeof(op1.basis) == typeof(op2.basis) || throw(ArgumentError(SYMPLECTIC_ERROR))
     op1.ħ == op2.ħ || throw(DimensionMismatch(HBAR_ERROR))
     disp, symplectic = _tensor(op1, op2)
-    return GaussianUnitary(op1.basis ⊕ op2.basis, Td(disp), Ts(symplectic))
+    return GaussianUnitary(op1.basis ⊕ op2.basis, Td(disp), Ts(symplectic); ħ = op1.ħ)
 end
 tensor(::Type{T}, op1::GaussianUnitary, op2::GaussianUnitary) where {T} = tensor(T, T, op1, op2)
 function tensor(op1::GaussianUnitary, op2::GaussianUnitary)
     typeof(op1.basis) == typeof(op2.basis) || throw(ArgumentError(SYMPLECTIC_ERROR))
     op1.ħ == op2.ħ || throw(DimensionMismatch(HBAR_ERROR))
     disp, symplectic = _tensor(op1, op2)
-    return GaussianUnitary(op1.basis ⊕ op2.basis, disp, symplectic)
+    return GaussianUnitary(op1.basis ⊕ op2.basis, disp, symplectic; ħ = op1.ħ)
 end
 function _tensor(op1::GaussianUnitary{B1,D1,S1}, op2::GaussianUnitary{B2,D2,S2}) where {B1<:QuadPairBasis,B2<:QuadPairBasis,D1,D2,S1,S2}
     basis1, basis2 = op1.basis, op2.basis
@@ -690,7 +690,7 @@ function changebasis(::Type{B1}, op::GaussianUnitary{B2,D,S}) where {B1<:QuadBlo
     T = typeof(T) == S ? T : S(T)
     disp = T * op.disp
     symp = T * op.symplectic * transpose(T)
-    return GaussianUnitary(B1(nmodes), disp, symp)
+    return GaussianUnitary(B1(nmodes), disp, symp; ħ = op.ħ)
 end
 function changebasis(::Type{B1}, op::GaussianUnitary{B2,D,S}) where {B1<:QuadPairBasis,B2<:QuadBlockBasis,D,S}
     basis = op.basis
@@ -704,7 +704,7 @@ function changebasis(::Type{B1}, op::GaussianUnitary{B2,D,S}) where {B1<:QuadPai
     T = typeof(T) == S ? T : S(T)
     disp = T * op.disp
     symp = T * op.symplectic * transpose(T)
-    return GaussianUnitary(B1(nmodes), disp, symp)
+    return GaussianUnitary(B1(nmodes), disp, symp; ħ = op.ħ)
 end
 changebasis(::Type{<:QuadBlockBasis}, op::GaussianUnitary{<:QuadBlockBasis,D,S}) where {D,S} = op
 changebasis(::Type{<:QuadPairBasis}, op::GaussianUnitary{<:QuadPairBasis,D,S}) where {D,S} = op

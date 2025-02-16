@@ -448,14 +448,14 @@ function tensor(::Type{Tm}, ::Type{Tc}, state1::GaussianState, state2::GaussianS
     typeof(state1.basis) == typeof(state2.basis) || throw(ArgumentError(SYMPLECTIC_ERROR))
     state1.ħ == state2.ħ || throw(DimensionMismatch(HBAR_ERROR))
     mean, covar = _tensor(state1, state2)
-    return GaussianState(state1.basis ⊕ state2.basis, Tm(mean), Tc(covar))
+    return GaussianState(state1.basis ⊕ state2.basis, Tm(mean), Tc(covar); ħ = state1.ħ)
 end
 tensor(::Type{T}, state1::GaussianState, state2::GaussianState) where {T} = tensor(T, T, state1, state2)
 function tensor(state1::GaussianState, state2::GaussianState)
     typeof(state1.basis) == typeof(state2.basis) || throw(ArgumentError(SYMPLECTIC_ERROR))
     state1.ħ == state2.ħ || throw(DimensionMismatch(HBAR_ERROR))
     mean, covar = _tensor(state1, state2)
-    return GaussianState(state1.basis ⊕ state2.basis, mean, covar)
+    return GaussianState(state1.basis ⊕ state2.basis, mean, covar; ; ħ = state1.ħ)
 end
 function _tensor(state1::GaussianState{B1,M1,V1}, state2::GaussianState{B2,M2,V2}) where {B1<:QuadPairBasis,B2<:QuadPairBasis,M1,M2,V1,V2}
     mean1, mean2 = state1.mean, state2.mean
@@ -583,21 +583,21 @@ covariance: 4×4 Matrix{Float64}:
 """
 function ptrace(::Type{Tm}, ::Type{Tc}, state::GaussianState, idx::N) where {Tm,Tc,N<:Int}
     mean′, covar′ = _ptrace(state, idx)
-    return GaussianState(typeof(state.basis)(1), Tm(mean′), Tc(covar′))
+    return GaussianState(typeof(state.basis)(1), Tm(mean′), Tc(covar′); ħ = state.ħ)
 end
 ptrace(::Type{T}, state::GaussianState, idx::N) where {T,N<:Int} = ptrace(T, T, state, idx)
 function ptrace(state::GaussianState, idx::N) where {N<:Int}
     mean′, covar′ = _ptrace(state, idx)
-    return GaussianState(typeof(state.basis)(1), mean′, covar′)
+    return GaussianState(typeof(state.basis)(1), mean′, covar′; ħ = state.ħ)
 end
 function ptrace(::Type{Tm}, ::Type{Tc}, state::GaussianState, indices::N) where {Tm,Tc,N<:AbstractVector}
     mean, covar = _ptrace(state, indices)
-    return GaussianState(typeof(state.basis)(length(indices)), Tm(mean), Tc(covar))
+    return GaussianState(typeof(state.basis)(length(indices)), Tm(mean), Tc(covar); ħ = state.ħ)
 end
 ptrace(::Type{T}, state::GaussianState, indices::N) where {T,N<:AbstractVector} = ptrace(T, T, state, indices)
 function ptrace(state::GaussianState, indices::T) where {T<:AbstractVector}
     mean, covar = _ptrace(state, indices)
-    return GaussianState(typeof(state.basis)(length(indices)), mean, covar)
+    return GaussianState(typeof(state.basis)(length(indices)), mean, covar; ħ = state.ħ)
 end
 function _ptrace(state::GaussianState{B,M,V}, idx::T) where {B<:QuadPairBasis,M,V,T<:Int}
     idxV = 2*idx-1:(2*idx)

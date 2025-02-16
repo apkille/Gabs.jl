@@ -228,14 +228,14 @@ function tensor(::Type{Td}, ::Type{Tt}, op1::GaussianChannel, op2::GaussianChann
     typeof(op1.basis) == typeof(op2.basis) || throw(ArgumentError(SYMPLECTIC_ERROR))
     op1.ħ == op2.ħ || throw(DimensionMismatch(HBAR_ERROR))
     disp, transform, noise = _tensor(op1, op2)
-    return GaussianChannel(op1.basis ⊕ op2.basis, Td(disp), Tt(transform), Tt(noise))
+    return GaussianChannel(op1.basis ⊕ op2.basis, Td(disp), Tt(transform), Tt(noise); ħ = op1.ħ)
 end
 tensor(::Type{T}, op1::GaussianChannel, op2::GaussianChannel) where {T} = tensor(T, T, op1, op2)
 function tensor(op1::GaussianChannel, op2::GaussianChannel)
     typeof(op1.basis) == typeof(op2.basis) || throw(ArgumentError(SYMPLECTIC_ERROR))
     op1.ħ == op2.ħ || throw(DimensionMismatch(HBAR_ERROR))
     disp, transform, noise = _tensor(op1, op2)
-    return GaussianChannel(op1.basis ⊕ op2.basis, disp, transform, noise)
+    return GaussianChannel(op1.basis ⊕ op2.basis, disp, transform, noise; ħ = op1.ħ)
 end
 function _tensor(op1::GaussianChannel{B1,D1,T1}, op2::GaussianChannel{B2,D2,T2}) where {B1<:QuadPairBasis,B2<:QuadPairBasis,D1,D2,T1,T2}
     basis1, basis2 = op1.basis, op2.basis
