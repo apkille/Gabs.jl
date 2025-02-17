@@ -64,8 +64,8 @@ mean: 2-element Vector{Float64}:
  0.0
  0.0
 covariance: 2×2 Matrix{Float64}:
- 4.5  0.0
- 0.0  4.5
+ 9.0  0.0
+ 0.0  9.0
 ```
 """
 function thermalstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, photons::P; ħ = 2) where {Tm,Tc,N<:Int,P}
@@ -129,8 +129,8 @@ julia> coherentstate(QuadPairBasis(1), 1.0+im)
 GaussianState for 1 mode.
   symplectic basis: QuadPairBasis
 mean: 2-element Vector{Float64}:
- 1.4142135623730951
- 1.4142135623730951
+ 2.0
+ 2.0
 covariance: 2×2 Matrix{Float64}:
  1.0  0.0
  0.0  1.0
@@ -198,8 +198,8 @@ mean: 2-element Vector{Float64}:
  0.0
  0.0
 covariance: 2×2 Matrix{Float64}:
- 0.356044  0.415496
- 0.415496  1.18704
+ 0.712088  0.830993
+ 0.830993  2.37407
 ```
 """
 function squeezedstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {Tm,Tc,N<:Int,R}
@@ -296,10 +296,10 @@ mean: 4-element Vector{Float64}:
  0.0
  0.0
 covariance: 4×4 Matrix{Float64}:
-  0.77154    0.0       -0.415496  -0.415496
-  0.0        0.77154   -0.415496   0.415496
- -0.415496  -0.415496   0.77154    0.0
- -0.415496   0.415496   0.0        0.77154
+  1.54308    0.0       -0.830993  -0.830993
+  0.0        1.54308   -0.830993   0.830993
+ -0.830993  -0.830993   1.54308    0.0
+ -0.830993   0.830993   0.0        1.54308
 ```
 """
 function eprstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {Tm,Tc,N<:Int,R}
@@ -433,15 +433,15 @@ julia> coherentstate(basis, 1.0+im) ⊗ thermalstate(basis, 2)
 GaussianState for 2 modes.
   symplectic basis: QuadPairBasis
 mean: 4-element Vector{Float64}:
- 1.4142135623730951
- 1.4142135623730951
+ 2.0
+ 2.0
  0.0
  0.0
 covariance: 4×4 Matrix{Float64}:
  1.0  0.0  0.0  0.0
  0.0  1.0  0.0  0.0
- 0.0  0.0  2.5  0.0
- 0.0  0.0  0.0  2.5
+ 0.0  0.0  5.0  0.0
+ 0.0  0.0  0.0  5.0
 ```
 """
 function tensor(::Type{Tm}, ::Type{Tc}, state1::GaussianState, state2::GaussianState) where {Tm,Tc}
@@ -455,7 +455,7 @@ function tensor(state1::GaussianState, state2::GaussianState)
     typeof(state1.basis) == typeof(state2.basis) || throw(ArgumentError(SYMPLECTIC_ERROR))
     state1.ħ == state2.ħ || throw(DimensionMismatch(HBAR_ERROR))
     mean, covar = _tensor(state1, state2)
-    return GaussianState(state1.basis ⊕ state2.basis, mean, covar; ; ħ = state1.ħ)
+    return GaussianState(state1.basis ⊕ state2.basis, mean, covar; ħ = state1.ħ)
 end
 function _tensor(state1::GaussianState{B1,M1,V1}, state2::GaussianState{B2,M2,V2}) where {B1<:QuadPairBasis,B2<:QuadPairBasis,M1,M2,V1,V2}
     mean1, mean2 = state1.mean, state2.mean
@@ -538,23 +538,7 @@ indicated by `indices`.
 ```jldoctest
 julia> basis = QuadPairBasis(1);
 
-julia> state = coherentstate(basis, 1.0+im) ⊗ thermalstate(basis, 2) ⊗ squeezedstate(basis, 3.0, pi/4)
-GaussianState for 3 modes.
-  symplectic basis: QuadPairBasis
-mean: 6-element Vector{Float64}:
- 1.4142135623730951
- 1.4142135623730951
- 0.0
- 0.0
- 0.0
- 0.0
-covariance: 6×6 Matrix{Float64}:
- 1.0  0.0  0.0  0.0   0.0       0.0
- 0.0  1.0  0.0  0.0   0.0       0.0
- 0.0  0.0  2.5  0.0   0.0       0.0
- 0.0  0.0  0.0  2.5   0.0       0.0
- 0.0  0.0  0.0  0.0  29.5414   71.3164
- 0.0  0.0  0.0  0.0  71.3164  172.174
+julia> state = coherentstate(basis, 1.0+im) ⊗ thermalstate(basis, 2) ⊗ squeezedstate(basis, 3.0, pi/4);
 
 julia> ptrace(state, 2)
 GaussianState for 1 mode.
@@ -563,22 +547,22 @@ mean: 2-element Vector{Float64}:
  0.0
  0.0
 covariance: 2×2 Matrix{Float64}:
- 2.5  0.0
- 0.0  2.5
+ 5.0  0.0
+ 0.0  5.0
 
 julia> ptrace(state, [1, 3])
 GaussianState for 2 modes.
   symplectic basis: QuadPairBasis
 mean: 4-element Vector{Float64}:
- 1.4142135623730951
- 1.4142135623730951
+ 2.0
+ 2.0
  0.0
  0.0
 covariance: 4×4 Matrix{Float64}:
- 1.0  0.0   0.0       0.0
- 0.0  1.0   0.0       0.0
- 0.0  0.0  29.5414   71.3164
- 0.0  0.0  71.3164  172.174
+ 1.0  0.0    0.0       0.0
+ 0.0  1.0    0.0       0.0
+ 0.0  0.0   59.0829  142.633
+ 0.0  0.0  142.633   344.348
 ```
 """
 function ptrace(::Type{Tm}, ::Type{Tc}, state::GaussianState, idx::N) where {Tm,Tc,N<:Int}
@@ -712,10 +696,10 @@ mean: 4-element Vector{Float64}:
  0.0
  0.0
 covariance: 4×4 Matrix{Float64}:
- 2.63575  0.0      1.64895  0.0
- 0.0      2.63575  0.0      1.64895
- 1.64895  0.0      1.12644  0.0
- 0.0      1.64895  0.0      1.12644
+ 5.2715   0.0      3.29789  0.0
+ 0.0      5.2715   0.0      3.29789
+ 3.29789  0.0      2.25289  0.0
+ 0.0      3.29789  0.0      2.25289
 
 julia> changebasis(QuadPairBasis, st)
 GaussianState for 2 modes.
@@ -726,10 +710,10 @@ mean: 4-element Vector{Float64}:
  0.0
  0.0
 covariance: 4×4 Matrix{Float64}:
- 2.63575  1.64895  0.0      0.0
- 1.64895  1.12644  0.0      0.0
- 0.0      0.0      2.63575  1.64895
- 0.0      0.0      1.64895  1.12644
+ 5.2715   3.29789  0.0      0.0
+ 3.29789  2.25289  0.0      0.0
+ 0.0      0.0      5.2715   3.29789
+ 0.0      0.0      3.29789  2.25289
 ```
 """
 function changebasis(::Type{B1}, state::GaussianState{B2,M,V}) where {B1<:QuadBlockBasis,B2<:QuadPairBasis,M,V}

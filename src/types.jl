@@ -15,8 +15,8 @@ julia> coherentstate(QuadPairBasis(1), 1.0+im)
 GaussianState for 1 mode.
   symplectic basis: QuadPairBasis
 mean: 2-element Vector{Float64}:
- 1.4142135623730951
- 1.4142135623730951
+ 2.0
+ 2.0
 covariance: 2×2 Matrix{Float64}:
  1.0  0.0
  0.0  1.0
@@ -33,8 +33,8 @@ covariance: 2×2 Matrix{Float64}:
     end
 end
 
-Base.:(==)(x::GaussianState, y::GaussianState) = x.basis == y.basis && x.mean == y.mean && x.covar == y.covar && x.ħ == y.h
-Base.isapprox(x::GaussianState, y::GaussianState; kwargs...) = x.basis == y.basis && isapprox(x.mean, y.mean; kwargs...) && isapprox(x.covar, y.covar; kwargs...) && x.ħ == y.h
+Base.:(==)(x::GaussianState, y::GaussianState) = x.basis == y.basis && x.mean == y.mean && x.covar == y.covar && x.ħ == y.ħ
+Base.isapprox(x::GaussianState, y::GaussianState; kwargs...) = x.basis == y.basis && isapprox(x.mean, y.mean; kwargs...) && isapprox(x.covar, y.covar; kwargs...) && x.ħ == y.ħ
 function Base.show(io::IO, mime::MIME"text/plain", x::GaussianState)
     Base.summary(io, x)
     print(io, "\n  symplectic basis: ")
@@ -72,8 +72,8 @@ julia> displace(QuadPairBasis(1), 1.0+im)
 GaussianUnitary for 1 mode.
   symplectic basis: QuadPairBasis
 displacement: 2-element Vector{Float64}:
- 1.4142135623730951
- 1.4142135623730951
+ 2.0
+ 2.0
 symplectic: 2×2 Matrix{Float64}:
  1.0  0.0
  0.0  1.0
@@ -90,8 +90,8 @@ symplectic: 2×2 Matrix{Float64}:
     end
 end
 
-Base.:(==)(x::GaussianUnitary, y::GaussianUnitary) = x.basis == y.basis && x.disp == y.disp && x.symplectic == y.symplectic && x.ħ == y.h
-Base.isapprox(x::GaussianUnitary, y::GaussianUnitary; kwargs...) = x.basis == y.basis && isapprox(x.disp, y.disp; kwargs...) && isapprox(x.symplectic, y.symplectic; kwargs...) && x.ħ == y.h
+Base.:(==)(x::GaussianUnitary, y::GaussianUnitary) = x.basis == y.basis && x.disp == y.disp && x.symplectic == y.symplectic && x.ħ == y.ħ
+Base.isapprox(x::GaussianUnitary, y::GaussianUnitary; kwargs...) = x.basis == y.basis && isapprox(x.disp, y.disp; kwargs...) && isapprox(x.symplectic, y.symplectic; kwargs...) && x.ħ == y.ħ
 function Base.show(io::IO, mime::MIME"text/plain", x::GaussianUnitary)
     Base.summary(io, x)
     print(io, "\n  symplectic basis: ")
@@ -137,17 +137,12 @@ Defines a Gaussian channel for an N-mode bosonic system over a 2N-dimensional ph
 
 ## Mathematical description of a Gaussian channel
 
-An ``N``-mode Gaussian channel, ``G(\\mathbf{d}, \\mathbf{T}, \\mathbf{N})``, is an
-operator characterized by a displacement vector ``\\mathbf{d}`` of length ``2N``, as well as
-a transformation matrix ``\\mathbf{T}`` and noise matrix ``\\mathbf{N}`` of size ``2N\\times 2N``,
+An `N`-mode Gaussian channel is an
+operator characterized by a displacement vector `d` of length `2N`, as well as
+a transformation matrix `T` and noise matrix `N` of size `2N x 2N`,
 such that its action on a Gaussian state results in a Gaussian state. More specifically, a Gaussian
-channel action on a Gaussian state ``\\hat{\\rho}(\\mathbf{\\bar{x}}, \\mathbf{V})`` is
-described by its maps on the statistical moments of the Gaussian state:
-
-```math
-\\mathbf{\\bar{x}} \\to \\mathbf{T} \\mathbf{\\bar{x}} + \\mathbf{d}, \\quad
-\\mathbf{V} \\to \\mathbf{T} \\mathbf{V} \\mathbf{T}^{\\text{T}} + \\mathbf{N}.
-```
+channel action on a Gaussian state is described by its maps on
+the statistical moments `x̄` and `V` of the Gaussian state: `x̄ → Tx̄ + d` and `V → TVTᵀ + N`.
 
 ## Example
 
@@ -158,8 +153,8 @@ julia> displace(QuadPairBasis(1), 1.0+im, noise)
 GaussianChannel for 1 mode.
   symplectic basis: QuadPairBasis
 displacement: 2-element Vector{Float64}:
- 1.4142135623730951
- 1.4142135623730951
+ 2.0
+ 2.0
 transform: 2×2 Matrix{Float64}:
  1.0  0.0
  0.0  1.0
@@ -180,8 +175,8 @@ noise: 2×2 Matrix{Float64}:
     end
 end
 
-Base.:(==)(x::GaussianChannel, y::GaussianChannel) = x.basis == y.basis && x.disp == y.disp && x.transform == y.transform && x.noise == y.noise && x.ħ == y.h
-Base.isapprox(x::GaussianChannel, y::GaussianChannel; kwargs...) = x.basis == y.basis && isapprox(x.disp, y.disp; kwargs...) && isapprox(x.transform, y.transform; kwargs...) && isapprox(x.noise, y.noise; kwargs...) && x.ħ == y.h
+Base.:(==)(x::GaussianChannel, y::GaussianChannel) = x.basis == y.basis && x.disp == y.disp && x.transform == y.transform && x.noise == y.noise && x.ħ == y.ħ
+Base.isapprox(x::GaussianChannel, y::GaussianChannel; kwargs...) = x.basis == y.basis && isapprox(x.disp, y.disp; kwargs...) && isapprox(x.transform, y.transform; kwargs...) && isapprox(x.noise, y.noise; kwargs...) && x.ħ == y.ħ
 function Base.show(io::IO, mime::MIME"text/plain", x::GaussianChannel)
     Base.summary(io, x)
     print(io, "\n  symplectic basis: ")
@@ -242,8 +237,8 @@ julia> op = displace(basis, 1.0-im)
 GaussianUnitary for 1 mode.
   symplectic basis: QuadPairBasis
 displacement: 2-element Vector{Float64}:
-  1.4142135623730951
- -1.4142135623730951
+  2.0
+ -2.0
 symplectic: 2×2 Matrix{Float64}:
  1.0  0.0
  0.0  1.0
