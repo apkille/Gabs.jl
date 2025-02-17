@@ -58,6 +58,9 @@ Listed below are supported predefined Gaussian states:
 Detailed discussions and mathematical descriptions for each of these states are given in the
 [Gaussian Zoos](@ref) page.
 
+!!! note
+    In Gabs, the default convention $\hbar = 2$ is used for the commutation relation $[\hat{x}, \hat{p}] = i\hbar$. To change this convention, pass a new value to `ħ` as a keyword argument in any predefined method that creates a Gaussian object. For instance, to change the convention to `ħ = 1` for a coherent state, call `coherentstate(basis, α, ħ = 1)`. This is a more performant and safer approach compared to setting a global variable in a package. An error will be thrown for operations between Gaussian objects with different `ħ` conventions.
+
 ## Gaussian Unitaries
 
 To transform Gaussian states into Gaussian states, we need Gaussian maps. Let's begin with the simplest Gaussian transformation, a unitary transformation, which can be created with the [`GaussianUnitary`](@ref) type:

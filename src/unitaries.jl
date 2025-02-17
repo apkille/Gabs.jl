@@ -81,9 +81,8 @@ with `noise`.
 ## Mathematical description of a squeezing operator
 
 A squeeze operator `S(r, θ)` is defined by the operation
-`S(r, θ)|0⟩ = |r, θ⟩``, where ``r`` and ``θ``
-are the real amplitude and phase parameters, respectively. The operator 
-``S(r, θ)`` is characterized by 
+`S(r, θ)|0⟩ = |r, θ⟩`, where `r` and `θ` are the real amplitude and phase parameters, 
+respectively. The operator `S(r, θ)` is characterized by 
 the zero displacement vector and symplectic
 matrix `cosh(r)I - sinh(r)R(θ)`, where `R(θ)` is the rotation matrix.
 
@@ -329,12 +328,11 @@ with `noise`.
 ## Mathematical description of a phase shift operator
 
 A phase shift operator is defined by the operation
-`U(θ) = exp(-iθâᵗâ)``, where `θ` is
+`U(θ) = exp(-iθâᵗâ)`, where `θ` is
 the phase parameter, and `âᵗ` and `â` are the raising
 and lowering operators, respectively. The operator `U(θ)` is characterized by 
 the zero displacement vector and symplectic
 matrix `[cos(θ) sin(θ); -sin(θ) cos(θ)]`.
-```
 
 ## Example
 
