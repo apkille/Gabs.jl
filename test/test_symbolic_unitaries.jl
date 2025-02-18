@@ -71,4 +71,21 @@
         @test isequal((p_block ⊗ p_block).disp, p_blocks.disp)
         @test isequal(simplify((p_block ⊗ p_block).symplectic), simplify(substitute(p_blocks.symplectic, Dict(thetas[i] => theta for i in eachindex(thetas)))))
     end
+
+    @testset "Symbolic actions" begin
+        @variables α1 α2
+        d = displace(qpairbasis, α1)
+        v = vacuumstate(qpairbasis)
+        c = coherentstate(qpairbasis,α1)
+        @test isequal((d * v).mean, c.mean)
+        @test isequal((d * v).covar, c.covar)
+        # @test isequal(apply!(v, d).mean, c.mean)
+        # @test isequal(apply!(v, d).covar, c.covar)
+        d1, d2 = displace(qpairbasis, α1), displace(qpairbasis, α2)
+        v1, v2 = vacuumstate(qpairbasis), vacuumstate(qpairbasis)
+        c1, c2 = coherentstate(qpairbasis, α1), coherentstate(qpairbasis, α2)
+        @test simplify(d1 * v1) ≈ simplify(c1)
+        @test isequal(simplify(d1 * v1).mean, simplify(c1).mean)
+        @test isequal(simplify(d1 * v1).covar, simplify(c1).covar)
+    end
 end
