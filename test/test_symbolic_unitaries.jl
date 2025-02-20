@@ -91,5 +91,6 @@
         @test isequal(simplify(d1 * v1).mean, simplify(c1).mean)
         @test isequal(simplify(d1 * v1).covar, simplify(c1).covar)
         @test isequal(apply!(s1, d1).mean, simplify(c1).mean)
+        @test isequal(apply!(s2, d1).mean, simplify(c1).mean)
     end
 end
