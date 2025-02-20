@@ -73,21 +73,23 @@
     end
 
     @testset "Symbolic actions" begin
-        @variables α1 α2
+        @variables α1 α2 r theta r1 theta1
         d = displace(qpairbasis, α1)
         v = vacuumstate(qpairbasis)
+        s = squeezedstate(qpairbasis, r, theta)
         c = coherentstate(qpairbasis,α1)
         @test isequal((d * v).mean, c.mean)
         @test isequal((d * v).covar, c.covar)
         @test_broken isequal(apply!(v, d).mean, c.mean)
         @test_broken isequal(apply!(v, d).covar, c.covar)
+        @test isequal(apply!(s, d).mean, c.mean)
         d1, d2 = displace(qpairbasis, α1), displace(qpairbasis, α2)
         v1, v2 = vacuumstate(qpairbasis), vacuumstate(qpairbasis)
+        s1, s2 = squeezedstate(qpairbasis, r, theta), squeezedstate(qpairbasis, r1, theta1)
         c1, c2 = coherentstate(qpairbasis, α1), coherentstate(qpairbasis, α2)
         @test simplify(d1 * v1) ≈ simplify(c1)
         @test isequal(simplify(d1 * v1).mean, simplify(c1).mean)
         @test isequal(simplify(d1 * v1).covar, simplify(c1).covar)
-        @test_broken isequal(apply!(simplify(d1 * v1)).mean, simplify(c1).mean)
-        @test_broken isequal(apply!(simplify(d1 * v1)).covar, simplify(c1).covar)
+        @test isequal(apply!(s1, d1).mean, simplify(c1).mean)
     end
 end
