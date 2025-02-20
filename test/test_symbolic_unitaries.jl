@@ -79,13 +79,15 @@
         c = coherentstate(qpairbasis,α1)
         @test isequal((d * v).mean, c.mean)
         @test isequal((d * v).covar, c.covar)
-        # @test isequal(apply!(v, d).mean, c.mean)
-        # @test isequal(apply!(v, d).covar, c.covar)
+        @test_broken isequal(apply!(v, d).mean, c.mean)
+        @test_broken isequal(apply!(v, d).covar, c.covar)
         d1, d2 = displace(qpairbasis, α1), displace(qpairbasis, α2)
         v1, v2 = vacuumstate(qpairbasis), vacuumstate(qpairbasis)
         c1, c2 = coherentstate(qpairbasis, α1), coherentstate(qpairbasis, α2)
         @test simplify(d1 * v1) ≈ simplify(c1)
         @test isequal(simplify(d1 * v1).mean, simplify(c1).mean)
         @test isequal(simplify(d1 * v1).covar, simplify(c1).covar)
+        @test_broken isequal(apply!(simplify(d1 * v1)).mean, simplify(c1).mean)
+        @test_broken isequal(apply!(simplify(d1 * v1)).covar, simplify(c1).covar)
     end
 end
