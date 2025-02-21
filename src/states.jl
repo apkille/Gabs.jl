@@ -446,14 +446,14 @@ covariance: 4×4 Matrix{Float64}:
 """
 function tensor(::Type{Tm}, ::Type{Tc}, state1::GaussianState, state2::GaussianState) where {Tm,Tc}
     typeof(state1.basis) == typeof(state2.basis) || throw(ArgumentError(SYMPLECTIC_ERROR))
-    state1.ħ == state2.ħ || throw(DimensionMismatch(HBAR_ERROR))
+    state1.ħ == state2.ħ || throw(ArgumentError(HBAR_ERROR))
     mean, covar = _tensor(state1, state2)
     return GaussianState(state1.basis ⊕ state2.basis, Tm(mean), Tc(covar); ħ = state1.ħ)
 end
 tensor(::Type{T}, state1::GaussianState, state2::GaussianState) where {T} = tensor(T, T, state1, state2)
 function tensor(state1::GaussianState, state2::GaussianState)
     typeof(state1.basis) == typeof(state2.basis) || throw(ArgumentError(SYMPLECTIC_ERROR))
-    state1.ħ == state2.ħ || throw(DimensionMismatch(HBAR_ERROR))
+    state1.ħ == state2.ħ || throw(ArgumentError(HBAR_ERROR))
     mean, covar = _tensor(state1, state2)
     return GaussianState(state1.basis ⊕ state2.basis, mean, covar; ħ = state1.ħ)
 end
