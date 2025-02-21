@@ -2,6 +2,10 @@
 # Predefined Gaussian states
 ##
 
+function infer_mean_type end
+
+function infer_covar_type end
+
 """
     vacuumstate([Tm=Vector{Float64}, Tc=Matrix{Float64}], basis::SymplecticBasis)
 
@@ -31,8 +35,10 @@ covariance: 2×2 Matrix{Float64}:
 ```
 """
 function vacuumstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}) where {Tm,Tc,N<:Int}
+    mean_type = infer_mean_type(Tm, basis)
+    covar_type = infer_covar_type(Tc, basis)
     mean, covar = _vacuumstate(basis)
-    return GaussianState(basis, Tm(mean), Tc(covar))
+    return GaussianState(basis,  mean_type(mean), covar_type(covar))
 end
 vacuumstate(::Type{T}, basis::SymplecticBasis{N}) where {T,N<:Int} = vacuumstate(T, T, basis)
 function vacuumstate(basis::SymplecticBasis{N}) where {N<:Int}
@@ -77,8 +83,10 @@ covariance: 2×2 Matrix{Float64}:
 ```
 """
 function thermalstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, photons::P) where {Tm,Tc,N<:Int,P}
+    mean_type = infer_mean_type(Tm, basis)
+    covar_type = infer_covar_type(Tc, basis)
     mean, covar = _thermalstate(basis, photons)
-    return GaussianState(basis, Tm(mean), Tc(covar))
+    return GaussianState(basis, mean_type(mean), covar_type(covar))
 end
 thermalstate(::Type{T}, basis::SymplecticBasis{N}, photons::P) where {T,N<:Int,P} = thermalstate(T, T, basis, photons)
 function thermalstate(basis::SymplecticBasis{N}, photons::P) where {N<:Int,P}
@@ -150,8 +158,10 @@ covariance: 2×2 Matrix{Float64}:
 ```
 """
 function coherentstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, alpha::A) where {Tm,Tc,N<:Int,A}
+    mean_type = infer_mean_type(Tm, basis)
+    covar_type = infer_covar_type(Tc, basis)
     mean, covar = _coherentstate(basis, alpha)
-    return GaussianState(basis, Tm(mean), Tc(covar))
+    return GaussianState(basis,  mean_type(mean), covar_type(covar))
 end
 coherentstate(::Type{T}, basis::SymplecticBasis{N}, alpha::A) where {T,N<:Int,A} = coherentstate(T, T, basis, alpha)
 function coherentstate(basis::SymplecticBasis{N}, alpha::A) where {N<:Int,A}
@@ -223,8 +233,10 @@ covariance: 2×2 Matrix{Float64}:
 ```
 """
 function squeezedstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, r::R, theta::R) where {Tm,Tc,N<:Int,R}
+    mean_type = infer_mean_type(Tm, basis)
+    covar_type = infer_covar_type(Tc, basis)
     mean, covar = _squeezedstate(basis, r, theta)
-    return GaussianState(basis, Tm(mean), Tc(covar))
+    return GaussianState(basis,  mean_type(mean), covar_type(covar))
 end
 squeezedstate(::Type{T}, basis::SymplecticBasis{N}, r::R, theta::R) where {T,N<:Int,R} = squeezedstate(T, T, basis, r, theta)
 function squeezedstate(basis::SymplecticBasis{N}, r::R, theta::R) where {N<:Int,R}
@@ -332,8 +344,10 @@ covariance: 4×4 Matrix{Float64}:
 ```
 """
 function eprstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, r::R, theta::R) where {Tm,Tc,N<:Int,R}
+    mean_type = infer_mean_type(Tm, basis)
+    covar_type = infer_covar_type(Tc, basis)
     mean, covar = _eprstate(basis, r, theta)
-    return GaussianState(basis, Tm(mean), Tc(covar))
+    return GaussianState(basis,  mean_type(mean), covar_type(covar))
 end
 eprstate(::Type{T}, basis::SymplecticBasis{N}, r::R, theta::R) where {T,N<:Int,R} = eprstate(T, T, basis, r, theta)
 function eprstate(basis::SymplecticBasis{N}, r::R, theta::R) where {N<:Int,R}

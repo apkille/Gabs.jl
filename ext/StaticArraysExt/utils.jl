@@ -15,3 +15,13 @@ end
 Base.@propagate_inbounds function _promote_output_matrix(::Type{<:SMatrix}, mat_out, out_dim::Tuple)
     return SMatrix{out_dim[1],out_dim[2]}(mat_out)
 end
+
+function infer_mean_type(::Type{SVector}, basis::Gabs.SymplecticBasis{N}) where {N}
+    nmodes = basis.nmodes
+    return SVector{2*nmodes, Float64}
+end
+
+function infer_covar_type(::Type{SMatrix}, basis::Gabs.SymplecticBasis{N}) where {N}
+    nmodes = basis.nmodes
+    return SMatrix{2*nmodes, 2*nmodes, Float64, 4*nmodes*nmodes}
+end

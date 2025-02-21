@@ -60,7 +60,7 @@ can specify an array type in its first (and second) arguments. Let's see an exam
 ```jldoctest
 julia> using StaticArrays
 
-julia> state = coherentstate(SVector{2}, SMatrix{2,2}, QuadPairBasis(1), 1.0-im)
+julia> state = coherentstate(SVector, SMatrix, QuadPairBasis(1), 1.0-im)
 GaussianState for 1 mode.
   symplectic basis: QuadPairBasis
 mean: 2-element SVector{2, Float64} with indices SOneTo(2):
