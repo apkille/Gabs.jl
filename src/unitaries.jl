@@ -44,7 +44,6 @@ function _displace(basis::QuadPairBasis{N}, alpha::A; ħ = 2) where {N<:Int,A<:N
     nmodes = basis.nmodes
     Rt = real(eltype(A))
     disp = repeat([sqrt(2*ħ) * real(alpha), sqrt(2*ħ) * imag(alpha)], nmodes)
-    
     symplectic = Matrix{Rt}(I, 2*nmodes, 2*nmodes)
     return disp, symplectic
 end
