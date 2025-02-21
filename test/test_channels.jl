@@ -26,7 +26,7 @@
         op_pair = displace(qpairbasis, alpha, noise)
         op_block = displace(qblockbasis, alpha, noise)
         @test op_pair isa GaussianChannel && op_block isa GaussianChannel
-        @test displace(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, alpha, noise) isa GaussianChannel
+        @test displace(SVector, SMatrix, qpairbasis, alpha, noise) isa GaussianChannel
         @test displace(Array, qpairbasis, alpha, noise) isa GaussianChannel
         @test displace(qblockbasis, alpha, T*noise*transpose(T)) == changebasis(QuadBlockBasis, op_pair)
         @test displace(qblockbasis, alphas, T*noise*transpose(T)) == changebasis(QuadBlockBasis, displace(qpairbasis, alphas, noise))
@@ -38,7 +38,7 @@
         op_pair = squeeze(qpairbasis, r, theta, noise)
         op_block = squeeze(qblockbasis, r, theta, noise)
         @test op_pair isa GaussianChannel && op_block isa GaussianChannel
-        @test squeeze(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, r, theta, noise) isa GaussianChannel
+        @test squeeze(SVector, SMatrix, qpairbasis, r, theta, noise) isa GaussianChannel
         @test squeeze(Array, qpairbasis, r, theta, noise) isa GaussianChannel
         @test squeeze(qblockbasis, r, theta, T*noise*transpose(T)) == changebasis(QuadBlockBasis, op_pair)
         @test squeeze(qblockbasis, rs, thetas, T*noise*transpose(T)) == changebasis(QuadBlockBasis, squeeze(qpairbasis, rs, thetas, noise))
@@ -49,7 +49,7 @@
         rs, thetas = rand(Float64, nmodes), rand(Float64, nmodes)
         op = twosqueeze(2*qpairbasis, r, theta, noise_ds)
         @test op isa GaussianChannel
-        @test twosqueeze(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, 2*qpairbasis, r, theta, noise_ds) isa GaussianChannel
+        @test twosqueeze(SVector, SMatrix, 2*qpairbasis, r, theta, noise_ds) isa GaussianChannel
         @test twosqueeze(Array, 2*qpairbasis, r, theta, noise_ds) isa GaussianChannel
         @test twosqueeze(2*qblockbasis, r, theta, T_ds*noise_ds*transpose(T_ds)) == changebasis(QuadBlockBasis, op)
         @test twosqueeze(2*qblockbasis, rs, thetas, T_ds*noise_ds*transpose(T_ds)) == changebasis(QuadBlockBasis, twosqueeze(2*qpairbasis, rs, thetas, noise_ds))
@@ -60,7 +60,7 @@
         thetas = rand(Float64, nmodes)
         op = phaseshift(qpairbasis, theta, noise)
         @test op isa GaussianChannel
-        @test phaseshift(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, theta, noise) isa GaussianChannel
+        @test phaseshift(SVector, SMatrix, qpairbasis, theta, noise) isa GaussianChannel
         @test phaseshift(Array, qpairbasis, theta, noise) isa GaussianChannel
         @test phaseshift(qblockbasis, theta, T*noise*transpose(T)) == changebasis(QuadBlockBasis, op)
         @test phaseshift(qblockbasis, thetas, T*noise*transpose(T)) == changebasis(QuadBlockBasis, phaseshift(qpairbasis, thetas, noise))
@@ -71,7 +71,7 @@
         thetas = rand(Float64, nmodes)
         op = beamsplitter(2*qpairbasis, theta, noise_ds)
         @test op isa GaussianChannel
-        @test beamsplitter(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, 2*qpairbasis, theta, noise_ds) isa GaussianChannel
+        @test beamsplitter(SVector, SMatrix, 2*qpairbasis, theta, noise_ds) isa GaussianChannel
         @test beamsplitter(Array, 2*qpairbasis, theta, noise_ds) isa GaussianChannel
         @test beamsplitter(2*qblockbasis, theta, T_ds*noise_ds*transpose(T_ds)) == changebasis(QuadBlockBasis, op)
         @test beamsplitter(2*qblockbasis, thetas, T_ds*noise_ds*transpose(T_ds)) == changebasis(QuadBlockBasis, beamsplitter(2*qpairbasis, thetas, noise_ds))
@@ -85,7 +85,7 @@
         op_pair = attenuator(qpairbasis, theta, n)
         op_block = attenuator(qblockbasis, theta, n)
         @test op_pair isa GaussianChannel && op_block isa GaussianChannel
-        @test attenuator(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, theta, n) isa GaussianChannel
+        @test attenuator(SVector, SMatrix, qpairbasis, theta, n) isa GaussianChannel
         @test attenuator(Array, qpairbasis, theta, n) isa GaussianChannel
         @test op_pair == changebasis(QuadPairBasis, op_block) && op_block == changebasis(QuadBlockBasis, op_pair)
         @test op_pair == changebasis(QuadPairBasis, op_pair) && op_block == changebasis(QuadBlockBasis, op_block)
@@ -102,7 +102,7 @@
         op_pair = amplifier(qpairbasis, r, n)
         op_block = amplifier(qblockbasis, r, n)
         @test op_pair isa GaussianChannel && op_block isa GaussianChannel
-        @test amplifier(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, r, n) isa GaussianChannel
+        @test amplifier(SVector, SMatrix, qpairbasis, r, n) isa GaussianChannel
         @test amplifier(Array, qpairbasis, r, n) isa GaussianChannel
         @test op_pair == changebasis(QuadPairBasis, op_block) && op_block == changebasis(QuadBlockBasis, op_pair)
         @test op_pair == changebasis(QuadPairBasis, op_pair) && op_block == changebasis(QuadBlockBasis, op_block)
@@ -128,7 +128,7 @@
         p_blocks = phaseshift(2*qblockbasis, repeat([theta], 2*nmodes), T_ds * noise_ds * transpose(T_ds))
         @test p_block ⊗ p_block == p_blocks
 
-        dstatic = displace(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, alpha1, noise)
+        dstatic = displace(SVector, SMatrix, qpairbasis, alpha1, noise)
         tpstatic = dstatic ⊗ dstatic ⊗ dstatic
         @test tpstatic.disp isa SVector{6*nmodes}
         @test tpstatic.transform isa SMatrix{6*nmodes,6*nmodes}

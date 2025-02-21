@@ -35,3 +35,8 @@ function infer_symplectic_type(::Type{SMatrix}, basis::Gabs.QuadPairBasis{N}) wh
     nmodes = basis.nmodes
     return SMatrix{2*nmodes, 2*nmodes, Float64, 4*nmodes*nmodes}
 end
+
+function infer_transform_type(::Type{SMatrix}, basis::Gabs.SymplecticBasis{N}) where {N}
+    nmodes = basis.nmodes
+    return SMatrix{2*nmodes, 2*nmodes, Float64, 4*nmodes*nmodes}
+end

@@ -2,9 +2,23 @@
 # Predefined Gaussian channels
 ##
 
+function infer_transform_type end
+
+function infer_transform_type(::Type{Array}, basis::Gabs.SymplecticBasis{N}) where {N}
+    nmodes = basis.nmodes
+    return Array{Float64, 2}
+end
+
+function infer_transform_type(::Type{Array{T}}, basis::Gabs.SymplecticBasis{N}) where {T, N}
+    nmodes = basis.nmodes
+    return Array{T, 2}
+end
+
 function displace(::Type{Td}, ::Type{Tt}, basis::SymplecticBasis{N}, alpha::A, noise::M) where {Td,Tt,N<:Int,A,M}
+    disp_type = infer_displacement_type(Td, basis)
+    transform_type = infer_transform_type(Tt, basis)
     disp, transform = _displace(basis, alpha)
-    return GaussianChannel(basis, Td(disp), Tt(transform), Tt(noise))
+    return GaussianChannel(basis, disp_type(disp), transform_type(transform), transform_type(noise))
 end
 displace(::Type{T}, basis::SymplecticBasis{N}, alpha::A, noise::M) where {T,N<:Int,A,M} = displace(T, T, basis, alpha, noise)
 function displace(basis::SymplecticBasis{N}, alpha::A, noise::M) where {N<:Int,A,M}
@@ -13,8 +27,10 @@ function displace(basis::SymplecticBasis{N}, alpha::A, noise::M) where {N<:Int,A
 end
 
 function squeeze(::Type{Td}, ::Type{Tt}, basis::SymplecticBasis{N}, r::R, theta::R, noise::M) where {Td,Tt,N<:Int,R,M}
+    disp_type = infer_displacement_type(Td, basis)
+    transform_type = infer_transform_type(Tt, basis)
     disp, transform = _squeeze(basis, r, theta)
-    return GaussianChannel(basis, Td(disp), Tt(transform), Tt(noise))
+    return GaussianChannel(basis, disp_type(disp), transform_type(transform), transform_type(noise))
 end
 squeeze(::Type{T}, basis::SymplecticBasis{N}, r::R, theta::R, noise::M) where {T,N<:Int,R,M} = squeeze(T, T, basis, r, theta, noise)
 function squeeze(basis::SymplecticBasis{N}, r::R, theta::R, noise::M) where {N<:Int,R,M}
@@ -23,8 +39,10 @@ function squeeze(basis::SymplecticBasis{N}, r::R, theta::R, noise::M) where {N<:
 end
 
 function twosqueeze(::Type{Td}, ::Type{Tt}, basis::SymplecticBasis{N}, r::R, theta::R, noise::M) where {Td,Tt,N<:Int,R,M}
+    disp_type = infer_displacement_type(Td, basis)
+    transform_type = infer_transform_type(Tt, basis)
     disp, transform = _twosqueeze(basis, r, theta)
-    return GaussianChannel(basis, Td(disp), Tt(transform), Tt(noise))
+    return GaussianChannel(basis, disp_type(disp), transform_type(transform), transform_type(noise))
 end
 twosqueeze(::Type{T}, basis::SymplecticBasis{N}, r::R, theta::R, noise::M) where {T,N<:Int,R,M} = twosqueeze(T, T, basis, r, theta, noise)
 function twosqueeze(basis::SymplecticBasis{N}, r::R, theta::R, noise::M) where {N<:Int,R,M}
@@ -33,8 +51,10 @@ function twosqueeze(basis::SymplecticBasis{N}, r::R, theta::R, noise::M) where {
 end
 
 function phaseshift(::Type{Td}, ::Type{Tt}, basis::SymplecticBasis{N}, theta::R, noise::M) where {Td,Tt,N<:Int,R,M}
+    disp_type = infer_displacement_type(Td, basis)
+    transform_type = infer_transform_type(Tt, basis)
     disp, transform = _phaseshift(basis, theta)
-    return GaussianChannel(basis, Td(disp), Tt(transform), Tt(noise))
+    return GaussianChannel(basis, disp_type(disp), transform_type(transform), transform_type(noise))
 end
 phaseshift(::Type{T}, basis::SymplecticBasis{N}, theta::R, noise::M) where {T,N<:Int,R,M} = phaseshift(T, T, basis, theta, noise)
 function phaseshift(basis::SymplecticBasis{N}, theta::R, noise::M) where {N<:Int,R,M}
@@ -43,8 +63,10 @@ function phaseshift(basis::SymplecticBasis{N}, theta::R, noise::M) where {N<:Int
 end
 
 function beamsplitter(::Type{Td}, ::Type{Tt}, basis::SymplecticBasis{N}, transmit::R, noise::M) where {Td,Tt,N<:Int,R,M}
+    disp_type = infer_displacement_type(Td, basis)
+    transform_type = infer_transform_type(Tt, basis)
     disp, transform = _beamsplitter(basis, transmit)
-    return GaussianChannel(basis, Td(disp), Tt(transform), Tt(noise))
+    return GaussianChannel(basis, disp_type(disp), transform_type(transform), transform_type(noise))
 end
 beamsplitter(::Type{T}, basis::SymplecticBasis{N}, transmit::R, noise::M) where {T,N<:Int,R,M} = beamsplitter(T, T, basis, transmit, noise)
 function beamsplitter(basis::SymplecticBasis{N}, transmit::R, noise::M) where {N<:Int,R,M}
@@ -90,8 +112,10 @@ noise: 2×2 Matrix{Float64}:
 ```
 """
 function attenuator(::Type{Td}, ::Type{Tt}, basis::SymplecticBasis{N}, theta::R, n::M) where {Td,Tt,N<:Int,R,M}
+    disp_type = infer_displacement_type(Td, basis)
+    transform_type = infer_transform_type(Tt, basis)
     disp, transform, noise = _attenuator(basis, theta, n)
-    return GaussianChannel(basis, Td(disp), Tt(transform), Tt(noise))
+    return GaussianChannel(basis, disp_type(disp), transform_type(transform), transform_type(noise))
 end
 attenuator(::Type{T}, basis::SymplecticBasis{N}, theta::R, n::M) where {T,N<:Int,R,M} = attenuator(T, T, basis, theta, n)
 function attenuator(basis::SymplecticBasis{N}, theta::R, n::M) where {N<:Int,R,M}
@@ -180,8 +204,10 @@ noise: 2×2 Matrix{Float64}:
 ```
 """
 function amplifier(::Type{Td}, ::Type{Tt}, basis::SymplecticBasis{N}, r::R, n::M) where {Td,Tt,N<:Int,R,M}
+    disp_type = infer_displacement_type(Td, basis)
+    transform_type = infer_transform_type(Tt, basis)
     disp, transform, noise = _amplifier(basis, r, n)
-    return GaussianChannel(basis, Td(disp), Tt(transform), Tt(noise))
+    return GaussianChannel(basis, disp_type(disp), transform_type(transform), transform_type(noise))
 end
 amplifier(::Type{T}, basis::SymplecticBasis{N}, r::R, n::M) where {T,N<:Int,R,M} = amplifier(T, T, basis, r, n)
 function amplifier(basis::SymplecticBasis{N}, r::R, n::M) where {N<:Int,R,M}
