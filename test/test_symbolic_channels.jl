@@ -78,7 +78,7 @@
         end
     end
 
-    @testset "Symbolic Gaussian Two-Mode Squeeze  and Beamsplitter Operators" begin
+    @testset "Symbolic Gaussian Two-Mode Squeeze and Beamsplitter Operators" begin
         noise = zeros(Num, 2*nmodes, 2*nmodes)
         noise_ds = [noise zeros(Num, 2*nmodes, 2*nmodes); zeros(Num, 2*nmodes, 2*nmodes) noise]
         @variables r θ
