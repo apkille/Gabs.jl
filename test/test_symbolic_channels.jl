@@ -50,6 +50,7 @@
         thetas_ps_vec = collect(thetas_ps)
         sub_dict(params_tuple) = Dict(vcat([p .=> 0 for p in params_tuple]...)...)
         test_configs = [(squeeze, (r, θs), (rs_vec, thetas_vec), "Squeeze Operator"), (phaseshift, (θps,), (thetas_ps_vec,), "Phase-Shift Operator")]
+
         for (op, single_params, multi_params, desc) in test_configs
             @testset "Single mode: $desc" begin
                 op_pair   = op(qpairbasis, single_params..., noise)
@@ -62,7 +63,8 @@
                 @test isequal(op(qblockbasis, single_params..., T*noise*transpose(T)).disp, changebasis(QuadBlockBasis, op_pair).disp)
                 @test isequal(op(qblockbasis, single_params..., T*noise*transpose(T)).basis, changebasis(QuadBlockBasis, op_pair).basis)
                 @test isequal(op(qblockbasis, single_params..., T*noise*transpose(T)).transform, changebasis(QuadBlockBasis, op_pair).transform)
-          end
+            end
+
             @testset "Multi mode: $desc" begin
                 op_pair_multi  = op(qpairbasis, multi_params..., noise)
                 op_block_multi = op(qblockbasis, multi_params..., noise)
@@ -91,6 +93,7 @@
         sub_dict(params_tuple) = Dict(vcat([p .=> 0 for p in params_tuple]...)...)
         test_configs = [(op = twosqueeze, single_params = (r, θ), multi_params = (rs_vec, thetas_vec), desc = "Two-Mode Squeeze Operator"),
                         (op = beamsplitter, single_params = (θ_bs,), multi_params = (thetas_bs_vec,), desc = "Beamsplitter Operator")]
+
         for (op, single_params, multi_params, desc) in test_configs
             @testset "$desc" begin
                 # Test single-mode operation
@@ -103,6 +106,7 @@
                 @test isequal(op(2*qblockbasis, single_params..., T_ds*noise_ds*transpose(T_ds)).disp, changebasis(QuadBlockBasis, op_single).disp)
                 @test isequal(op(2*qblockbasis, single_params..., T_ds*noise_ds*transpose(T_ds)).basis, changebasis(QuadBlockBasis, op_single).basis)
                 @test isequal(op(2*qblockbasis, single_params..., T_ds*noise_ds*transpose(T_ds)).transform, changebasis(QuadBlockBasis, op_single).transform)
+
                 # Test multi-mode operation
                 op_multi = op(2*qpairbasis, multi_params..., noise_ds)
                 @test op_multi isa GaussianChannel
@@ -123,6 +127,7 @@
         n = rand(1:10)
         ns = rand(1:10, nmodes)
         noise_ds = [noise zeros(Num, 2*nmodes,2*nmodes); zeros(Num, 2*nmodes,2*nmodes) noise]
+
         for (op, param, param_vec) in [(attenuator, θ, thetas), (amplifier, r, rs)]
             # Test single mode
             op_pair = op(qpairbasis, param, n)
@@ -130,6 +135,7 @@
             @test op_pair isa GaussianChannel && op_block isa GaussianChannel
             @test iszero(simplify(substitute(op_block.transform - changebasis(QuadBlockBasis, op_pair).transform, Dict(vcat(param.=> 0)...))))
             @test iszero(simplify(op_block.disp - changebasis(QuadBlockBasis, op_pair).disp))
+
             # Test multi-mode
             param_vec_col = collect(param_vec)
             ns_vec = collect(ns)
