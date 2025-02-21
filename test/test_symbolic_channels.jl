@@ -78,39 +78,43 @@
         end
     end
 
-    @testset "Symbolic Two-Mode Squeeze Operator" begin
+    @testset "Symbolic Gaussian Two-Mode Squeeze  and Beamsplitter Operators" begin
+        noise = zeros(Num, 2*nmodes, 2*nmodes)
+        noise_ds = [noise zeros(Num, 2*nmodes, 2*nmodes); zeros(Num, 2*nmodes, 2*nmodes) noise]
         @variables r θ
         @variables rs[1:nmodes] thetas[1:nmodes]
-        noise_ds = [noise zeros(Num, 2*nmodes,2*nmodes); zeros(Num, 2*nmodes,2*nmodes) noise]
-        # Test single two-mode squeeze
-        op = twosqueeze(2*qpairbasis, r, θ, noise_ds)
-        @test op isa GaussianChannel
-        @test iszero(simplify(substitute(op.transform - changebasis(QuadBlockBasis, op).transform, Dict(vcat(r .=> 0,  θ.=> 0)...))))
-        @test iszero(simplify(op.disp - changebasis(QuadBlockBasis, op).disp))
-        # Test multi-mode two-mode squeeze
         rs_vec = collect(rs)
         thetas_vec = collect(thetas)
-        op_multi = twosqueeze(2*qpairbasis, rs_vec, thetas_vec, noise_ds)
-        @test op_multi isa GaussianChannel
-        @test iszero(simplify(substitute(op_multi.transform - changebasis(QuadBlockBasis, op_multi).transform, Dict(vcat(rs_vec .=> 0, thetas_vec .=> 0)...))))
-        @test iszero(simplify(op_multi.disp - changebasis(QuadBlockBasis, op_multi).disp))
-    end
-
-    @testset "Symbolic Beamsplitter Operator" begin
-        @variables θ
-        @variables thetas[1:nmodes]
-        noise_ds = [noise zeros(Num, 2*nmodes,2*nmodes); zeros(Num, 2*nmodes,2*nmodes) noise]
-        # Test single beamsplitter
-        op = beamsplitter(2*qpairbasis, θ, noise_ds)
-        @test op isa GaussianChannel
-        @test iszero(simplify(substitute(op.transform - changebasis(QuadBlockBasis, op).transform, Dict(vcat(θ.=> 0)...))))
-        @test iszero(simplify(op.disp - changebasis(QuadBlockBasis, op).disp))
-        # Test multi-mode beamsplitter
-        thetas_vec = collect(thetas)
-        op_multi = beamsplitter(2*qpairbasis, thetas_vec, noise_ds)
-        @test op_multi isa GaussianChannel
-        @test iszero(simplify(substitute(op_multi.transform - changebasis(QuadBlockBasis, op_multi).transform, Dict(vcat(thetas_vec .=> 0)...))))
-        @test iszero(simplify(op_multi.disp - changebasis(QuadBlockBasis, op_multi).disp))
+        @variables θ_bs
+        @variables thetas_bs[1:nmodes]
+        thetas_bs_vec = collect(thetas_bs)
+        sub_dict(params_tuple) = Dict(vcat([p .=> 0 for p in params_tuple]...)...)
+        test_configs = [(op = twosqueeze, single_params = (r, θ), multi_params = (rs_vec, thetas_vec), desc = "Two-Mode Squeeze Operator"),
+                        (op = beamsplitter, single_params = (θ_bs,), multi_params = (thetas_bs_vec,), desc = "Beamsplitter Operator")]
+        for (op, single_params, multi_params, desc) in test_configs
+            @testset "$desc" begin
+                # Test single-mode operation
+                op_single = op(2*qpairbasis, single_params..., noise_ds)
+                @test op_single isa GaussianChannel
+                @test iszero(simplify(substitute(op_single.transform - changebasis(QuadBlockBasis, op_single).transform, sub_dict(single_params))))
+                @test iszero(simplify(op_single.disp - changebasis(QuadBlockBasis, op_single).disp))
+                @test op(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, 2*qpairbasis, single_params..., noise_ds) isa GaussianChannel
+                @test op(Array, 2*qpairbasis, single_params..., noise_ds) isa GaussianChannel
+                @test isequal(op(2*qblockbasis, single_params..., T_ds*noise_ds*transpose(T_ds)).disp, changebasis(QuadBlockBasis, op_single).disp)
+                @test isequal(op(2*qblockbasis, single_params..., T_ds*noise_ds*transpose(T_ds)).basis, changebasis(QuadBlockBasis, op_single).basis)
+                @test isequal(op(2*qblockbasis, single_params..., T_ds*noise_ds*transpose(T_ds)).transform, changebasis(QuadBlockBasis, op_single).transform)
+                # Test multi-mode operation
+                op_multi = op(2*qpairbasis, multi_params..., noise_ds)
+                @test op_multi isa GaussianChannel
+                @test iszero(simplify(substitute(op_multi.transform - changebasis(QuadBlockBasis, op_multi).transform, sub_dict(multi_params))))
+                @test iszero(simplify(op_multi.disp - changebasis(QuadBlockBasis, op_multi).disp))
+                @test op(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, 2*qpairbasis, multi_params..., noise_ds) isa GaussianChannel
+                @test op(Array, 2*qpairbasis, multi_params..., noise_ds) isa GaussianChannel
+                @test isequal(op(2*qblockbasis, multi_params..., T_ds*noise_ds*transpose(T_ds)).disp, changebasis(QuadBlockBasis, op_multi).disp)
+                @test isequal(op(2*qblockbasis, multi_params..., T_ds*noise_ds*transpose(T_ds)).basis, changebasis(QuadBlockBasis, op_multi).basis)
+                @test isequal(op(2*qblockbasis, multi_params..., T_ds*noise_ds*transpose(T_ds)).transform, changebasis(QuadBlockBasis, op_multi).transform)
+            end
+        end
     end
 
     @testset "Symbolic Gaussian Attenuator and Amplifier" begin
