@@ -100,7 +100,7 @@ function attenuator(basis::SymplecticBasis{N}, theta::R, n::M) where {N<:Int,R,M
 end
 function _attenuator(basis::Union{QuadPairBasis{N},QuadBlockBasis{N}}, theta::R, n::M) where {N<:Int,R<:Real,M<:Int}
     nmodes = basis.nmodes
-    disp = zeros(R, 2*nmodes) 
+    disp = zeros(R, 2*nmodes)
     transform = Matrix{R}(cos(theta) * I, 2*nmodes, 2*nmodes)
     noise = Matrix{R}((sin(theta))^2 * n * I, 2*nmodes, 2*nmodes)
     return disp, transform, noise
@@ -108,7 +108,7 @@ end
 function _attenuator(basis::QuadPairBasis{N}, theta::R, n::M) where {N<:Int,R<:Vector,M<:Vector}
     nmodes = basis.nmodes
     Rt = eltype(R)
-    disp = zeros(Rt, 2*nmodes) 
+    disp = zeros(Rt, 2*nmodes)
     transform = zeros(Rt, 2*nmodes, 2*nmodes)
     noise = zeros(Rt, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
@@ -126,7 +126,7 @@ end
 function _attenuator(basis::QuadBlockBasis{N}, theta::R, n::M) where {N<:Int,R<:Vector,M<:Vector}
     nmodes = basis.nmodes
     Rt = eltype(R)
-    disp = zeros(Rt, 2*nmodes) 
+    disp = zeros(Rt, 2*nmodes)
     transform = zeros(Rt, 2*nmodes, 2*nmodes)
     noise = zeros(Rt, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
