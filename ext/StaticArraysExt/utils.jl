@@ -25,3 +25,13 @@ function infer_covar_type(::Type{SMatrix}, basis::Gabs.SymplecticBasis{N}) where
     nmodes = basis.nmodes
     return SMatrix{2*nmodes, 2*nmodes, Float64, 4*nmodes*nmodes}
 end
+
+function infer_displacement_type(::Type{SVector}, basis::Gabs.QuadPairBasis{N}) where {N}
+    nmodes = basis.nmodes
+    return SVector{2*nmodes, Float64}
+end
+
+function infer_symplectic_type(::Type{SMatrix}, basis::Gabs.QuadPairBasis{N}) where {N}
+    nmodes = basis.nmodes
+    return SMatrix{2*nmodes, 2*nmodes, Float64, 4*nmodes*nmodes}
+end

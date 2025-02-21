@@ -2,6 +2,30 @@
 # Predefined Gaussian unitaries
 ##
 
+function infer_displacement_type end
+
+function infer_symplectic_type end
+
+function infer_displacement_type(::Type{Array{T}}, basis::Gabs.QuadPairBasis{N}) where {T, N}
+    nmodes = basis.nmodes
+    return Array{T, 1}
+end
+
+function infer_displacement_type(::Type{Array}, basis::Gabs.QuadPairBasis{N}) where {N}
+    nmodes = basis.nmodes
+    return Array{Float64, 1}
+end
+
+function infer_symplectic_type(::Type{Array{T}}, basis::Gabs.QuadPairBasis{N}) where {T, N}
+    nmodes = basis.nmodes
+    return Array{T, 2}
+end
+
+function infer_symplectic_type(::Type{Array}, basis::Gabs.QuadPairBasis{N}) where {N}
+    nmodes = basis.nmodes
+    return Array{Float64, 2}
+end
+
 """
     displace([Tm=Vector{Float64}, Ts=Matrix{Float64}], basis::SymplecticBasis, alpha<:Number)
     displace([Tm=Vector{Float64}, Ts=Matrix{Float64}], basis::SymplecticBasis, alpha<:Number, noise::Ts)
@@ -38,8 +62,10 @@ symplectic: 2×2 Matrix{Float64}:
 ```
 """
 function displace(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}, alpha::A) where {Td,Ts,N<:Int,A}
+    disp_type = infer_displacement_type(Td, basis)
+    symplectic_type = infer_symplectic_type(Ts, basis)
     disp, symplectic = _displace(basis, alpha)
-    return GaussianUnitary(basis, Td(disp), Ts(symplectic))
+    return GaussianUnitary(basis, disp_type(disp), symplectic_type(symplectic))
 end
 displace(::Type{T}, basis::SymplecticBasis{N}, alpha::A) where {T,N<:Int,A} = displace(T, T, basis, alpha)
 function displace(basis::SymplecticBasis{N}, alpha::A) where {N<:Int,A}
@@ -117,8 +143,10 @@ symplectic: 2×2 Matrix{Float64}:
 ```
 """
 function squeeze(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}, r::R, theta::R) where {Td,Ts,N<:Int,R}
+    disp_type = infer_displacement_type(Td, basis)
+    symplectic_type = infer_symplectic_type(Ts, basis)
     disp, symplectic = _squeeze(basis, r, theta)
-    return GaussianUnitary(basis, Td(disp), Ts(symplectic))
+    return GaussianUnitary(basis, disp_type(disp), symplectic_type(symplectic))
 end
 squeeze(::Type{T}, basis::SymplecticBasis{N}, r::R, theta::R) where {T,N<:Int,R} = squeeze(T, T, basis, r, theta)
 function squeeze(basis::SymplecticBasis{N}, r::R, theta::R) where {N<:Int, R}
@@ -233,8 +261,10 @@ symplectic: 4×4 Matrix{Float64}:
 ```
 """
 function twosqueeze(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}, r::R, theta::R) where {Td,Ts,N<:Int,R}
+    disp_type = infer_displacement_type(Td, basis)
+    symplectic_type = infer_symplectic_type(Ts, basis)
     disp, symplectic = _twosqueeze(basis, r, theta)
-    return GaussianUnitary(basis, Td(disp), Ts(symplectic))
+    return GaussianUnitary(basis, disp_type(disp), symplectic_type(symplectic))
 end
 twosqueeze(::Type{T}, basis::SymplecticBasis{N}, r::R, theta::R) where {T,N<:Int,R} = twosqueeze(T, T, basis, r, theta)
 function twosqueeze(basis::SymplecticBasis{N}, r::R, theta::R) where {N<:Int,R}
@@ -387,8 +417,10 @@ symplectic: 2×2 Matrix{Float64}:
 ```
 """
 function phaseshift(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}, theta::R) where {Td,Ts,N<:Int,R}
+    disp_type = infer_displacement_type(Td, basis)
+    symplectic_type = infer_symplectic_type(Ts, basis)
     disp, symplectic = _phaseshift(basis, theta)
-    return GaussianUnitary(basis, Td(disp), Ts(symplectic))
+    return GaussianUnitary(basis, disp_type(disp), symplectic_type(symplectic))
 end
 phaseshift(::Type{T}, basis::SymplecticBasis{N}, theta::R) where {T,N<:Int,R} = phaseshift(T, T, basis, theta)
 function phaseshift(basis::SymplecticBasis{N}, theta::R) where {N<:Int,R}
@@ -496,8 +528,10 @@ symplectic: 4×4 Matrix{Float64}:
 ```
 """
 function beamsplitter(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}, transmit::R) where {Td,Ts,N<:Int,R}
+    disp_type = infer_displacement_type(Td, basis)
+    symplectic_type = infer_symplectic_type(Ts, basis)
     disp, symplectic = _beamsplitter(basis, transmit)
-    return GaussianUnitary(basis, Td(disp), Ts(symplectic))
+    return GaussianUnitary(basis, disp_type(disp), symplectic_type(symplectic))
 end
 beamsplitter(::Type{T}, basis::SymplecticBasis{N}, transmit::R) where {T,N<:Int,R} = beamsplitter(T, T, basis, transmit)
 function beamsplitter(basis::SymplecticBasis{N}, transmit::R) where {N<:Int,R}
