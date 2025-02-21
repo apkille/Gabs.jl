@@ -1,5 +1,6 @@
 @testitem "Symbolic Channels" begin
     using Gabs
+    using Symbolics
     using StaticArrays
 
     nmodes = rand(1:5)
