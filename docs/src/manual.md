@@ -210,12 +210,12 @@ mean: 6-element Vector{Float64}:
   0.0
   0.0
 covariance: 6×6 Matrix{Float64}:
- 1.0  0.0  0.0  0.0  0.0       0.0
- 0.0  1.0  0.0  0.0  0.0       0.0
- 0.0  0.0  1.0  0.0  0.0       0.0
- 0.0  0.0  0.0  1.0  0.0       0.0
- 0.0  0.0  0.0  0.0  0.759156  0.36847
- 0.0  0.0  0.0  0.0  0.36847   1.4961
+ 1.0  0.0  0.0  0.0   0.0        0.0
+ 0.0  1.0  0.0  0.0   0.0        0.0
+ 0.0  0.0  1.0  0.0   0.0        0.0
+ 0.0  0.0  0.0  1.0   0.0        0.0
+ 0.0  0.0  0.0  0.0   0.759156  -0.36847
+ 0.0  0.0  0.0  0.0  -0.36847    1.4961
 ```
 
 Note that in the above example, we defined the symplectic basis to be of type [`QuadPairBasis`](@ref). If we wanted the canonical field operators to be ordered blockwise, then we would call [`QuadBlockBasis`](@ref) instead:
@@ -234,12 +234,12 @@ mean: 6-element Vector{Float64}:
   0.0
   0.0
 covariance: 6×6 Matrix{Float64}:
- 1.0  0.0  0.0       0.0  0.0  0.0
- 0.0  1.0  0.0       0.0  0.0  0.0
- 0.0  0.0  0.759156  0.0  0.0  0.36847
- 0.0  0.0  0.0       1.0  0.0  0.0
- 0.0  0.0  0.0       0.0  1.0  0.0
- 0.0  0.0  0.36847   0.0  0.0  1.4961
+ 1.0  0.0   0.0       0.0  0.0   0.0
+ 0.0  1.0   0.0       0.0  0.0   0.0
+ 0.0  0.0   0.759156  0.0  0.0  -0.36847
+ 0.0  0.0   0.0       1.0  0.0   0.0
+ 0.0  0.0   0.0       0.0  1.0   0.0
+ 0.0  0.0  -0.36847   0.0  0.0   1.4961
 ```
 These tensor product methods are also available for Gaussian unitaries and channels:
 

@@ -198,8 +198,8 @@ mean: 2-element Vector{Float64}:
  0.0
  0.0
 covariance: 2×2 Matrix{Float64}:
- 0.712088  0.830993
- 0.830993  2.37407
+  0.712088  -0.830993
+ -0.830993   2.37407
 ```
 """
 function squeezedstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {Tm,Tc,N<:Int,R}
@@ -219,8 +219,8 @@ function _squeezedstate(basis::QuadPairBasis{N}, r::R, theta::R; ħ = 2) where {
     ct, st = cos(theta), sin(theta)
     @inbounds for i in Base.OneTo(nmodes)
         covar[2*i-1, 2*i-1] = (ħ/2) * (cr - sr*ct)
-        covar[2*i-1, 2*i] = (ħ/2) * sr * st
-        covar[2*i, 2*i-1] = (ħ/2) * sr * st
+        covar[2*i-1, 2*i] = -(ħ/2) * sr * st
+        covar[2*i, 2*i-1] = -(ħ/2) * sr * st
         covar[2*i, 2*i] = (ħ/2) * (cr + sr*ct)
     end
     return mean, covar
@@ -234,8 +234,8 @@ function _squeezedstate(basis::QuadPairBasis{N}, r::R, theta::R; ħ = 2) where {
         cr, sr = cosh(2*r[i]), sinh(2*r[i])
         ct, st = cos(theta[i]), sin(theta[i])
         covar[2*i-1, 2*i-1] = (ħ/2) * (cr - sr*ct)
-        covar[2*i-1, 2*i] = (ħ/2) * sr * st
-        covar[2*i, 2*i-1] = (ħ/2) * sr * st
+        covar[2*i-1, 2*i] = -(ħ/2) * sr * st
+        covar[2*i, 2*i-1] = -(ħ/2) * sr * st
         covar[2*i, 2*i] = (ħ/2) * (cr + sr*ct)
     end
     return mean, covar
@@ -248,8 +248,8 @@ function _squeezedstate(basis::QuadBlockBasis{N}, r::R, theta::R; ħ = 2) where 
     ct, st = cos(theta), sin(theta)
     @inbounds for i in Base.OneTo(nmodes)
         covar[i, i] = (ħ/2) * (cr - sr*ct)
-        covar[i, i+nmodes] = (ħ/2) * sr * st
-        covar[i+nmodes, i] = (ħ/2) * sr * st
+        covar[i, i+nmodes] = -(ħ/2) * sr * st
+        covar[i+nmodes, i] = -(ħ/2) * sr * st
         covar[i+nmodes, i+nmodes] = (ħ/2) * (cr + sr*ct)
     end
     return mean, covar
@@ -263,8 +263,8 @@ function _squeezedstate(basis::QuadBlockBasis{N}, r::R, theta::R; ħ = 2) where 
         cr, sr = cosh(2*r[i]), sinh(2*r[i])
         ct, st = cos(theta[i]), sin(theta[i])
         covar[i, i] = (ħ/2) * (cr - sr*ct)
-        covar[i, i+nmodes] = (ħ/2) * sr * st
-        covar[i+nmodes, i] = (ħ/2) * sr * st
+        covar[i, i+nmodes] = -(ħ/2) * sr * st
+        covar[i+nmodes, i] = -(ħ/2) * sr * st
         covar[i+nmodes, i+nmodes] = (ħ/2) * (cr + sr*ct)
     end
     return mean, covar
@@ -559,10 +559,10 @@ mean: 4-element Vector{Float64}:
  0.0
  0.0
 covariance: 4×4 Matrix{Float64}:
- 1.0  0.0    0.0       0.0
- 0.0  1.0    0.0       0.0
- 0.0  0.0   59.0829  142.633
- 0.0  0.0  142.633   344.348
+ 1.0  0.0     0.0        0.0
+ 0.0  1.0     0.0        0.0
+ 0.0  0.0    59.0829  -142.633
+ 0.0  0.0  -142.633    344.348
 ```
 """
 function ptrace(::Type{Tm}, ::Type{Tc}, state::GaussianState, idx::N) where {Tm,Tc,N<:Int}
@@ -696,10 +696,10 @@ mean: 4-element Vector{Float64}:
  0.0
  0.0
 covariance: 4×4 Matrix{Float64}:
- 5.2715   0.0      3.29789  0.0
- 0.0      5.2715   0.0      3.29789
- 3.29789  0.0      2.25289  0.0
- 0.0      3.29789  0.0      2.25289
+  5.2715    0.0      -3.29789   0.0
+  0.0       5.2715    0.0      -3.29789
+ -3.29789   0.0       2.25289   0.0
+  0.0      -3.29789   0.0       2.25289
 
 julia> changebasis(QuadPairBasis, st)
 GaussianState for 2 modes.
@@ -710,10 +710,10 @@ mean: 4-element Vector{Float64}:
  0.0
  0.0
 covariance: 4×4 Matrix{Float64}:
- 5.2715   3.29789  0.0      0.0
- 3.29789  2.25289  0.0      0.0
- 0.0      0.0      5.2715   3.29789
- 0.0      0.0      3.29789  2.25289
+  5.2715   -3.29789   0.0       0.0
+ -3.29789   2.25289   0.0       0.0
+  0.0       0.0       5.2715   -3.29789
+  0.0       0.0      -3.29789   2.25289
 ```
 """
 function changebasis(::Type{B1}, state::GaussianState{B2,M,V}) where {B1<:QuadBlockBasis,B2<:QuadPairBasis,M,V}
