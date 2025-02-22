@@ -21,7 +21,7 @@ export
     vacuumstate, thermalstate, coherentstate, squeezedstate, eprstate,
     # predefined Gaussian channels
     displace, squeeze, twosqueeze, phaseshift, beamsplitter,
-    attenuator, amplifier,
+    attenuator, amplifier, twosumgate,
     # random objects
     randstate, randunitary, randchannel, randsymplectic,
     # wigner functions

@@ -537,6 +537,105 @@ function _beamsplitter(basis::QuadBlockBasis{N}, transmit::R) where {N<:Int,R<:V
     return disp, symplectic
 end
 
+"""
+Constructs the **two-mode sum gate** (SUM gate), a fundamental operation
+in continuous-variable quantum computing.The SUM gate applies a transformation
+that displaces one oscillator's quadrature by an amount proportional to the
+position quadrature of another oscillator.
+
+## Mathematical description of a two-mode sum gate
+
+For two oscillators `a` and `b`, the SUM gate is defined as: SUM(λ) = exp(-i 2λ ẋₐ p̂_b)
+which transforms position eigenstates as: SUM(λ) |xₐ⟩ |x_b⟩ = |xₐ⟩ |x_b + λ xₐ⟩.
+
+The SUM gate can be realized using a [`beamsplitter`](@ref) and [`squeeze`](@ref),
+following the *Bloch-Messiah decomposition*:
+
+```math
+\begin{align}
+\text{SUM}(\\lambda) &= \\text{BS}(\\pi + 2\\theta, -\\pi/2) \\left[ s(r) \\otimes s(-r) \\right] \text{BS}(2\\theta, -\\pi/2), \\
+\\sinh r &= \frac{\\lambda}{2}, \\
+\\cos(2\\theta) &= \\tanh(r), \\
+\\sin(2\\theta) &= -\\text{sech}(r)
+\end{align}
+```
+
+where:
+- `sinh(r) = λ / 2` (squeezing parameter),
+- `cos(2θ) = tanh(r)`, `sin(2θ) = -sech(r)` (beam splitter angles).
+
+## Example
+
+```julia
+julia> twosumgate(QuadBlockBasis(2), 1.0)
+GaussianUnitary for 2 modes.
+  symplectic basis: QuadBlockBasis
+displacement: 4-element Vector{Float64}:
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+symplectic: 4×4 Matrix{Float64}:
+  0.17082   0.894427   0.0       0.0
+ -0.894427  1.17082    0.0       0.0
+  0.0       0.0        1.17082   0.894427
+  0.0       0.0       -0.894427  0.17082
+```
+
+"""
+function twosumgate(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}, lambda::R; ħ = 2) where {Td,Ts,N<:Int,R<:Real}
+    disp, symplectic = _twosumgate(basis, lambda)
+    return GaussianUnitary(basis, Td(disp), Ts(symplectic); ħ = ħ)
+end
+twosumgate(::Type{T}, basis::SymplecticBasis{N}, lambda::R; ħ = 2) where {T,N<:Int,R} = twosumgate(T, T, basis, lambda; ħ = ħ)
+function twosumgate(basis::SymplecticBasis{N}, lambda::R; ħ = 2) where {N<:Int,R<:Real}
+    disp, symplectic = _twosumgate(basis, lambda)
+    return GaussianUnitary(basis, disp, symplectic; ħ = ħ)
+end
+function _twosumgate(basis::QuadPairBasis{N}, lambda::R) where {N,R<:Real}
+    # Compute the squeezing parameter from sinh(r) = lambda/2
+    r = asinh(lambda / 2)
+    # Determine the beam-splitter mixing angle: cos(2θ) = tanh(r), sin(2θ) = -sech(r)
+    twoθ = -acos(tanh(r))
+    θ = twoθ / 2
+    # First beam splitter: BS(2θ, -π/2)
+    transmit1 = cos(2θ)^2
+    BS1 = _beamsplitter(basis, transmit1)
+    # Single-mode squeezing: S1 ⊗ S2
+    S1 = squeeze(QuadPairBasis(basis.nmodes - 1), r, 0.0)
+    S2 = squeeze(QuadPairBasis(basis.nmodes - 1), -r, 0.0)
+    S_tensor = S1 ⊗ S2
+    # Second beam splitter: BS(π+2θ, -π/2)
+    transmit2 = cos(π + 2θ)^2
+    BS2 = _beamsplitter(basis, transmit2)
+    # Compose the operations
+    final_symplectic = BS2[2] * S_tensor.symplectic * BS1[2]
+    final_disp = BS2[1] + S_tensor.disp + BS1[1]
+    return final_disp, final_symplectic
+end
+
+function _twosumgate(basis::QuadBlockBasis{N}, lambda::R) where {N,R<:Real}
+    # Compute the squeezing parameter from sinh(r) = lambda/2
+    r = asinh(lambda / 2)
+    # Determine the beam-splitter mixing angle: cos(2θ) = tanh(r), sin(2θ) = -sech(r)
+    twoθ = -acos(tanh(r))
+    θ = twoθ / 2
+    # First beam splitter: BS(2θ, -π/2)
+    transmit1 = cos(2θ)^2
+    BS1 = _beamsplitter(basis, transmit1)
+    # Single-mode squeezing: S1 ⊗ S2
+    S1 = squeeze(QuadPairBasis(basis.nmodes - 1), r, 0.0)
+    S2 = squeeze(QuadPairBasis(basis.nmodes - 1), -r, 0.0)
+    S_tensor = S1 ⊗ S2
+    # Second beam splitter: BS(π+2θ, -π/2)
+    transmit2 = cos(π + 2θ)^2
+    BS2 = _beamsplitter(basis, transmit2)
+    # Compose the operations
+    final_symplectic = BS2[2] * S_tensor.symplectic * BS1[2]
+    final_disp = BS2[1] + S_tensor.disp + BS1[1]
+    return final_disp, final_symplectic
+end
+
 ##
 # Operations on Gaussian unitaries
 ##
