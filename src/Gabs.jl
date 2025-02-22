@@ -3,7 +3,7 @@ module Gabs
 using BlockArrays: BlockedArray, BlockArray, Block, mortar
 
 import LinearAlgebra
-using LinearAlgebra: I, det, mul!, diagm, diag, qr, eigvals
+using LinearAlgebra: I, det, mul!, diag, qr, eigvals, Diagonal
 
 import QuantumInterface: StateVector, AbstractOperator, apply!, tensor, ⊗, directsum, ⊕
 

@@ -9,12 +9,8 @@ Gaussian state with zero photons, known as the vacuum state. The symplectic repr
 
 ## Mathematical description of a vacuum state
 
-A vacuum state ``|0\\rangle`` is characterized by the mean vector ``\\mathbf{\\bar{x}}`` and covariance
-matrix ``\\mathbf{V}``, expressed respectively as follows:
-
-```math
-\\mathbf{\\bar{x}} = \\mathbf{0}, \\quad \\mathbf{V} = \\mathbf{I}.
-```
+A vacuum state `|0⟩` is characterized by the zero mean vector and covariance
+matrix `(ħ/2)I`.
 
 ## Example
 
@@ -30,19 +26,19 @@ covariance: 2×2 Matrix{Float64}:
  0.0  1.0
 ```
 """
-function vacuumstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}) where {Tm,Tc,N<:Int}
-    mean, covar = _vacuumstate(basis)
-    return GaussianState(basis, Tm(mean), Tc(covar))
+function vacuumstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}; ħ = 2) where {Tm,Tc,N<:Int}
+    mean, covar = _vacuumstate(basis; ħ = ħ)
+    return GaussianState(basis, Tm(mean), Tc(covar); ħ = ħ)
 end
-vacuumstate(::Type{T}, basis::SymplecticBasis{N}) where {T,N<:Int} = vacuumstate(T, T, basis)
-function vacuumstate(basis::SymplecticBasis{N}) where {N<:Int}
-    mean, covar = _vacuumstate(basis)
-    return GaussianState(basis, mean, covar)
+vacuumstate(::Type{T}, basis::SymplecticBasis{N}; ħ = 2) where {T,N<:Int} = vacuumstate(T, T, basis; ħ = ħ)
+function vacuumstate(basis::SymplecticBasis{N}; ħ = 2) where {N<:Int}
+    mean, covar = _vacuumstate(basis; ħ = ħ)
+    return GaussianState(basis, mean, covar; ħ = ħ)
 end
-function _vacuumstate(basis::SymplecticBasis{N}) where {N<:Int}
+function _vacuumstate(basis::SymplecticBasis{N}; ħ = 2) where {N<:Int}
     nmodes = basis.nmodes
     mean = zeros(2*nmodes)
-    covar = Matrix{Float64}(I, 2*nmodes, 2*nmodes)
+    covar = Matrix{Float64}((ħ/2) * I, 2*nmodes, 2*nmodes)
     return mean, covar
 end
 
@@ -54,13 +50,9 @@ is defined by `basis`. The mean photon number of the state is given by `photons`
 
 ## Mathematical description of a thermal state
 
-A thermal state ``|\\bar{n}\\rangle``, where ``\\bar{n}`` is the mean number of photons,
-is characterized by the mean vector ``\\mathbf{\\bar{x}}`` and covariance
-matrix ``\\mathbf{V}``, expressed respectively as follows:
-
-```math
-\\mathbf{\\bar{x}} = \\mathbf{0}, \\quad \\mathbf{V} = \\left(\\bar{n} + \\frac{1}{2}\\right)\\mathbf{I}.
-```
+A thermal state `|n̄⟩`, where `n̄` is the mean number of photons,
+is characterized by the zero mean vector and covariance
+matrix `ħ(n̄+1/2)I`.
 
 ## Example
 
@@ -72,45 +64,45 @@ mean: 2-element Vector{Float64}:
  0.0
  0.0
 covariance: 2×2 Matrix{Float64}:
- 4.5  0.0
- 0.0  4.5
+ 9.0  0.0
+ 0.0  9.0
 ```
 """
-function thermalstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, photons::P) where {Tm,Tc,N<:Int,P}
-    mean, covar = _thermalstate(basis, photons)
-    return GaussianState(basis, Tm(mean), Tc(covar))
+function thermalstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, photons::P; ħ = 2) where {Tm,Tc,N<:Int,P}
+    mean, covar = _thermalstate(basis, photons; ħ = ħ)
+    return GaussianState(basis, Tm(mean), Tc(covar); ħ = ħ)
 end
-thermalstate(::Type{T}, basis::SymplecticBasis{N}, photons::P) where {T,N<:Int,P} = thermalstate(T, T, basis, photons)
-function thermalstate(basis::SymplecticBasis{N}, photons::P) where {N<:Int,P}
-    mean, covar = _thermalstate(basis, photons)
-    return GaussianState(basis, mean, covar)
+thermalstate(::Type{T}, basis::SymplecticBasis{N}, photons::P; ħ = 2) where {T,N<:Int,P} = thermalstate(T, T, basis, photons; ħ = ħ)
+function thermalstate(basis::SymplecticBasis{N}, photons::P; ħ = 2) where {N<:Int,P}
+    mean, covar = _thermalstate(basis, photons; ħ = ħ)
+    return GaussianState(basis, mean, covar; ħ = ħ)
 end
-function _thermalstate(basis::Union{QuadPairBasis{N},QuadBlockBasis{N}}, photons::P) where {N<:Int,P<:Number}
+function _thermalstate(basis::Union{QuadPairBasis{N},QuadBlockBasis{N}}, photons::P; ħ = 2) where {N<:Int,P<:Number}
     nmodes = basis.nmodes
     Rt = float(eltype(P))
     mean = zeros(Rt, 2*nmodes)
-    covar = Matrix{Rt}((photons + 1/2) * I, 2*nmodes, 2*nmodes)
+    covar = Matrix{Rt}((2 * photons + 1) * (ħ/2) * I, 2*nmodes, 2*nmodes)
     return mean, covar
 end
-function _thermalstate(basis::QuadPairBasis{N}, photons::P) where {N<:Int,P<:Vector}
+function _thermalstate(basis::QuadPairBasis{N}, photons::P; ħ = 2) where {N<:Int,P<:Vector}
     nmodes = basis.nmodes
     Rt = float(eltype(P))
     mean = zeros(Rt, 2*nmodes)
     covar = zeros(Rt, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
-        val = photons[i] + 1/2
+        val = (2 * photons[i] + 1) * (ħ/2)
         covar[2*i-1, 2*i-1] = val
         covar[2*i, 2*i] = val
     end
     return mean, covar
 end
-function _thermalstate(basis::QuadBlockBasis{N}, photons::P) where {N<:Int,P<:Vector}
+function _thermalstate(basis::QuadBlockBasis{N}, photons::P; ħ = 2) where {N<:Int,P<:Vector}
     nmodes = basis.nmodes
     Rt = float(eltype(P))
     mean = zeros(Rt, 2*nmodes)
     covar = zeros(Rt, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
-        val = photons[i] + 1/2
+        val = (2 * photons[i] + 1) * (ħ/2)
         covar[i, i] = val
         covar[i+nmodes, i+nmodes] = val
     end
@@ -126,14 +118,9 @@ The complex amplitude of the state is given by `alpha`.
 
 ## Mathematical description of a coherent state
 
-A coherent state ``|\\alpha\\rangle``, where ``\\alpha`` is the complex amplitude,
-is characterized by the mean vector ``\\mathbf{\\bar{x}}`` and covariance
-matrix ``\\mathbf{V}``, expressed respectively as follows:
-
-```math
-\\mathbf{\\bar{x}} = \\sqrt{2}\\left(\\text{Re}(\\alpha), \\text{Im}(\\alpha)\\right)^{\\text{T}},
-\\quad \\mathbf{V} = \\mathbf{I}.
-```
+A coherent state `|α⟩`, where `α` is the complex amplitude,
+is characterized by the mean vector `√2ħ [real(α), imag(α)]` and covariance
+matrix `(ħ/2)I`.
 
 ## Example
 
@@ -142,48 +129,48 @@ julia> coherentstate(QuadPairBasis(1), 1.0+im)
 GaussianState for 1 mode.
   symplectic basis: QuadPairBasis
 mean: 2-element Vector{Float64}:
- 1.4142135623730951
- 1.4142135623730951
+ 2.0
+ 2.0
 covariance: 2×2 Matrix{Float64}:
  1.0  0.0
  0.0  1.0
 ```
 """
-function coherentstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, alpha::A) where {Tm,Tc,N<:Int,A}
-    mean, covar = _coherentstate(basis, alpha)
-    return GaussianState(basis, Tm(mean), Tc(covar))
+function coherentstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, alpha::A; ħ = 2) where {Tm,Tc,N<:Int,A}
+    mean, covar = _coherentstate(basis, alpha; ħ = ħ)
+    return GaussianState(basis, Tm(mean), Tc(covar); ħ = ħ)
 end
-coherentstate(::Type{T}, basis::SymplecticBasis{N}, alpha::A) where {T,N<:Int,A} = coherentstate(T, T, basis, alpha)
-function coherentstate(basis::SymplecticBasis{N}, alpha::A) where {N<:Int,A}
-    mean, covar = _coherentstate(basis, alpha)
-    return GaussianState(basis, mean, covar)
+coherentstate(::Type{T}, basis::SymplecticBasis{N}, alpha::A; ħ = 2) where {T,N<:Int,A} = coherentstate(T, T, basis, alpha; ħ = ħ)
+function coherentstate(basis::SymplecticBasis{N}, alpha::A; ħ = 2) where {N<:Int,A}
+    mean, covar = _coherentstate(basis, alpha; ħ = ħ)
+    return GaussianState(basis, mean, covar; ħ = ħ)
 end
-function _coherentstate(basis::QuadPairBasis{N}, alpha::A) where {N<:Int,A<:Number}
+function _coherentstate(basis::QuadPairBasis{N}, alpha::A; ħ = 2) where {N<:Int,A<:Number}
     nmodes = basis.nmodes
-    mean = repeat([sqrt(2)*real(alpha), sqrt(2)*imag(alpha)], nmodes)
-    covar = Matrix{real(A)}(I, 2*nmodes, 2*nmodes)
+    mean = repeat([sqrt(2*ħ) * real(alpha), sqrt(2*ħ) * imag(alpha)], nmodes)
+    covar = Matrix{real(A)}((ħ/2) * I, 2*nmodes, 2*nmodes)
     return mean, covar
 end
-function _coherentstate(basis::QuadPairBasis{N}, alpha::A) where {N<:Int,A<:Vector}
+function _coherentstate(basis::QuadPairBasis{N}, alpha::A; ħ = 2) where {N<:Int,A<:Vector}
     nmodes = basis.nmodes
     Rt = real(eltype(A))
-    mean = sqrt(2) * reinterpret(Rt, alpha)
-    covar = Matrix{Rt}(I, 2*nmodes, 2*nmodes)
+    mean = sqrt(2*ħ) * reinterpret(Rt, alpha)
+    covar = Matrix{Rt}((ħ/2) * I, 2*nmodes, 2*nmodes)
     return mean, covar
 end
-function _coherentstate(basis::QuadBlockBasis{N}, alpha::A) where {N<:Int,A<:Number}
+function _coherentstate(basis::QuadBlockBasis{N}, alpha::A; ħ = 2) where {N<:Int,A<:Number}
     nmodes = basis.nmodes
-    mean = repeat([sqrt(2)*real(alpha), sqrt(2)*imag(alpha)], inner = nmodes)
-    covar = Matrix{real(A)}(I, 2*nmodes, 2*nmodes)
+    mean = repeat([sqrt(2*ħ) * real(alpha), sqrt(2*ħ) * imag(alpha)], inner = nmodes)
+    covar = Matrix{real(A)}((ħ/2) * I, 2*nmodes, 2*nmodes)
     return mean, covar
 end
-function _coherentstate(basis::QuadBlockBasis{N}, alpha::A) where {N<:Int,A<:Vector}
+function _coherentstate(basis::QuadBlockBasis{N}, alpha::A; ħ = 2) where {N<:Int,A<:Vector}
     nmodes = basis.nmodes
     Rt = real(eltype(A))
     re = reinterpret(Rt, alpha)
     mean = vcat(@view(re[1:2:end]), @view(re[2:2:end]))
-    mean .*= sqrt(2)
-    covar = Matrix{Rt}(I, 2*nmodes, 2*nmodes)
+    mean .*= sqrt(2*ħ)
+    covar = Matrix{Rt}((ħ/2) * I, 2*nmodes, 2*nmodes)
     return mean, covar
 end
 
@@ -196,17 +183,10 @@ and `theta`, respectively.
 
 ## Mathematical description of a squeezed state
 
-A squeezed state ``|r, \\theta\\rangle``, where ``r`` is the amplitude squeezing
-parameter and ``\\theta`` is the phase squeezing parameter,
-is characterized by the mean vector ``\\mathbf{\\bar{x}}`` and covariance
-matrix ``\\mathbf{V}``, expressed respectively as follows:
-
-```math
-\\mathbf{\\bar{x}} = \\mathbf{0},
-\\quad \\mathbf{V} = \\frac{1}{2}\\left(\\cosh(2r)\\mathbf{I} - \\sinh(2r)\\mathbf{R}(\\theta)\\right),
-```
-
-where ``\\mathbf{R}(\\theta)`` is the rotation matrix.
+A squeezed state `|r, θ⟩`, where `r` is the amplitude squeezing
+parameter and `θ` is the phase squeezing parameter,
+is characterized by the zero mean vector and covariance
+matrix `(ħ/2) (cosh(2r)I - sinh(2r)R(θ))`, where `R(θ)` is the rotation matrix.
 
 ## Example
 
@@ -218,34 +198,34 @@ mean: 2-element Vector{Float64}:
  0.0
  0.0
 covariance: 2×2 Matrix{Float64}:
- 0.356044  0.415496
- 0.415496  1.18704
+  0.712088  -0.830993
+ -0.830993   2.37407
 ```
 """
-function squeezedstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, r::R, theta::R) where {Tm,Tc,N<:Int,R}
-    mean, covar = _squeezedstate(basis, r, theta)
-    return GaussianState(basis, Tm(mean), Tc(covar))
+function squeezedstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {Tm,Tc,N<:Int,R}
+    mean, covar = _squeezedstate(basis, r, theta; ħ = ħ)
+    return GaussianState(basis, Tm(mean), Tc(covar); ħ = ħ)
 end
-squeezedstate(::Type{T}, basis::SymplecticBasis{N}, r::R, theta::R) where {T,N<:Int,R} = squeezedstate(T, T, basis, r, theta)
-function squeezedstate(basis::SymplecticBasis{N}, r::R, theta::R) where {N<:Int,R}
-    mean, covar = _squeezedstate(basis, r, theta)
-    return GaussianState(basis, mean, covar)
+squeezedstate(::Type{T}, basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {T,N<:Int,R} = squeezedstate(T, T, basis, r, theta; ħ = ħ)
+function squeezedstate(basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {N<:Int,R}
+    mean, covar = _squeezedstate(basis, r, theta; ħ = ħ)
+    return GaussianState(basis, mean, covar; ħ = ħ)
 end
-function _squeezedstate(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Real}
+function _squeezedstate(basis::QuadPairBasis{N}, r::R, theta::R; ħ = 2) where {N<:Int,R<:Real}
     nmodes = basis.nmodes
     mean = zeros(R, 2*nmodes)
     covar = zeros(R, 2*nmodes, 2*nmodes)
     cr, sr = cosh(2*r), sinh(2*r)
     ct, st = cos(theta), sin(theta)
     @inbounds for i in Base.OneTo(nmodes)
-        covar[2*i-1, 2*i-1] = (1/2) * (cr - sr*ct)
-        covar[2*i-1, 2*i] = (1/2) * sr * st
-        covar[2*i, 2*i-1] = (1/2) * sr * st
-        covar[2*i, 2*i] = (1/2) * (cr + sr*ct)
+        covar[2*i-1, 2*i-1] = (ħ/2) * (cr - sr*ct)
+        covar[2*i-1, 2*i] = -(ħ/2) * sr * st
+        covar[2*i, 2*i-1] = -(ħ/2) * sr * st
+        covar[2*i, 2*i] = (ħ/2) * (cr + sr*ct)
     end
     return mean, covar
 end
-function _squeezedstate(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Vector}
+function _squeezedstate(basis::QuadPairBasis{N}, r::R, theta::R; ħ = 2) where {N<:Int,R<:Vector}
     nmodes = basis.nmodes
     Rt = eltype(R)
     mean = zeros(Rt, 2*nmodes)
@@ -253,28 +233,28 @@ function _squeezedstate(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R
     @inbounds for i in Base.OneTo(nmodes)
         cr, sr = cosh(2*r[i]), sinh(2*r[i])
         ct, st = cos(theta[i]), sin(theta[i])
-        covar[2*i-1, 2*i-1] = (1/2) * (cr - sr*ct)
-        covar[2*i-1, 2*i] = (1/2) * sr * st
-        covar[2*i, 2*i-1] = (1/2) * sr * st
-        covar[2*i, 2*i] = (1/2) * (cr + sr*ct)
+        covar[2*i-1, 2*i-1] = (ħ/2) * (cr - sr*ct)
+        covar[2*i-1, 2*i] = -(ħ/2) * sr * st
+        covar[2*i, 2*i-1] = -(ħ/2) * sr * st
+        covar[2*i, 2*i] = (ħ/2) * (cr + sr*ct)
     end
     return mean, covar
 end
-function _squeezedstate(basis::QuadBlockBasis{N}, r::R, theta::R) where {N<:Int,R<:Real}
+function _squeezedstate(basis::QuadBlockBasis{N}, r::R, theta::R; ħ = 2) where {N<:Int,R<:Real}
     nmodes = basis.nmodes
     mean = zeros(R, 2*nmodes)
     covar = zeros(R, 2*nmodes, 2*nmodes)
     cr, sr = cosh(2*r), sinh(2*r)
     ct, st = cos(theta), sin(theta)
     @inbounds for i in Base.OneTo(nmodes)
-        covar[i, i] = (1/2) * (cr - sr*ct)
-        covar[i, i+nmodes] = (1/2) * sr * st
-        covar[i+nmodes, i] = (1/2) * sr * st
-        covar[i+nmodes, i+nmodes] = (1/2) * (cr + sr*ct)
+        covar[i, i] = (ħ/2) * (cr - sr*ct)
+        covar[i, i+nmodes] = -(ħ/2) * sr * st
+        covar[i+nmodes, i] = -(ħ/2) * sr * st
+        covar[i+nmodes, i+nmodes] = (ħ/2) * (cr + sr*ct)
     end
     return mean, covar
 end
-function _squeezedstate(basis::QuadBlockBasis{N}, r::R, theta::R) where {N<:Int,R<:Vector}
+function _squeezedstate(basis::QuadBlockBasis{N}, r::R, theta::R; ħ = 2) where {N<:Int,R<:Vector}
     nmodes = basis.nmodes
     Rt = eltype(R)
     mean = zeros(Rt, 2*nmodes)
@@ -282,10 +262,10 @@ function _squeezedstate(basis::QuadBlockBasis{N}, r::R, theta::R) where {N<:Int,
     @inbounds for i in Base.OneTo(nmodes)
         cr, sr = cosh(2*r[i]), sinh(2*r[i])
         ct, st = cos(theta[i]), sin(theta[i])
-        covar[i, i] = (1/2) * (cr - sr*ct)
-        covar[i, i+nmodes] = (1/2) * sr * st
-        covar[i+nmodes, i] = (1/2) * sr * st
-        covar[i+nmodes, i+nmodes] = (1/2) * (cr + sr*ct)
+        covar[i, i] = (ħ/2) * (cr - sr*ct)
+        covar[i, i+nmodes] = -(ħ/2) * sr * st
+        covar[i+nmodes, i] = -(ħ/2) * sr * st
+        covar[i+nmodes, i+nmodes] = (ħ/2) * (cr + sr*ct)
     end
     return mean, covar
 end
@@ -298,20 +278,11 @@ representation is defined by `basis`. The amplitude and phase squeezing paramete
 
 ## Mathematical description of an EPR state
 
-An EPR state ``|r, \\theta\\rangle_{\\text{EPR}}``, where ``r`` is the amplitude squeezing
-parameter and ``\\theta`` is the phase squeezing parameter,
-is characterized by the mean vector ``\\mathbf{\\bar{x}}`` and covariance
-matrix ``\\mathbf{V}``, expressed respectively as follows:
-
-```math
-\\mathbf{\\bar{x}} = \\mathbf{0},
-\\quad \\mathbf{V} = \\frac{1}{2}\\begin{pmatrix}
-                                    \\cosh(2r)\\mathbf{I} & -\\sinh(2r)\\mathbf{R}(\\theta) \\\\
-                                    -\\sinh(2r)\\mathbf{R}(\\theta) & \\cosh(2r)\\mathbf{I} \\\\
-                                    \\end{pmatrix},
-```
-
-where ``\\mathbf{R}(\\theta)`` is the rotation matrix.
+An EPR state `|r, θ⟩ₑₚᵣ`, where `r` is the amplitude squeezing
+parameter and `θ` is the phase squeezing parameter,
+is characterized by the zero mean vector and covariance
+matrix `(ħ/2)[cosh(2r)I -sinh(2r)R(θ); -sinh(2r)R(θ) cosh(2r)I]`, 
+where `R(θ)` is the rotation matrix.
 
 ## Example
 
@@ -325,25 +296,25 @@ mean: 4-element Vector{Float64}:
  0.0
  0.0
 covariance: 4×4 Matrix{Float64}:
-  0.77154    0.0       -0.415496  -0.415496
-  0.0        0.77154   -0.415496   0.415496
- -0.415496  -0.415496   0.77154    0.0
- -0.415496   0.415496   0.0        0.77154
+  1.54308    0.0       -0.830993  -0.830993
+  0.0        1.54308   -0.830993   0.830993
+ -0.830993  -0.830993   1.54308    0.0
+ -0.830993   0.830993   0.0        1.54308
 ```
 """
-function eprstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, r::R, theta::R) where {Tm,Tc,N<:Int,R}
-    mean, covar = _eprstate(basis, r, theta)
-    return GaussianState(basis, Tm(mean), Tc(covar))
+function eprstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {Tm,Tc,N<:Int,R}
+    mean, covar = _eprstate(basis, r, theta; ħ = ħ)
+    return GaussianState(basis, Tm(mean), Tc(covar); ħ = ħ)
 end
-eprstate(::Type{T}, basis::SymplecticBasis{N}, r::R, theta::R) where {T,N<:Int,R} = eprstate(T, T, basis, r, theta)
-function eprstate(basis::SymplecticBasis{N}, r::R, theta::R) where {N<:Int,R}
-    mean, covar = _eprstate(basis, r, theta)
-    return GaussianState(basis, mean, covar)
+eprstate(::Type{T}, basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {T,N<:Int,R} = eprstate(T, T, basis, r, theta; ħ = ħ)
+function eprstate(basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {N<:Int,R}
+    mean, covar = _eprstate(basis, r, theta; ħ = ħ)
+    return GaussianState(basis, mean, covar; ħ = ħ)
 end
-function _eprstate(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Real}
+function _eprstate(basis::QuadPairBasis{N}, r::R, theta::R; ħ = 2) where {N<:Int,R<:Real}
     nmodes = basis.nmodes
     mean = zeros(R, 2*nmodes)
-    cr, sr = (1/2)*cosh(2*r), (1/2)*sinh(2*r)
+    cr, sr = (ħ/2)*cosh(2*r), (ħ/2)*sinh(2*r)
     ct, st = cos(theta), sin(theta)
     covar = zeros(R, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(Int(nmodes/2))
@@ -365,13 +336,13 @@ function _eprstate(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Rea
     end
     return mean, covar
 end
-function _eprstate(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Vector}
+function _eprstate(basis::QuadPairBasis{N}, r::R, theta::R; ħ = 2) where {N<:Int,R<:Vector}
     nmodes = basis.nmodes
     Rt = eltype(R)
     mean = zeros(Rt, 2*nmodes)
     covar = zeros(Rt, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(Int(nmodes/2))
-        cr, sr = (1/2)*cosh(2*r[i]), (1/2)*sinh(2*r[i])
+        cr, sr = (ħ/2)*cosh(2*r[i]), (ħ/2)*sinh(2*r[i])
         ct, st = cos(theta[i]), sin(theta[i])
 
         covar[4*i-3, 4*i-3] = cr
@@ -392,10 +363,10 @@ function _eprstate(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Vec
     end
     return mean, covar
 end
-function _eprstate(basis::QuadBlockBasis{N}, r::R, theta::R) where {N<:Int,R<:Real}
+function _eprstate(basis::QuadBlockBasis{N}, r::R, theta::R; ħ = 2) where {N<:Int,R<:Real}
     nmodes = basis.nmodes
     mean = zeros(R, 2*nmodes)
-    cr, sr = (1/2)*cosh(2*r), (1/2)*sinh(2*r)
+    cr, sr = (ħ/2)*cosh(2*r), (ħ/2)*sinh(2*r)
     ct, st = cos(theta), sin(theta)
     covar = zeros(R, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(Int(nmodes/2))
@@ -417,13 +388,13 @@ function _eprstate(basis::QuadBlockBasis{N}, r::R, theta::R) where {N<:Int,R<:Re
     end
     return mean, covar
 end
-function _eprstate(basis::QuadBlockBasis{N}, r::R, theta::R) where {N<:Int,R<:Vector}
+function _eprstate(basis::QuadBlockBasis{N}, r::R, theta::R; ħ = 2) where {N<:Int,R<:Vector}
     nmodes = basis.nmodes
     Rt = eltype(R)
     mean = zeros(Rt, 2*nmodes)
     covar = zeros(Rt, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(Int(nmodes/2))
-        cr, sr = (1/2)*cosh(2*r[i]), (1/2)*sinh(2*r[i])
+        cr, sr = (ħ/2)*cosh(2*r[i]), (ħ/2)*sinh(2*r[i])
         ct, st = cos(theta[i]), sin(theta[i])
 
         covar[2*i-1, 2*i-1] = cr
@@ -462,27 +433,29 @@ julia> coherentstate(basis, 1.0+im) ⊗ thermalstate(basis, 2)
 GaussianState for 2 modes.
   symplectic basis: QuadPairBasis
 mean: 4-element Vector{Float64}:
- 1.4142135623730951
- 1.4142135623730951
+ 2.0
+ 2.0
  0.0
  0.0
 covariance: 4×4 Matrix{Float64}:
  1.0  0.0  0.0  0.0
  0.0  1.0  0.0  0.0
- 0.0  0.0  2.5  0.0
- 0.0  0.0  0.0  2.5
+ 0.0  0.0  5.0  0.0
+ 0.0  0.0  0.0  5.0
 ```
 """
 function tensor(::Type{Tm}, ::Type{Tc}, state1::GaussianState, state2::GaussianState) where {Tm,Tc}
     typeof(state1.basis) == typeof(state2.basis) || throw(ArgumentError(SYMPLECTIC_ERROR))
+    state1.ħ == state2.ħ || throw(ArgumentError(HBAR_ERROR))
     mean, covar = _tensor(state1, state2)
-    return GaussianState(state1.basis ⊕ state2.basis, Tm(mean), Tc(covar))
+    return GaussianState(state1.basis ⊕ state2.basis, Tm(mean), Tc(covar); ħ = state1.ħ)
 end
 tensor(::Type{T}, state1::GaussianState, state2::GaussianState) where {T} = tensor(T, T, state1, state2)
 function tensor(state1::GaussianState, state2::GaussianState)
     typeof(state1.basis) == typeof(state2.basis) || throw(ArgumentError(SYMPLECTIC_ERROR))
+    state1.ħ == state2.ħ || throw(ArgumentError(HBAR_ERROR))
     mean, covar = _tensor(state1, state2)
-    return GaussianState(state1.basis ⊕ state2.basis, mean, covar)
+    return GaussianState(state1.basis ⊕ state2.basis, mean, covar; ħ = state1.ħ)
 end
 function _tensor(state1::GaussianState{B1,M1,V1}, state2::GaussianState{B2,M2,V2}) where {B1<:QuadPairBasis,B2<:QuadPairBasis,M1,M2,V1,V2}
     mean1, mean2 = state1.mean, state2.mean
@@ -565,23 +538,7 @@ indicated by `indices`.
 ```jldoctest
 julia> basis = QuadPairBasis(1);
 
-julia> state = coherentstate(basis, 1.0+im) ⊗ thermalstate(basis, 2) ⊗ squeezedstate(basis, 3.0, pi/4)
-GaussianState for 3 modes.
-  symplectic basis: QuadPairBasis
-mean: 6-element Vector{Float64}:
- 1.4142135623730951
- 1.4142135623730951
- 0.0
- 0.0
- 0.0
- 0.0
-covariance: 6×6 Matrix{Float64}:
- 1.0  0.0  0.0  0.0   0.0       0.0
- 0.0  1.0  0.0  0.0   0.0       0.0
- 0.0  0.0  2.5  0.0   0.0       0.0
- 0.0  0.0  0.0  2.5   0.0       0.0
- 0.0  0.0  0.0  0.0  29.5414   71.3164
- 0.0  0.0  0.0  0.0  71.3164  172.174
+julia> state = coherentstate(basis, 1.0+im) ⊗ thermalstate(basis, 2) ⊗ squeezedstate(basis, 3.0, pi/4);
 
 julia> ptrace(state, 2)
 GaussianState for 1 mode.
@@ -590,41 +547,41 @@ mean: 2-element Vector{Float64}:
  0.0
  0.0
 covariance: 2×2 Matrix{Float64}:
- 2.5  0.0
- 0.0  2.5
+ 5.0  0.0
+ 0.0  5.0
 
 julia> ptrace(state, [1, 3])
 GaussianState for 2 modes.
   symplectic basis: QuadPairBasis
 mean: 4-element Vector{Float64}:
- 1.4142135623730951
- 1.4142135623730951
+ 2.0
+ 2.0
  0.0
  0.0
 covariance: 4×4 Matrix{Float64}:
- 1.0  0.0   0.0       0.0
- 0.0  1.0   0.0       0.0
- 0.0  0.0  29.5414   71.3164
- 0.0  0.0  71.3164  172.174
+ 1.0  0.0     0.0        0.0
+ 0.0  1.0     0.0        0.0
+ 0.0  0.0    59.0829  -142.633
+ 0.0  0.0  -142.633    344.348
 ```
 """
 function ptrace(::Type{Tm}, ::Type{Tc}, state::GaussianState, idx::N) where {Tm,Tc,N<:Int}
     mean′, covar′ = _ptrace(state, idx)
-    return GaussianState(typeof(state.basis)(1), Tm(mean′), Tc(covar′))
+    return GaussianState(typeof(state.basis)(1), Tm(mean′), Tc(covar′); ħ = state.ħ)
 end
 ptrace(::Type{T}, state::GaussianState, idx::N) where {T,N<:Int} = ptrace(T, T, state, idx)
 function ptrace(state::GaussianState, idx::N) where {N<:Int}
     mean′, covar′ = _ptrace(state, idx)
-    return GaussianState(typeof(state.basis)(1), mean′, covar′)
+    return GaussianState(typeof(state.basis)(1), mean′, covar′; ħ = state.ħ)
 end
 function ptrace(::Type{Tm}, ::Type{Tc}, state::GaussianState, indices::N) where {Tm,Tc,N<:AbstractVector}
     mean, covar = _ptrace(state, indices)
-    return GaussianState(typeof(state.basis)(length(indices)), Tm(mean), Tc(covar))
+    return GaussianState(typeof(state.basis)(length(indices)), Tm(mean), Tc(covar); ħ = state.ħ)
 end
 ptrace(::Type{T}, state::GaussianState, indices::N) where {T,N<:AbstractVector} = ptrace(T, T, state, indices)
 function ptrace(state::GaussianState, indices::T) where {T<:AbstractVector}
     mean, covar = _ptrace(state, indices)
-    return GaussianState(typeof(state.basis)(length(indices)), mean, covar)
+    return GaussianState(typeof(state.basis)(length(indices)), mean, covar; ħ = state.ħ)
 end
 function _ptrace(state::GaussianState{B,M,V}, idx::T) where {B<:QuadPairBasis,M,V,T<:Int}
     idxV = 2*idx-1:(2*idx)
@@ -739,10 +696,10 @@ mean: 4-element Vector{Float64}:
  0.0
  0.0
 covariance: 4×4 Matrix{Float64}:
- 2.63575  0.0      1.64895  0.0
- 0.0      2.63575  0.0      1.64895
- 1.64895  0.0      1.12644  0.0
- 0.0      1.64895  0.0      1.12644
+  5.2715    0.0      -3.29789   0.0
+  0.0       5.2715    0.0      -3.29789
+ -3.29789   0.0       2.25289   0.0
+  0.0      -3.29789   0.0       2.25289
 
 julia> changebasis(QuadPairBasis, st)
 GaussianState for 2 modes.
@@ -753,10 +710,10 @@ mean: 4-element Vector{Float64}:
  0.0
  0.0
 covariance: 4×4 Matrix{Float64}:
- 2.63575  1.64895  0.0      0.0
- 1.64895  1.12644  0.0      0.0
- 0.0      0.0      2.63575  1.64895
- 0.0      0.0      1.64895  1.12644
+  5.2715   -3.29789   0.0       0.0
+ -3.29789   2.25289   0.0       0.0
+  0.0       0.0       5.2715   -3.29789
+  0.0       0.0      -3.29789   2.25289
 ```
 """
 function changebasis(::Type{B1}, state::GaussianState{B2,M,V}) where {B1<:QuadBlockBasis,B2<:QuadPairBasis,M,V}

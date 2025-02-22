@@ -36,7 +36,7 @@
     end
 
     @testset "random states" begin
-        nmodes = rand(1:5)
+        nmodes, ħ = rand(1:5), rand(1:5)
         qpairbasis = QuadPairBasis(nmodes)
         qblockbasis = QuadBlockBasis(nmodes)
         rs_pair = randstate(qpairbasis)
@@ -44,11 +44,12 @@
         rc = randchannel(qpairbasis)
         @test rc isa GaussianChannel
         @test rc * rs_pair isa GaussianState
+        @test rs_pair.ħ == 2 && rs_block.ħ == 2
         @test isgaussian(rs_pair, atol = 1e-5)
         @test isgaussian(rs_block, atol = 1e-5)
 
-        rspure_pair = randstate(qpairbasis, pure = true)
-        rspure_block = randstate(qblockbasis, pure = true)
+        rspure_pair = randstate(qpairbasis, pure = true, ħ = ħ)
+        rspure_block = randstate(qblockbasis, pure = true, ħ = ħ)
         @test isgaussian(rspure_pair, atol = 1e-5)
         @test isapprox(purity(rspure_pair), 1.0, atol = 1e-5)
         @test isgaussian(rspure_block, atol = 1e-5)
@@ -57,6 +58,7 @@
         rs_array = randstate(Array, qpairbasis)
         rc_array = randchannel(Array, qpairbasis)
         @test rc_array isa GaussianChannel
+        @test rc_array.ħ == 2
         @test rc_array * rs_array isa GaussianState
         @test isgaussian(rs_array, atol = 1e-5)
 
@@ -67,6 +69,7 @@
         rs_static = randstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis)
         rc_static = randchannel(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis)
         @test rc_static isa GaussianChannel
+        @test rs_static isa GaussianState
         @test rc_static * rs_static isa GaussianState
         @test isgaussian(rs_static, atol = 1e-5)
 
@@ -76,17 +79,19 @@
     end
 
     @testset "random unitaries" begin
-        nmodes = rand(1:5)
+        nmodes, ħ = rand(1:5), rand(1:5)
         qpairbasis = QuadPairBasis(nmodes)
         qblockbasis = QuadBlockBasis(nmodes)
-        ru = randunitary(qpairbasis)
+        ru = randunitary(qpairbasis, ħ = ħ)
         @test isgaussian(ru, atol = 1e-5)
 
         rupassive = randunitary(qpairbasis, passive = true)
+        @test rupassive.ħ == 2
         @test isapprox(rupassive.symplectic', inv(rupassive.symplectic), atol = 1e-5)
         @test isgaussian(rupassive, atol = 1e-5)
 
         ru_array = randunitary(Array, qpairbasis)
+        @test ru_array.ħ == 2
         @test isgaussian(ru_array, atol = 1e-5)
 
         rupassive_array = randunitary(qpairbasis, passive = true)
@@ -94,6 +99,7 @@
         @test isgaussian(rupassive_array, atol = 1e-5)
 
         ru_static = randunitary(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis)
+        @test ru_static.ħ == 2
         @test isgaussian(ru_static, atol = 1e-5)
 
         rupassive_static = randunitary(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, passive = true)
@@ -102,16 +108,18 @@
     end
 
     @testset "random channels" begin
-        nmodes = rand(1:5)
+        nmodes, ħ = rand(1:5), rand(1:5)
         qpairbasis = QuadPairBasis(nmodes)
         qblockbasis = QuadBlockBasis(nmodes)
-        rc = randchannel(qpairbasis)
+        rc = randchannel(qpairbasis, ħ = ħ)
         @test isgaussian(rc, atol = 1e-5)
 
         rc_array = randchannel(Array, qpairbasis)
+        @test rc_array.ħ == 2
         @test isgaussian(rc_array, atol = 1e-5)
 
         rc_static = randchannel(SVector{2*nmodes}, SMatrix{2*nmodes, 2*nmodes}, qpairbasis)
+        @test rc_static.ħ == 2
         @test isgaussian(rc_static, atol = 1e-5)
     end
 end

@@ -58,6 +58,9 @@ Listed below are supported predefined Gaussian states:
 Detailed discussions and mathematical descriptions for each of these states are given in the
 [Gaussian Zoos](@ref) page.
 
+!!! note
+    In Gabs, the default convention $\hbar = 2$ is used for the commutation relation $[\hat{x}, \hat{p}] = i\hbar$. To change this convention, pass a new value to `ħ` as a keyword argument in any predefined method that creates a Gaussian object. For instance, to change the convention to `ħ = 1` for a coherent state, call `coherentstate(basis, α, ħ = 1)`. This is a more performant and safer approach compared to setting a global variable in a package. An error will be thrown for operations between Gaussian objects with different `ħ` conventions.
+
 ## Gaussian Unitaries
 
 To transform Gaussian states into Gaussian states, we need Gaussian maps. Let's begin with the simplest Gaussian transformation, a unitary transformation, which can be created with the [`GaussianUnitary`](@ref) type:
@@ -105,8 +108,8 @@ Listed below are a list of predefined Gaussian channels supported by Gabs:
     GaussianChannel for 1 mode.
       symplectic basis: QuadPairBasis
     displacement: 2-element Vector{Float64}:
-      1.4142135623730951
-     -1.4142135623730951
+      2.0
+     -2.0
     transform: 2×2 Matrix{Float64}:
      1.0  0.0
      0.0  1.0
@@ -200,19 +203,19 @@ julia> coherentstate(basis, -1.0+im) ⊗ vacuumstate(basis) ⊗ squeezedstate(ba
 GaussianState for 3 modes.
   symplectic basis: QuadPairBasis
 mean: 6-element Vector{Float64}:
- -1.4142135623730951
-  1.4142135623730951
+ -2.0
+  2.0
   0.0
   0.0
   0.0
   0.0
 covariance: 6×6 Matrix{Float64}:
- 1.0  0.0  0.0  0.0  0.0       0.0
- 0.0  1.0  0.0  0.0  0.0       0.0
- 0.0  0.0  1.0  0.0  0.0       0.0
- 0.0  0.0  0.0  1.0  0.0       0.0
- 0.0  0.0  0.0  0.0  0.379578  0.184235
- 0.0  0.0  0.0  0.0  0.184235  0.748048
+ 1.0  0.0  0.0  0.0   0.0        0.0
+ 0.0  1.0  0.0  0.0   0.0        0.0
+ 0.0  0.0  1.0  0.0   0.0        0.0
+ 0.0  0.0  0.0  1.0   0.0        0.0
+ 0.0  0.0  0.0  0.0   0.759156  -0.36847
+ 0.0  0.0  0.0  0.0  -0.36847    1.4961
 ```
 
 Note that in the above example, we defined the symplectic basis to be of type [`QuadPairBasis`](@ref). If we wanted the canonical field operators to be ordered blockwise, then we would call [`QuadBlockBasis`](@ref) instead:
@@ -224,19 +227,19 @@ julia> coherentstate(basis, -1.0+im) ⊗ vacuumstate(basis) ⊗ squeezedstate(ba
 GaussianState for 3 modes.
   symplectic basis: QuadBlockBasis
 mean: 6-element Vector{Float64}:
- -1.4142135623730951
+ -2.0
   0.0
   0.0
-  1.4142135623730951
+  2.0
   0.0
   0.0
 covariance: 6×6 Matrix{Float64}:
- 1.0  0.0  0.0       0.0  0.0  0.0
- 0.0  1.0  0.0       0.0  0.0  0.0
- 0.0  0.0  0.379578  0.0  0.0  0.184235
- 0.0  0.0  0.0       1.0  0.0  0.0
- 0.0  0.0  0.0       0.0  1.0  0.0
- 0.0  0.0  0.184235  0.0  0.0  0.748048
+ 1.0  0.0   0.0       0.0  0.0   0.0
+ 0.0  1.0   0.0       0.0  0.0   0.0
+ 0.0  0.0   0.759156  0.0  0.0  -0.36847
+ 0.0  0.0   0.0       1.0  0.0   0.0
+ 0.0  0.0   0.0       0.0  1.0   0.0
+ 0.0  0.0  -0.36847   0.0  0.0   1.4961
 ```
 These tensor product methods are also available for Gaussian unitaries and channels:
 
@@ -321,12 +324,12 @@ julia> coherentstate(basis, 1.0-im)
 GaussianState for 3 modes.
   symplectic basis: QuadPairBasis
 mean: 6-element Vector{Float64}:
-  1.4142135623730951
- -1.4142135623730951
-  1.4142135623730951
- -1.4142135623730951
-  1.4142135623730951
- -1.4142135623730951
+  2.0
+ -2.0
+  2.0
+ -2.0
+  2.0
+ -2.0
 covariance: 6×6 Matrix{Float64}:
  1.0  0.0  0.0  0.0  0.0  0.0
  0.0  1.0  0.0  0.0  0.0  0.0
@@ -339,12 +342,12 @@ julia> coherentstate(basis, [1.0-im, 2.0-2.0im, 3.0-3.0im])
 GaussianState for 3 modes.
   symplectic basis: QuadPairBasis
 mean: 6-element Vector{Float64}:
-  1.4142135623730951
- -1.4142135623730951
-  2.8284271247461903
- -2.8284271247461903
-  4.242640687119286
- -4.242640687119286
+  2.0
+ -2.0
+  4.0
+ -4.0
+  6.0
+ -6.0
 covariance: 6×6 Matrix{Float64}:
  1.0  0.0  0.0  0.0  0.0  0.0
  0.0  1.0  0.0  0.0  0.0  0.0
@@ -366,30 +369,30 @@ julia> state = coherentstate(basis, [1.0-im, 2.0-2.0im]) ⊗ eprstate(basis, 2.0
 GaussianState for 4 modes.
   symplectic basis: QuadPairBasis
 mean: 8-element Vector{Float64}:
-  1.4142135623730951
- -1.4142135623730951
-  2.8284271247461903
- -2.8284271247461903
+  2.0
+ -2.0
+  4.0
+ -4.0
   0.0
   0.0
   0.0
   0.0
 covariance: 8×8 Matrix{Float64}:
- 1.0  0.0  0.0  0.0    0.0        0.0        0.0        0.0
- 0.0  1.0  0.0  0.0    0.0        0.0        0.0        0.0
- 0.0  0.0  1.0  0.0    0.0        0.0        0.0        0.0
- 0.0  0.0  0.0  1.0    0.0        0.0        0.0        0.0
- 0.0  0.0  0.0  0.0   13.6541     0.0       -6.82248  -11.8169
- 0.0  0.0  0.0  0.0    0.0       13.6541   -11.8169     6.82248
- 0.0  0.0  0.0  0.0   -6.82248  -11.8169    13.6541     0.0
- 0.0  0.0  0.0  0.0  -11.8169     6.82248    0.0       13.6541
+ 1.0  0.0  0.0  0.0    0.0       0.0       0.0       0.0
+ 0.0  1.0  0.0  0.0    0.0       0.0       0.0       0.0
+ 0.0  0.0  1.0  0.0    0.0       0.0       0.0       0.0
+ 0.0  0.0  0.0  1.0    0.0       0.0       0.0       0.0
+ 0.0  0.0  0.0  0.0   27.3082    0.0     -13.645   -23.6338
+ 0.0  0.0  0.0  0.0    0.0      27.3082  -23.6338   13.645
+ 0.0  0.0  0.0  0.0  -13.645   -23.6338   27.3082    0.0
+ 0.0  0.0  0.0  0.0  -23.6338   13.645     0.0      27.3082
 
 julia> ptrace(state, 1)
 GaussianState for 1 mode.
   symplectic basis: QuadPairBasis
 mean: 2-element Vector{Float64}:
-  1.4142135623730951
- -1.4142135623730951
+  2.0
+ -2.0
 covariance: 2×2 Matrix{Float64}:
  1.0  0.0
  0.0  1.0
@@ -398,15 +401,15 @@ julia> ptrace(state, [1, 4])
 GaussianState for 2 modes.
   symplectic basis: QuadPairBasis
 mean: 4-element Vector{Float64}:
-  1.4142135623730951
- -1.4142135623730951
+  2.0
+ -2.0
   0.0
   0.0
 covariance: 4×4 Matrix{Float64}:
  1.0  0.0   0.0      0.0
  0.0  1.0   0.0      0.0
- 0.0  0.0  13.6541   0.0
- 0.0  0.0   0.0     13.6541
+ 0.0  0.0  27.3082   0.0
+ 0.0  0.0   0.0     27.3082
 ```
 
 ## Symplectic Analysis

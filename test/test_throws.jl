@@ -23,4 +23,18 @@
         ts = twosqueeze(2*basis1, rand(), rand())
         @test_throws ArgumentError Makie.heatmap(collect(-3.0:0.25:3.0), collect(-3.0:0.25:3.0), ts)
     end
+
+    @testset "hbar throws" begin
+        rs1, rs2 = randstate(basis1, ħ = 1), randstate(basis1)
+        ru1, ru2 = randunitary(basis1, ħ = 1), randunitary(basis1)
+        rc1, rc2 = randchannel(basis1, ħ = 1), randchannel(basis1)
+        
+        @test_throws ArgumentError ru2 * rs1
+        @test_throws ArgumentError rc1 * rs2
+        @test_throws ArgumentError apply!(rs1, ru2)
+        @test_throws ArgumentError apply!(rs2, rc1)
+        @test_throws ArgumentError rs1 ⊗ rs2
+        @test_throws ArgumentError ru1 ⊗ ru2
+        @test_throws ArgumentError rc1 ⊗ rc2
+    end
 end
