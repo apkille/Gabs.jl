@@ -28,3 +28,6 @@ WIGNER_ERROR = lazy"The length of your input array does not match the
 
 HEATMAP_ERROR = lazy"The input Gaussian state describes more than one mode. 
     A heat map visualization for a multi-mode Gaussian state is not possible."
+
+HBAR_ERROR = lazy"There are at least two different conventions for `ħ` used in this operation. Make sure
+    that each Gaussian object has the same convention for `ħ`."
