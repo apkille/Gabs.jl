@@ -59,7 +59,7 @@
         rs, thetas = rand(Float64, nmodes), rand(Float64, nmodes)
         state, array_state, static_state = eprstate(2*qpairbasis, r, theta), eprstate(Array, 2*qpairbasis, r, theta), eprstate(SVector, SMatrix, 2*qpairbasis, r, theta)
         @test state isa GaussianState && array_state isa GaussianState && static_state isa GaussianState
-        @test eprstate(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, 2*qpairbasis, r, theta) isa GaussianState
+        @test eprstate(SVector, SMatrix, 2*qpairbasis, r, theta) isa GaussianState
         @test eprstate(2*qblockbasis, r, theta) == changebasis(QuadBlockBasis, state)
         @test eprstate(2*qblockbasis, rs, thetas) == changebasis(QuadBlockBasis, eprstate(2*qpairbasis, rs, thetas))
         @test state.ħ == 2 && array_state.ħ == 2 && static_state.ħ == 2

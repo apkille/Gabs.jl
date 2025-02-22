@@ -5,12 +5,10 @@
 function infer_transform_type end
 
 function infer_transform_type(::Type{Array}, basis::Gabs.SymplecticBasis{N}) where {N}
-    nmodes = basis.nmodes
     return Array{Float64, 2}
 end
 
 function infer_transform_type(::Type{Array{T}}, basis::Gabs.SymplecticBasis{N}) where {T, N}
-    nmodes = basis.nmodes
     return Array{T, 2}
 end
 

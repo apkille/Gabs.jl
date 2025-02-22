@@ -4,7 +4,23 @@
 
 function infer_mean_type end
 
+function infer_mean_type(::Type{Array}, basis::Gabs.SymplecticBasis{N}) where {N}
+    return Array
+end
+
+function infer_mean_type(::Type{Array{T}}, basis::Gabs.SymplecticBasis{N}) where {T, N}
+    return Array{T, 1}
+end
+
 function infer_covar_type end
+
+function infer_covar_type(::Type{Array}, basis::Gabs.SymplecticBasis{N}) where {N}
+    return Array
+end
+
+function infer_covar_type(::Type{Array{T}}, basis::Gabs.SymplecticBasis{N}) where {T, N}
+    return Array{T, 2}
+end
 
 """
     vacuumstate([Tm=Vector{Float64}, Tc=Matrix{Float64}], basis::SymplecticBasis)
@@ -77,7 +93,7 @@ covariance: 2×2 Matrix{Float64}:
 function thermalstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, photons::P; ħ = 2) where {Tm,Tc,N<:Int,P}
     mean_type = infer_mean_type(Tm, basis)
     covar_type = infer_covar_type(Tc, basis)
-    mean, covar = _thermalstate(basis, photons)
+    mean, covar = _thermalstate(basis, photons; ħ = ħ)
     return GaussianState(basis, mean_type(mean), covar_type(covar); ħ = ħ)
 end
 thermalstate(::Type{T}, basis::SymplecticBasis{N}, photons::P; ħ = 2) where {T,N<:Int,P} = thermalstate(T, T, basis, photons; ħ = ħ)
