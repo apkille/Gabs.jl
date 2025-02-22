@@ -36,16 +36,10 @@ be added to the operation with `noise`.
 
 ## Mathematical description of a displacement operator
 
-A displacement operator ``D(\\alpha)`` is defined by the operation
-``D(\\alpha)|0\\rangle = |\\alpha\\rangle``, where ``\\alpha`` is
-a complex amplitude. The operator ``D(\\alpha)`` is characterized by 
-the displacement vector ``\\mathbf{d}`` and symplectic
-matrix ``\\mathbf{S}``, expressed respectively as follows:
-
-```math
-\\mathbf{d} = \\sqrt{2}\\left(\\text{Re}(\\alpha), \\text{Im}(\\alpha)\\right)^{\\text{T}},
-\\quad \\mathbf{S} = \\mathbf{I}.
-```
+A displacement operator `D(α)` is defined by the operation
+`D(α)|0⟩ = |α⟩`, where `α` is a complex amplitude. The operator `D(α)` 
+is characterized by the displacement vector `√2ħ [real(α), imag(α)]` 
+and symplectic matrix `I`.
 
 ## Example
 
@@ -54,51 +48,51 @@ julia> displace(QuadPairBasis(1), 1.0+im)
 GaussianUnitary for 1 mode.
   symplectic basis: QuadPairBasis
 displacement: 2-element Vector{Float64}:
- 1.4142135623730951
- 1.4142135623730951
+ 2.0
+ 2.0
 symplectic: 2×2 Matrix{Float64}:
  1.0  0.0
  0.0  1.0
 ```
 """
-function displace(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}, alpha::A) where {Td,Ts,N<:Int,A}
+function displace(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}, alpha::A; ħ = 2) where {Td,Ts,N<:Int,A}
     disp_type = infer_displacement_type(Td, basis)
     symplectic_type = infer_symplectic_type(Ts, basis)
     disp, symplectic = _displace(basis, alpha)
-    return GaussianUnitary(basis, disp_type(disp), symplectic_type(symplectic))
+    return GaussianUnitary(basis, disp_type(disp), symplectic_type(symplectic); ħ = ħ)
 end
-displace(::Type{T}, basis::SymplecticBasis{N}, alpha::A) where {T,N<:Int,A} = displace(T, T, basis, alpha)
-function displace(basis::SymplecticBasis{N}, alpha::A) where {N<:Int,A}
-    disp, symplectic = _displace(basis, alpha)
-    return GaussianUnitary(basis, disp, symplectic)
+displace(::Type{T}, basis::SymplecticBasis{N}, alpha::A; ħ = 2) where {T,N<:Int,A} = displace(T, T, basis, alpha; ħ = ħ)
+function displace(basis::SymplecticBasis{N}, alpha::A; ħ = 2) where {N<:Int,A}
+    disp, symplectic = _displace(basis, alpha; ħ = ħ)
+    return GaussianUnitary(basis, disp, symplectic; ħ = ħ)
 end
-function _displace(basis::QuadPairBasis{N}, alpha::A) where {N<:Int,A<:Number}
+function _displace(basis::QuadPairBasis{N}, alpha::A; ħ = 2) where {N<:Int,A<:Number}
     nmodes = basis.nmodes
     Rt = real(eltype(A))
-    disp = repeat([sqrt(2)*real(alpha), sqrt(2)*imag(alpha)], nmodes)
+    disp = repeat([sqrt(2*ħ) * real(alpha), sqrt(2*ħ) * imag(alpha)], nmodes)
     symplectic = Matrix{Rt}(I, 2*nmodes, 2*nmodes)
     return disp, symplectic
 end
-function _displace(basis::QuadPairBasis{N}, alpha::A) where {N<:Int,A<:Vector}
+function _displace(basis::QuadPairBasis{N}, alpha::A; ħ = 2) where {N<:Int,A<:Vector}
     nmodes = basis.nmodes
     Rt = real(eltype(A))
-    disp = sqrt(2) * reinterpret(Rt, alpha)
+    disp = sqrt(2*ħ) * reinterpret(Rt, alpha)
     symplectic = Matrix{Rt}(I, 2*nmodes, 2*nmodes)
     return disp, symplectic
 end
-function _displace(basis::QuadBlockBasis{N}, alpha::A) where {N<:Int,A<:Number}
+function _displace(basis::QuadBlockBasis{N}, alpha::A; ħ = 2) where {N<:Int,A<:Number}
     nmodes = basis.nmodes
     Rt = real(eltype(A))
-    disp = repeat([sqrt(2)*real(alpha), sqrt(2)*imag(alpha)], inner = nmodes)
+    disp = repeat([sqrt(2*ħ) * real(alpha), sqrt(2*ħ) * imag(alpha)], inner = nmodes)
     symplectic = Matrix{Rt}(I, 2*nmodes, 2*nmodes)
     return disp, symplectic
 end
-function _displace(basis::QuadBlockBasis{N}, alpha::A) where {N<:Int,A<:Vector}
+function _displace(basis::QuadBlockBasis{N}, alpha::A; ħ = 2) where {N<:Int,A<:Vector}
     nmodes = basis.nmodes
     Rt = real(eltype(A))
     re = reinterpret(Rt, alpha)
     disp = vcat(@view(re[1:2:end]), @view(re[2:2:end]))
-    disp .*= sqrt(2)
+    disp .*= sqrt(2*ħ)
     symplectic = Matrix{Rt}(I, 2*nmodes, 2*nmodes)
     return disp, symplectic
 end
@@ -114,19 +108,11 @@ with `noise`.
 
 ## Mathematical description of a squeezing operator
 
-A squeeze operator ``S(r, \\theta)`` is defined by the operation
-``S(r, \\theta)|0\\rangle = |r, \\theta\\rangle``, where ``r`` and ``\\theta``
-are the real amplitude and phase parameters, respectively. The operator 
-``S(r, \\theta)`` is characterized by 
-the displacement vector ``\\mathbf{d}`` and symplectic
-matrix ``\\mathbf{S}``, expressed respectively as follows:
-
-```math
-\\mathbf{d} = \\mathbf{0},
-\\quad \\mathbf{S} = \\cosh(r)\\mathbf{I} - \\sinh(r)\\mathbf{R}(\\theta),
-```
-
-where ``\\mathbf{R}(\\theta)`` is the rotation matrix.
+A squeeze operator `S(r, θ)` is defined by the operation
+`S(r, θ)|0⟩ = |r, θ⟩`, where `r` and `θ` are the real amplitude and phase parameters, 
+respectively. The operator `S(r, θ)` is characterized by 
+the zero displacement vector and symplectic
+matrix `cosh(r)I - sinh(r)R(θ)`, where `R(θ)` is the rotation matrix.
 
 ## Example
 
@@ -142,16 +128,16 @@ symplectic: 2×2 Matrix{Float64}:
  -0.178624   1.21004
 ```
 """
-function squeeze(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}, r::R, theta::R) where {Td,Ts,N<:Int,R}
+function squeeze(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {Td,Ts,N<:Int,R}
     disp_type = infer_displacement_type(Td, basis)
     symplectic_type = infer_symplectic_type(Ts, basis)
     disp, symplectic = _squeeze(basis, r, theta)
-    return GaussianUnitary(basis, disp_type(disp), symplectic_type(symplectic))
+    return GaussianUnitary(basis, disp_type(disp), symplectic_type(symplectic); ħ = ħ)
 end
-squeeze(::Type{T}, basis::SymplecticBasis{N}, r::R, theta::R) where {T,N<:Int,R} = squeeze(T, T, basis, r, theta)
-function squeeze(basis::SymplecticBasis{N}, r::R, theta::R) where {N<:Int, R}
+squeeze(::Type{T}, basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {T,N<:Int,R} = squeeze(T, T, basis, r, theta; ħ = ħ)
+function squeeze(basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {N<:Int, R}
     disp, symplectic = _squeeze(basis, r, theta)
-    return GaussianUnitary(basis, disp, symplectic)
+    return GaussianUnitary(basis, disp, symplectic; ħ = ħ)
 end
 function _squeeze(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Real}
     nmodes = basis.nmodes
@@ -225,22 +211,11 @@ with `noise`.
 
 ## Mathematical description of a two-mode squeezing operator
 
-A two-mode squeeze operator ``S_2(r, \\theta)`` is defined by the operation
-``S_2(r, \\theta)|0\\rangle = |r, \\theta\\rangle``, where ``r`` and ``\\theta``
+A two-mode squeeze operator `S₂(r, θ)` is defined by the operation
+`S₂(r, θ)|0⟩ = |r, θ⟩`, where `r` and `θ`
 are the real amplitude and phase parameters, respectively. The operator 
-``S_2(r, \\theta)`` is characterized by 
-the displacement vector ``\\mathbf{d}`` and symplectic
-matrix ``\\mathbf{S}``, expressed respectively as follows:
-
-```math
-\\mathbf{d} = \\mathbf{0},
-\\quad \\mathbf{S} = \\begin{pmatrix}
-                    \\cosh(r)\\mathbf{I} & -\\sinh(r)\\mathbf{R}(\\theta) \\\\
-                    -\\sinh(r)\\mathbf{R}(\\theta) & \\cosh(r)\\mathbf{I} \\\\
-                    \\end{pmatrix},
-```
-
-where ``\\mathbf{R}(\\theta)`` is the rotation matrix.
+`S₂(r, θ)` is characterized by the zero displacement vector and symplectic
+matrix `[cosh(r)I -sinh(r)R(θ); -sinh(r)R(θ) cosh(r)I]`, where `R(θ)` is the rotation matrix.
 
 ## Example
 
@@ -260,16 +235,16 @@ symplectic: 4×4 Matrix{Float64}:
  -0.178624   0.178624   0.0        1.03141
 ```
 """
-function twosqueeze(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}, r::R, theta::R) where {Td,Ts,N<:Int,R}
+function twosqueeze(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {Td,Ts,N<:Int,R}
     disp_type = infer_displacement_type(Td, basis)
     symplectic_type = infer_symplectic_type(Ts, basis)
     disp, symplectic = _twosqueeze(basis, r, theta)
-    return GaussianUnitary(basis, disp_type(disp), symplectic_type(symplectic))
+    return GaussianUnitary(basis, disp_type(disp), symplectic_type(symplectic); ħ = ħ)
 end
-twosqueeze(::Type{T}, basis::SymplecticBasis{N}, r::R, theta::R) where {T,N<:Int,R} = twosqueeze(T, T, basis, r, theta)
-function twosqueeze(basis::SymplecticBasis{N}, r::R, theta::R) where {N<:Int,R}
+twosqueeze(::Type{T}, basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {T,N<:Int,R} = twosqueeze(T, T, basis, r, theta; ħ = ħ)
+function twosqueeze(basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {N<:Int,R}
     disp, symplectic = _twosqueeze(basis, r, theta)
-    return GaussianUnitary(basis, disp, symplectic)
+    return GaussianUnitary(basis, disp, symplectic; ħ = ħ)
 end
 function _twosqueeze(basis::QuadPairBasis{N}, r::R, theta::R) where {N<:Int,R<:Real}
     nmodes = basis.nmodes
@@ -386,21 +361,12 @@ with `noise`.
 
 ## Mathematical description of a phase shift operator
 
-A phase shift operator ``U(\\theta)`` is defined by the operation
-``U(\\Theta) = \\exp(-i\\theta\\hat{a}^{\\dagger}\\hat{a})``, where ``\\theta`` is
-the phase parameter, and ``\\hat{a}^{\\dagger}`` and ``\\hat{a}`` are the raising
-and lowering operators, respectively. The operator 
-``U(\\theta)`` is characterized by 
-the displacement vector ``\\mathbf{d}`` and symplectic
-matrix ``\\mathbf{S}``, expressed respectively as follows:
-
-```math
-\\mathbf{d} = \\mathbf{0},
-\\quad \\mathbf{S} = \\begin{pmatrix}
-                        \\cos(\\theta) & \\sin(\\theta) \\\\
-                        -\\sin(\\theta) & \\cos(\\theta) \\\\
-                     \\end{pmatrix}.
-```
+A phase shift operator is defined by the operation
+`U(θ) = exp(-iθâᵗâ)`, where `θ` is
+the phase parameter, and `âᵗ` and `â` are the raising
+and lowering operators, respectively. The operator `U(θ)` is characterized by 
+the zero displacement vector and symplectic
+matrix `[cos(θ) sin(θ); -sin(θ) cos(θ)]`.
 
 ## Example
 
@@ -416,16 +382,16 @@ symplectic: 2×2 Matrix{Float64}:
  -0.707107  -0.707107
 ```
 """
-function phaseshift(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}, theta::R) where {Td,Ts,N<:Int,R}
+function phaseshift(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}, theta::R; ħ = 2) where {Td,Ts,N<:Int,R}
     disp_type = infer_displacement_type(Td, basis)
     symplectic_type = infer_symplectic_type(Ts, basis)
     disp, symplectic = _phaseshift(basis, theta)
-    return GaussianUnitary(basis, disp_type(disp), symplectic_type(symplectic))
+    return GaussianUnitary(basis, disp_type(disp), symplectic_type(symplectic); ħ = ħ)
 end
-phaseshift(::Type{T}, basis::SymplecticBasis{N}, theta::R) where {T,N<:Int,R} = phaseshift(T, T, basis, theta)
-function phaseshift(basis::SymplecticBasis{N}, theta::R) where {N<:Int,R}
+phaseshift(::Type{T}, basis::SymplecticBasis{N}, theta::R; ħ = 2) where {T,N<:Int,R} = phaseshift(T, T, basis, theta; ħ = ħ)
+function phaseshift(basis::SymplecticBasis{N}, theta::R; ħ = 2) where {N<:Int,R}
     disp, symplectic = _phaseshift(basis, theta)
-    return GaussianUnitary(basis, disp, symplectic)
+    return GaussianUnitary(basis, disp, symplectic; ħ = ħ)
 end
 function _phaseshift(basis::QuadPairBasis{N}, theta::R) where {N<:Int,R<:Real}
     nmodes = basis.nmodes
@@ -493,21 +459,12 @@ with `noise`.
 
 ## Mathematical description of a beam splitter operator
 
-A beam splitter operator ``B(\\tau)`` is defined by the operation
-``B(\\theta) = \\exp\\left[\\theta(\\hat{a}^{\\dagger}\\hat{b} - \\hat{a}\\hat{b}^{\\dagger})\\right]``,
-where ``\\theta`` is defined by ``\\tau = \\cos^2\\theta``, and ``\\hat{a}`` and ``\\hat{b}``
-are the annihilation operators of the two modes, respectively. The operator 
-``B(\\tau)`` is characterized by 
-the displacement vector ``\\mathbf{d}`` and symplectic
-matrix ``\\mathbf{S}``, expressed respectively as follows:
-
-```math
-\\mathbf{d} = \\mathbf{0},
-\\quad \\mathbf{S} = \\begin{pmatrix}
-                        \\sqrt{\\tau}\\mathbf{I} & \\sqrt{1-\\tau}\\mathbf{I} \\\\
-                        -\\sqrt{1-\\tau}\\mathbf{I} & \\sqrt{\\tau}\\mathbf{I} \\\\
-                     \\end{pmatrix}.
-```
+A beam splitter operator `B(τ)` is defined by the operation
+`B(τ) = exp(θ(âᵗb̂ - âb̂ᵗ))`, where `θ` is defined by `τ = cos²θ`, 
+and `â` and `b̂` are the annihilation operators of the two modes, 
+respectively. The operator `B(τ)` is characterized by 
+the zero displacement vector and symplectic
+matrix `[√τI √(1-τ)I; -√(1-τ)I √τI]`.
 
 ## Example
 
@@ -527,16 +484,16 @@ symplectic: 4×4 Matrix{Float64}:
   0.0       -0.866025  0.0       0.5
 ```
 """
-function beamsplitter(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}, transmit::R) where {Td,Ts,N<:Int,R}
+function beamsplitter(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}, transmit::R; ħ = 2) where {Td,Ts,N<:Int,R}
     disp_type = infer_displacement_type(Td, basis)
     symplectic_type = infer_symplectic_type(Ts, basis)
     disp, symplectic = _beamsplitter(basis, transmit)
-    return GaussianUnitary(basis, disp_type(disp), symplectic_type(symplectic))
+    return GaussianUnitary(basis, disp_type(disp), symplectic_type(symplectic); ħ = ħ)
 end
-beamsplitter(::Type{T}, basis::SymplecticBasis{N}, transmit::R) where {T,N<:Int,R} = beamsplitter(T, T, basis, transmit)
-function beamsplitter(basis::SymplecticBasis{N}, transmit::R) where {N<:Int,R}
+beamsplitter(::Type{T}, basis::SymplecticBasis{N}, transmit::R; ħ = 2) where {T,N<:Int,R} = beamsplitter(T, T, basis, transmit; ħ = ħ)
+function beamsplitter(basis::SymplecticBasis{N}, transmit::R; ħ = 2) where {N<:Int,R}
     disp, symplectic = _beamsplitter(basis, transmit)
-    return GaussianUnitary(basis, disp, symplectic)
+    return GaussianUnitary(basis, disp, symplectic; ħ = ħ)
 end
 function _beamsplitter(basis::QuadPairBasis{N}, transmit::R) where {N<:Int,R<:Real}
     nmodes = basis.nmodes
@@ -620,13 +577,16 @@ end
 
 function tensor(::Type{Td}, ::Type{Ts}, op1::GaussianUnitary, op2::GaussianUnitary) where {Td,Ts}
     typeof(op1.basis) == typeof(op2.basis) || throw(ArgumentError(SYMPLECTIC_ERROR))
+    op1.ħ == op2.ħ || throw(ArgumentError(HBAR_ERROR))
     disp, symplectic = _tensor(op1, op2)
-    return GaussianUnitary(op1.basis ⊕ op2.basis, Td(disp), Ts(symplectic))
+    return GaussianUnitary(op1.basis ⊕ op2.basis, Td(disp), Ts(symplectic); ħ = op1.ħ)
 end
 tensor(::Type{T}, op1::GaussianUnitary, op2::GaussianUnitary) where {T} = tensor(T, T, op1, op2)
 function tensor(op1::GaussianUnitary, op2::GaussianUnitary)
+    typeof(op1.basis) == typeof(op2.basis) || throw(ArgumentError(SYMPLECTIC_ERROR))
+    op1.ħ == op2.ħ || throw(ArgumentError(HBAR_ERROR))
     disp, symplectic = _tensor(op1, op2)
-    return GaussianUnitary(op1.basis ⊕ op2.basis, disp, symplectic)
+    return GaussianUnitary(op1.basis ⊕ op2.basis, disp, symplectic; ħ = op1.ħ)
 end
 function _tensor(op1::GaussianUnitary{B1,D1,S1}, op2::GaussianUnitary{B2,D2,S2}) where {B1<:QuadPairBasis,B2<:QuadPairBasis,D1,D2,S1,S2}
     basis1, basis2 = op1.basis, op2.basis
@@ -729,10 +689,10 @@ julia> op = displace(QuadBlockBasis(2), 1.0-im)
 GaussianUnitary for 2 modes.
   symplectic basis: QuadBlockBasis
 displacement: 4-element Vector{Float64}:
-  1.4142135623730951
-  1.4142135623730951
- -1.4142135623730951
- -1.4142135623730951
+  2.0
+  2.0
+ -2.0
+ -2.0
 symplectic: 4×4 Matrix{Float64}:
  1.0  0.0  0.0  0.0
  0.0  1.0  0.0  0.0
@@ -743,10 +703,10 @@ julia> changebasis(QuadPairBasis, op)
 GaussianUnitary for 2 modes.
   symplectic basis: QuadPairBasis
 displacement: 4-element Vector{Float64}:
-  1.4142135623730951
- -1.4142135623730951
-  1.4142135623730951
- -1.4142135623730951
+  2.0
+ -2.0
+  2.0
+ -2.0
 symplectic: 4×4 Matrix{Float64}:
  1.0  0.0  0.0  0.0
  0.0  1.0  0.0  0.0
@@ -766,7 +726,7 @@ function changebasis(::Type{B1}, op::GaussianUnitary{B2,D,S}) where {B1<:QuadBlo
     T = typeof(T) == S ? T : S(T)
     disp = T * op.disp
     symp = T * op.symplectic * transpose(T)
-    return GaussianUnitary(B1(nmodes), disp, symp)
+    return GaussianUnitary(B1(nmodes), disp, symp; ħ = op.ħ)
 end
 function changebasis(::Type{B1}, op::GaussianUnitary{B2,D,S}) where {B1<:QuadPairBasis,B2<:QuadBlockBasis,D,S}
     basis = op.basis
@@ -780,7 +740,7 @@ function changebasis(::Type{B1}, op::GaussianUnitary{B2,D,S}) where {B1<:QuadPai
     T = typeof(T) == S ? T : S(T)
     disp = T * op.disp
     symp = T * op.symplectic * transpose(T)
-    return GaussianUnitary(B1(nmodes), disp, symp)
+    return GaussianUnitary(B1(nmodes), disp, symp; ħ = op.ħ)
 end
 changebasis(::Type{<:QuadBlockBasis}, op::GaussianUnitary{<:QuadBlockBasis,D,S}) where {D,S} = op
 changebasis(::Type{<:QuadPairBasis}, op::GaussianUnitary{<:QuadPairBasis,D,S}) where {D,S} = op

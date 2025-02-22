@@ -21,27 +21,7 @@ julia> basis = QuadPairBasis(1);
 
 julia> vac = vacuumstate(basis); coh = coherentstate(basis, 1.0-im);
 
-julia> state = vac ⊗ coh ⊗ vac ⊗ coh
-GaussianState for 4 modes.
-  symplectic basis: QuadPairBasis
-mean: 8-element Vector{Float64}:
-  0.0
-  0.0
-  1.4142135623730951
- -1.4142135623730951
-  0.0
-  0.0
-  1.4142135623730951
- -1.4142135623730951
-covariance: 8×8 Matrix{Float64}:
- 1.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
- 0.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0
- 0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.0
- 0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0
- 0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0
- 0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0
- 0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0
- 0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0
+julia> state = vac ⊗ coh ⊗ vac ⊗ coh;
 
 julia> Generaldyne(state, coh ⊗ vac ⊗ coh, [1, 3, 4])
 Generaldyne on indices [1, 3, 4]
@@ -102,27 +82,7 @@ julia> basis = QuadPairBasis(1);
 
 julia> vac = vacuumstate(basis); coh = coherentstate(basis, 1.0-im);
 
-julia> state = vac ⊗ coh ⊗ vac ⊗ coh
-GaussianState for 4 modes.
-  symplectic basis: QuadPairBasis
-mean: 8-element Vector{Float64}:
-  0.0
-  0.0
-  1.4142135623730951
- -1.4142135623730951
-  0.0
-  0.0
-  1.4142135623730951
- -1.4142135623730951
-covariance: 8×8 Matrix{Float64}:
- 1.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
- 0.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0
- 0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.0
- 0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0
- 0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0
- 0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0
- 0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0
- 0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0
+julia> state = vac ⊗ coh ⊗ vac ⊗ coh;
 
 julia> gd = Generaldyne(state, coh ⊗ vac ⊗ coh, [1, 3, 4])
 Generaldyne on indices [1, 3, 4]
@@ -135,8 +95,8 @@ julia> output(gd)
 GaussianState for 1 mode.
   symplectic basis: QuadPairBasis
 mean: 2-element Vector{Float64}:
-  1.4142135623730951
- -1.4142135623730951
+  2.0
+ -2.0
 covariance: 2×2 Matrix{Float64}:
  1.0  0.0
  0.0  1.0
@@ -200,27 +160,7 @@ julia> basis = QuadPairBasis(1);
 
 julia> vac = vacuumstate(basis); coh = coherentstate(basis, 1.0-im);
 
-julia> state = vac ⊗ coh ⊗ vac ⊗ coh
-GaussianState for 4 modes.
-  symplectic basis: QuadPairBasis
-mean: 8-element Vector{Float64}:
-  0.0
-  0.0
-  1.4142135623730951
- -1.4142135623730951
-  0.0
-  0.0
-  1.4142135623730951
- -1.4142135623730951
-covariance: 8×8 Matrix{Float64}:
- 1.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
- 0.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0
- 0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.0
- 0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0
- 0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0
- 0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0
- 0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.0
- 0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0
+julia> state = vac ⊗ coh ⊗ vac ⊗ coh;
 
 julia> gd = Generaldyne(state, coh ⊗ vac ⊗ coh, [1, 3, 4])
 Generaldyne on indices [1, 3, 4]
@@ -230,7 +170,7 @@ outcome: GaussianState for 3 modes.
  (xType: Vector{Float64} | vType: Matrix{Float64})
 
 julia> prob(gd)
-0.029788549650438086
+0.2201092644728679
 ```
 """
 function prob(meas::Generaldyne)

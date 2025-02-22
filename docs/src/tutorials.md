@@ -47,8 +47,8 @@ julia> coherentstate(QuadPairBasis(1), 1.0-im)
 GaussianState for 1 mode.
   symplectic basis: QuadPairBasis
 mean: 2-element Vector{Float64}:
-  1.4142135623730951
- -1.4142135623730951
+  2.0
+ -2.0
 covariance: 2×2 Matrix{Float64}:
  1.0  0.0
  0.0  1.0
@@ -64,8 +64,8 @@ julia> state = coherentstate(SVector, SMatrix, QuadPairBasis(1), 1.0-im)
 GaussianState for 1 mode.
   symplectic basis: QuadPairBasis
 mean: 2-element SVector{2, Float64} with indices SOneTo(2):
-  1.4142135623730951
- -1.4142135623730951
+  2.0
+ -2.0
 covariance: 2×2 SMatrix{2, 2, Float64, 4} with indices SOneTo(2)×SOneTo(2):
  1.0  0.0
  0.0  1.0
@@ -74,10 +74,10 @@ julia> tp = state ⊗ state
 GaussianState for 2 modes.
   symplectic basis: QuadPairBasis
 mean: 4-element SVector{4, Float64} with indices SOneTo(4):
-  1.4142135623730951
- -1.4142135623730951
-  1.4142135623730951
- -1.4142135623730951
+  2.0
+ -2.0
+  2.0
+ -2.0
 covariance: 4×4 SMatrix{4, 4, Float64, 16} with indices SOneTo(4)×SOneTo(4):
  1.0  0.0  0.0  0.0
  0.0  1.0  0.0  0.0
@@ -90,8 +90,8 @@ julia> ptrace(SparseVector, SparseMatrixCSC, tp, 1)
 GaussianState for 1 mode.
   symplectic basis: QuadPairBasis
 mean: 2-element SparseVector{Float64, Int64} with 2 stored entries:
-  [1]  =  1.41421
-  [2]  =  -1.41421
+  [1]  =  2.0
+  [2]  =  -2.0
 covariance: 2×2 SparseMatrixCSC{Float64, Int64} with 2 stored entries:
  1.0   ⋅ 
   ⋅   1.0
@@ -107,8 +107,8 @@ Importantly, methods that create or manipulate a Gaussian state, such as [`tenso
     GaussianUnitary for 1 mode.
       symplectic basis: QuadPairBasis
     displacement: 2-element Vector{Float32}:
-      1.4142135
-     -1.4142135
+      2.0
+     -2.0
     symplectic: 2×2 Matrix{Float32}:
      1.0  0.0
      0.0  1.0
@@ -138,10 +138,10 @@ mean: 4-element Vector{Num}:
  0
  0
 covariance: 4×4 Matrix{Num}:
-         0.5cosh(2r)  -0.5cos(θ)*sinh(2r)  …  -0.5sinh(2r)*sin(θ)
- -0.5cos(θ)*sinh(2r)          0.5cosh(2r)                       0
-                   0  -0.5sinh(2r)*sin(θ)      0.5cos(θ)*sinh(2r)
- -0.5sinh(2r)*sin(θ)                    0             0.5cosh(2r)
+         cosh(2r)  -cos(θ)*sinh(2r)                 0  -sinh(2r)*sin(θ)
+ -cos(θ)*sinh(2r)          cosh(2r)  -sinh(2r)*sin(θ)                 0
+                0  -sinh(2r)*sin(θ)          cosh(2r)   cos(θ)*sinh(2r)
+ -sinh(2r)*sin(θ)                 0   cos(θ)*sinh(2r)          cosh(2r)
 
 julia> op = beamsplitter(b, τ)
 GaussianUnitary for 2 modes.
@@ -166,8 +166,8 @@ Use [Latexify](https://github.com/korsbo/Latexify.jl) to render the covariance m
 \begin{equation}
 \left[
 \begin{array}{cc}
-\left( 0.5 \cosh\left( 2 r \right) \sqrt{1 - \tau} - 0.5 \cos\left( \theta \right) \sinh\left( 2 r \right) \sqrt{\tau} \right) \sqrt{1 - \tau} + \left( 0.5 \sqrt{\tau} \cosh\left( 2 r \right) - 0.5 \cos\left( \theta \right) \sinh\left( 2 r \right) \sqrt{1 - \tau} \right) \sqrt{\tau} &  - \sinh\left( 2 r \right) \sin\left( \theta \right) \sqrt{\tau} \sqrt{1 - \tau} \\
- - \sinh\left( 2 r \right) \sin\left( \theta \right) \sqrt{\tau} \sqrt{1 - \tau} & \left( 0.5 \cosh\left( 2 r \right) \sqrt{1 - \tau} + 0.5 \cos\left( \theta \right) \sinh\left( 2 r \right) \sqrt{\tau} \right) \sqrt{1 - \tau} + \left( 0.5 \sqrt{\tau} \cosh\left( 2 r \right) + 0.5 \cos\left( \theta \right) \sinh\left( 2 r \right) \sqrt{1 - \tau} \right) \sqrt{\tau} \\
+\left( \cosh\left( 2 r \right) \sqrt{1 - \tau} - \cos\left( \theta \right) \sinh\left( 2 r \right) \sqrt{\tau} \right) \sqrt{1 - \tau} + \left( \sqrt{\tau} \cosh\left( 2 r \right) - \cos\left( \theta \right) \sinh\left( 2 r \right) \sqrt{1 - \tau} \right) \sqrt{\tau} &  - 2 \sinh\left( 2 r \right) \sin\left( \theta \right) \sqrt{\tau} \sqrt{1 - \tau} \\
+ - 2 \sinh\left( 2 r \right) \sin\left( \theta \right) \sqrt{\tau} \sqrt{1 - \tau} & \left( \cosh\left( 2 r \right) \sqrt{1 - \tau} + \cos\left( \theta \right) \sinh\left( 2 r \right) \sqrt{\tau} \right) \sqrt{1 - \tau} + \left( \sqrt{\tau} \cosh\left( 2 r \right) + \cos\left( \theta \right) \sinh\left( 2 r \right) \sqrt{1 - \tau} \right) \sqrt{\tau} \\
 \end{array}
 \right]
 \end{equation}

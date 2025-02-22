@@ -3,16 +3,16 @@
 
 Calculate a random Gaussian state in symplectic representation defined by `basis`.
 """
-function randstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}; pure = false) where {Tm,Tc,N<:Int}
-    mean, covar = _randstate(basis, pure)
-    return GaussianState(basis, Tm(mean), Tc(covar))
+function randstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}; pure = false, ħ = 2) where {Tm,Tc,N<:Int}
+    mean, covar = _randstate(basis; pure = pure, ħ = ħ)
+    return GaussianState(basis, Tm(mean), Tc(covar), ħ = ħ)
 end
-randstate(::Type{T}, basis::SymplecticBasis{N}; pure = false) where {T,N<:Int} = randstate(T,T,basis,pure=pure)
-function randstate(basis::SymplecticBasis{N}; pure = false) where {N<:Int}
-    mean, covar = _randstate(basis, pure)
-    return GaussianState(basis, mean, covar)
+randstate(::Type{T}, basis::SymplecticBasis{N}; pure = false, ħ = 2) where {T,N<:Int} = randstate(T,T,basis; pure = pure, ħ = ħ)
+function randstate(basis::SymplecticBasis{N}; pure = false, ħ = 2) where {N<:Int}
+    mean, covar = _randstate(basis; pure = pure, ħ = ħ)
+    return GaussianState(basis, mean, covar, ħ = ħ)
 end
-function _randstate(basis::QuadPairBasis{N}, pure) where {N<:Int}
+function _randstate(basis::QuadPairBasis{N}; pure = false, ħ = 2) where {N<:Int}
     nmodes = basis.nmodes
     mean = randn(2*nmodes)
     covar = zeros(2*nmodes, 2*nmodes)
@@ -20,17 +20,18 @@ function _randstate(basis::QuadPairBasis{N}, pure) where {N<:Int}
     # generate pure Gaussian state
     if pure
         mul!(covar, symp, symp')
+        covar .*= (ħ/2)
         return mean, covar
     end
     # create buffer for matrix multiplication
     buf = zeros(2*nmodes, 2*nmodes)
     # William decomposition for mixed Gaussian states
-    sympeigs = abs.(rand(nmodes)) .+ 1.0
-    will = diagm(repeat(sympeigs, inner = 2))
+    sympeigs = (ħ/2)*(abs.(rand(nmodes)) .+ 1.0)
+    will = Diagonal(repeat(sympeigs, inner = 2))
     mul!(covar, symp, mul!(buf, will, symp'))
     return mean, covar
 end
-function _randstate(basis::QuadBlockBasis{N}, pure) where {N<:Int}
+function _randstate(basis::QuadBlockBasis{N}; pure = false, ħ = 2) where {N<:Int}
     nmodes = basis.nmodes
     mean = randn(2*nmodes)
     covar = zeros(2*nmodes, 2*nmodes)
@@ -38,13 +39,14 @@ function _randstate(basis::QuadBlockBasis{N}, pure) where {N<:Int}
     # generate pure Gaussian state
     if pure
         mul!(covar, symp, symp')
+        covar .*= (ħ/2)
         return mean, covar
     end
     # create buffer for matrix multiplication
     buf = zeros(2*nmodes, 2*nmodes)
     # William decomposition for mixed Gaussian states
-    sympeigs = abs.(rand(nmodes)) .+ 1.0
-    will = diagm(repeat(sympeigs, outer = 2))
+    sympeigs = (ħ/2)*(abs.(rand(nmodes)) .+ 1.0)
+    will = Diagonal(repeat(sympeigs, outer = 2))
     mul!(covar, symp, mul!(buf, will, symp'))
     return mean, covar
 end
@@ -54,16 +56,16 @@ end
 
 Calculate a random Gaussian unitary operator in symplectic representation defined by `basis`.
 """
-function randunitary(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}; passive = false) where {Td,Ts,N<:Int}
-    disp, symp = _randunitary(basis, passive)
-    return GaussianUnitary(basis, Td(disp), Ts(symp))
+function randunitary(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}; passive = false, ħ = 2) where {Td,Ts,N<:Int}
+    disp, symp = _randunitary(basis, passive = passive)
+    return GaussianUnitary(basis, Td(disp), Ts(symp), ħ = ħ)
 end
-randunitary(::Type{T}, basis::SymplecticBasis{N}; passive = false) where {T,N<:Int} = randunitary(T,T,basis; passive = passive)
-function randunitary(basis::SymplecticBasis{N}; passive = false) where {N<:Int}
-    disp, symp = _randunitary(basis, passive)
-    return GaussianUnitary(basis, disp, symp)
+randunitary(::Type{T}, basis::SymplecticBasis{N}; passive = false, ħ = 2) where {T,N<:Int} = randunitary(T,T,basis; passive = passive, ħ = ħ)
+function randunitary(basis::SymplecticBasis{N}; passive = false, ħ = 2) where {N<:Int}
+    disp, symp = _randunitary(basis, passive = passive)
+    return GaussianUnitary(basis, disp, symp, ħ = ħ)
 end
-function _randunitary(basis::SymplecticBasis{N}, passive) where {N<:Int}
+function _randunitary(basis::SymplecticBasis{N}; passive = false) where {N<:Int}
     nmodes = basis.nmodes
     disp = rand(2*nmodes)
     symp = randsymplectic(basis, passive = passive)
@@ -75,14 +77,14 @@ end
 
 Calculate a random Gaussian channel in symplectic representation defined by `basis`.
 """
-function randchannel(::Type{Td}, ::Type{Tt}, basis::SymplecticBasis{N}) where {Td,Tt,N<:Int}
+function randchannel(::Type{Td}, ::Type{Tt}, basis::SymplecticBasis{N}; ħ = 2) where {Td,Tt,N<:Int}
     disp, transform, noise = _randchannel(basis)
-    return GaussianChannel(basis, Td(disp), Tt(transform), Tt(noise))
+    return GaussianChannel(basis, Td(disp), Tt(transform), Tt(noise), ħ = ħ)
 end
-randchannel(::Type{T}, basis::SymplecticBasis{N}) where {T,N<:Int} = randchannel(T,T,basis)
-function randchannel(basis::SymplecticBasis{N}) where {N<:Int}
+randchannel(::Type{T}, basis::SymplecticBasis{N}; ħ = 2) where {T,N<:Int} = randchannel(T,T,basis; ħ = ħ)
+function randchannel(basis::SymplecticBasis{N}; ħ = 2) where {N<:Int}
     disp, transform, noise = _randchannel(basis)
-    return GaussianChannel(basis, disp, transform, noise)
+    return GaussianChannel(basis, disp, transform, noise, ħ = ħ)
 end
 function _randchannel(basis::SymplecticBasis{N}) where {N<:Int}
     nmodes = basis.nmodes
@@ -182,6 +184,6 @@ function _rand_unitary(basis::SymplecticBasis{N}) where {N<:Int}
     nmodes = basis.nmodes
     M = rand(ComplexF64, nmodes, nmodes) ./ sqrt(2.0)
     q, r = qr(M)
-    d = diagm([r[i, i] / abs(r[i, i]) for i in Base.OneTo(nmodes)])
+    d = Diagonal([r[i, i] / abs(r[i, i]) for i in Base.OneTo(nmodes)])
     return q * d
 end

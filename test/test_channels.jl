@@ -30,6 +30,7 @@
         @test displace(Array, qpairbasis, alpha, noise) isa GaussianChannel
         @test displace(qblockbasis, alpha, T*noise*transpose(T)) == changebasis(QuadBlockBasis, op_pair)
         @test displace(qblockbasis, alphas, T*noise*transpose(T)) == changebasis(QuadBlockBasis, displace(qpairbasis, alphas, noise))
+        @test op_pair.ħ == 2 && op_block.ħ == 2
     end
 
     @testset "squeeze operator" begin
@@ -42,6 +43,7 @@
         @test squeeze(Array, qpairbasis, r, theta, noise) isa GaussianChannel
         @test squeeze(qblockbasis, r, theta, T*noise*transpose(T)) == changebasis(QuadBlockBasis, op_pair)
         @test squeeze(qblockbasis, rs, thetas, T*noise*transpose(T)) == changebasis(QuadBlockBasis, squeeze(qpairbasis, rs, thetas, noise))
+        @test op_pair.ħ == 2 && op_block.ħ == 2
     end
 
     @testset "two-mode squeeze operator" begin
@@ -53,6 +55,7 @@
         @test twosqueeze(Array, 2*qpairbasis, r, theta, noise_ds) isa GaussianChannel
         @test twosqueeze(2*qblockbasis, r, theta, T_ds*noise_ds*transpose(T_ds)) == changebasis(QuadBlockBasis, op)
         @test twosqueeze(2*qblockbasis, rs, thetas, T_ds*noise_ds*transpose(T_ds)) == changebasis(QuadBlockBasis, twosqueeze(2*qpairbasis, rs, thetas, noise_ds))
+        @test op.ħ == 2 && op_array.ħ == 2 && op_static.ħ == 2
     end
 
     @testset "phase-shift operator" begin
@@ -64,6 +67,7 @@
         @test phaseshift(Array, qpairbasis, theta, noise) isa GaussianChannel
         @test phaseshift(qblockbasis, theta, T*noise*transpose(T)) == changebasis(QuadBlockBasis, op)
         @test phaseshift(qblockbasis, thetas, T*noise*transpose(T)) == changebasis(QuadBlockBasis, phaseshift(qpairbasis, thetas, noise))
+        @test op.ħ == 2 && op_array.ħ == 2 && op_static.ħ == 2
     end
 
     @testset "beamsplitter operator" begin
@@ -75,6 +79,7 @@
         @test beamsplitter(Array, 2*qpairbasis, theta, noise_ds) isa GaussianChannel
         @test beamsplitter(2*qblockbasis, theta, T_ds*noise_ds*transpose(T_ds)) == changebasis(QuadBlockBasis, op)
         @test beamsplitter(2*qblockbasis, thetas, T_ds*noise_ds*transpose(T_ds)) == changebasis(QuadBlockBasis, beamsplitter(2*qpairbasis, thetas, noise_ds))
+        @test op.ħ == 2 && op_array.ħ == 2 && op_static.ħ == 2
     end
 
     @testset "attenuator channel" begin
@@ -92,6 +97,7 @@
         @test attenuator(qblockbasis, theta, n) == changebasis(QuadBlockBasis, op_pair)
         @test attenuator(qblockbasis, thetas, ns) == changebasis(QuadBlockBasis, attenuator(qpairbasis, thetas, ns))
         @test isgaussian(op_pair, atol = 1e-4)
+        @test op_pair.ħ == 2 && op_block.ħ == 2
     end
 
     @testset "amplifier channel" begin
@@ -109,6 +115,7 @@
         @test amplifier(qblockbasis, r, n) == changebasis(QuadBlockBasis, op_pair)
         @test amplifier(qblockbasis, rs, ns) == changebasis(QuadBlockBasis, amplifier(qpairbasis, rs, ns))
         @test isgaussian(op_pair, atol = 1e-4)
+        @test op_pair.ħ == 2 && op_block.ħ == 2
     end
     
     @testset "tensor products" begin
