@@ -314,7 +314,7 @@ covariance: 4×4 Matrix{Float64}:
  -0.830993   0.830993   0.0        1.54308
 ```
 """
-function eprstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {Tm,Tc,N<:In
+function eprstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {Tm,Tc,N<:Int,R}
     mean_type = infer_mean_type(Tm, basis)
     covar_type = infer_covar_type(Tc, basis)
     mean, covar = _eprstate(basis, r, theta)
