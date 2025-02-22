@@ -49,10 +49,8 @@
     @testset "two-mode squeeze operator" begin
         r, theta = rand(Float64), rand(Float64)
         rs, thetas = rand(Float64, nmodes), rand(Float64, nmodes)
-        op = twosqueeze(2*qpairbasis, r, theta, noise_ds)
-        @test op isa GaussianChannel
-        @test twosqueeze(SVector, SMatrix, 2*qpairbasis, r, theta, noise_ds) isa GaussianChannel
-        @test twosqueeze(Array, 2*qpairbasis, r, theta, noise_ds) isa GaussianChannel
+        op, op_array, op_static = twosqueeze(2*qpairbasis, r, theta, noise_ds), twosqueeze(Array, 2*qpairbasis, r, theta, noise_ds), twosqueeze(SVector, SMatrix, 2*qpairbasis, r, theta, noise_ds)
+        @test op isa GaussianChannel && op_array isa GaussianChannel && op_static isa GaussianChannel
         @test twosqueeze(2*qblockbasis, r, theta, T_ds*noise_ds*transpose(T_ds)) == changebasis(QuadBlockBasis, op)
         @test twosqueeze(2*qblockbasis, rs, thetas, T_ds*noise_ds*transpose(T_ds)) == changebasis(QuadBlockBasis, twosqueeze(2*qpairbasis, rs, thetas, noise_ds))
         @test op.ħ == 2 && op_array.ħ == 2 && op_static.ħ == 2
@@ -61,10 +59,8 @@
     @testset "phase-shift operator" begin
         theta = rand(Float64)
         thetas = rand(Float64, nmodes)
-        op = phaseshift(qpairbasis, theta, noise)
-        @test op isa GaussianChannel
-        @test phaseshift(SVector, SMatrix, qpairbasis, theta, noise) isa GaussianChannel
-        @test phaseshift(Array, qpairbasis, theta, noise) isa GaussianChannel
+        op, op_array, op_static = phaseshift(qpairbasis, theta, noise), phaseshift(Array, qpairbasis, theta, noise), phaseshift(SVector, SMatrix, qpairbasis, theta, noise)
+        @test op isa GaussianChannel && op_array isa GaussianChannel && op_static isa GaussianChannel
         @test phaseshift(qblockbasis, theta, T*noise*transpose(T)) == changebasis(QuadBlockBasis, op)
         @test phaseshift(qblockbasis, thetas, T*noise*transpose(T)) == changebasis(QuadBlockBasis, phaseshift(qpairbasis, thetas, noise))
         @test op.ħ == 2 && op_array.ħ == 2 && op_static.ħ == 2
@@ -73,10 +69,8 @@
     @testset "beamsplitter operator" begin
         theta = rand(Float64)
         thetas = rand(Float64, nmodes)
-        op = beamsplitter(2*qpairbasis, theta, noise_ds)
-        @test op isa GaussianChannel
-        @test beamsplitter(SVector, SMatrix, 2*qpairbasis, theta, noise_ds) isa GaussianChannel
-        @test beamsplitter(Array, 2*qpairbasis, theta, noise_ds) isa GaussianChannel
+        op, op_array, op_static = beamsplitter(2*qpairbasis, theta, noise_ds), beamsplitter(Array, 2*qpairbasis, theta, noise_ds), beamsplitter(SVector, SMatrix, 2*qpairbasis, theta, noise_ds)
+        @test op isa GaussianChannel && op_array isa GaussianChannel && op_static isa GaussianChannel
         @test beamsplitter(2*qblockbasis, theta, T_ds*noise_ds*transpose(T_ds)) == changebasis(QuadBlockBasis, op)
         @test beamsplitter(2*qblockbasis, thetas, T_ds*noise_ds*transpose(T_ds)) == changebasis(QuadBlockBasis, beamsplitter(2*qpairbasis, thetas, noise_ds))
         @test op.ħ == 2 && op_array.ħ == 2 && op_static.ħ == 2
