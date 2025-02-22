@@ -3,6 +3,9 @@
 ## v1.2.9 - dev
 
 - Add seminal papers section to documentation.
+- **(breaking)** Add `hbar=2` as default convention in Gabs.
+- Add kwarg to predefined Gaussian methods to specify `hbar`.
+- Clean up docstrings to no longer include uncompiled LaTeX.
 
 ## v1.2.8 - 2025-02-06
 
