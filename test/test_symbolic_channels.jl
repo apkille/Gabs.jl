@@ -55,58 +55,58 @@
         end
     end
 
-    @testset "Symbolic two-mode squeeze operator" begin
+    @testset "Symbolic Two-Mode Squeeze and Beamsplitter Operators" begin
+        @variables r θ θ_bs
+        @variables rs[1:nmodes] thetas[1:nmodes] thetas_bs[1:nmodes]
+        rs_vec = collect(rs)
+        thetas_vec = collect(thetas)
+        thetas_bs_vec = collect(thetas_bs)
+        test_configs = [(twosqueeze, (r, θ), (rs_vec, thetas_vec), "Two-Mode Squeeze Operator"),(beamsplitter, (θ_bs,), (thetas_bs_vec,), "Beamsplitter Operator")]
+        for (op, single_params, multi_params, desc) in test_configs
+            @testset "$desc" begin
+                op_pair   = op(2*qpairbasis, single_params..., noise_ds)
+                op_block  = op(2*qblockbasis, single_params..., noise_ds)
+                @test op_pair isa GaussianChannel && op_block isa GaussianChannel
+                @test isapprox(op_block, changebasis(QuadBlockBasis, op_pair))
+                @test op(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, 2*qpairbasis, single_params..., noise_ds) isa GaussianChannel
+                @test op(Array, 2*qpairbasis, single_params..., noise_ds) isa GaussianChannel
+            end
+            @testset "$desc" begin
+                op_pair_multi  = op(2*qpairbasis, multi_params..., noise_ds)
+                op_block_multi = op(2*qblockbasis, multi_params..., noise_ds)
+                @test op_pair_multi isa GaussianChannel && op_block_multi isa GaussianChannel
+                @test op(Array, 2*qpairbasis, multi_params..., noise_ds) isa GaussianChannel
+                @test op(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, 2*qpairbasis, multi_params..., noise_ds) isa GaussianChannel
+                @test isapprox(op_block_multi, changebasis(QuadBlockBasis, op_pair_multi))
+            end
+        end
+    end
+
+    @testset "Symbolic Gaussian Channels" begin
         @variables r θ
         @variables rs[1:nmodes] thetas[1:nmodes]
         rs_vec = collect(rs)
         thetas_vec = collect(thetas)
-        op = twosqueeze(2*qpairbasis, r, θ, noise_ds)
-        @test op isa GaussianChannel
-        @test twosqueeze(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, 2*qpairbasis, r, θ, noise_ds) isa GaussianChannel
-        @test twosqueeze(Array, 2*qpairbasis, r, θ, noise_ds) isa GaussianChannel
-        @test isapprox(twosqueeze(2*qblockbasis, r, θ, noise_ds), changebasis(QuadBlockBasis, op))
-        @test isapprox(twosqueeze(2*qblockbasis, rs_vec, thetas_vec, noise_ds), changebasis(QuadBlockBasis, twosqueeze(2*qpairbasis, rs_vec, thetas_vec, noise_ds)))
-    end
-
-    @testset "Symbolic beamsplitter operator" begin
-        @variables θ_bs
-        @variables thetas_bs[1:nmodes]
-        thetas_bs_vec = collect(thetas_bs)
-        op = beamsplitter(2*qpairbasis, theta, noise_ds)
-        @test op isa GaussianChannel
-        @test beamsplitter(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, 2*qpairbasis, θ_bs, noise_ds) isa GaussianChannel
-        @test beamsplitter(Array, 2*qpairbasis, θ_bs, noise_ds) isa GaussianChannel
-        @test isapprox(beamsplitter(2*qblockbasis, θ_bs, noise_ds), changebasis(QuadBlockBasis, op))
-        @test isapprox(beamsplitter(2*qblockbasis, thetas_bs_vec, noise_ds), changebasis(QuadBlockBasis, beamsplitter(2*qpairbasis, thetas_bs_vec, noise_ds)))
-    end
-
-    @testset "Symbolic Gaussian Amplifier" begin
-        @variables r
-        @variables rs[1:nmodes]
-        rs_vec = collect(rs)
         n = rand(1:10)
         ns = rand(1:10, nmodes)
-        op_pair = amplifier(qpairbasis, r, n)
-        op_block = amplifier(qblockbasis, r, n)
-        @test op_pair isa GaussianChannel && op_block isa GaussianChannel
-        @test amplifier(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, r, n) isa GaussianChannel
-        @test amplifier(Array, qpairbasis, r, n) isa GaussianChannel
-        @test isapprox(amplifier(qblockbasis, r, n), changebasis(QuadBlockBasis, op_pair))
-        @test isapprox(amplifier(qblockbasis, rs_vec, ns), changebasis(QuadBlockBasis, amplifier(qpairbasis, rs_vec, ns)))
-    end
-
-    @testset "Symbolic attenuator channel" begin
-        @variables θ
-        @variables thetas[1:nmodes]
-        thetas_vec = collect(thetas)
-        n = rand(1:10)
-        ns = rand(1:10, nmodes)
-        op_pair = attenuator(qpairbasis, θ, n)
-        op_block = attenuator(qblockbasis, θ, n)
-        @test op_pair isa GaussianChannel && op_block isa GaussianChannel
-        @test attenuator(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, θ, n) isa GaussianChannel
-        @test attenuator(Array, qpairbasis, θ, n) isa GaussianChannel
-        @test isapprox(attenuator(qblockbasis, θ, n), changebasis(QuadBlockBasis, op_pair))
-        @test isapprox(attenuator(qblockbasis, thetas_vec, ns), changebasis(QuadBlockBasis, attenuator(qpairbasis, thetas_vec, ns)))
+        test_configs = [(amplifier, (r, n), (rs_vec, ns), "Gaussian Amplifier"),(attenuator, (θ, n), (thetas_vec, ns), "Attenuator Channel")]
+        for (op, single_params, multi_params, desc) in test_configs
+            @testset "$desc" begin
+                op_pair   = op(qpairbasis, single_params...)
+                op_block  = op(qblockbasis, single_params...)
+                @test op_pair isa GaussianChannel && op_block isa GaussianChannel
+                @test op(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, single_params...) isa GaussianChannel
+                @test op(Array, qpairbasis, single_params...) isa GaussianChannel
+                @test isapprox(op(qblockbasis, single_params...), changebasis(QuadBlockBasis, op_pair))
+            end
+            @testset "$desc" begin
+                op_pair_multi  = op(qpairbasis, multi_params...)
+                op_block_multi = op(qblockbasis, multi_params...)
+                @test op_pair_multi isa GaussianChannel && op_block_multi isa GaussianChannel
+                @test op(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, multi_params...) isa GaussianChannel
+                @test op(Array, qpairbasis, multi_params...) isa GaussianChannel
+                @test isapprox(op(qblockbasis, multi_params...), changebasis(QuadBlockBasis, op_pair_multi))
+            end
+        end
     end
 end
