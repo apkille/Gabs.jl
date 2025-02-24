@@ -11,13 +11,15 @@
 
     @testset "displacement operator" begin
         @variables α
-        @variables alphas[1:2*nmodes]
-        alphas_vec = collect(alphas)
+        @variables αs[1:2*nmodes]
+        alphas_vec = collect(αs)
         op_pair = displace(qpairbasis, α, noise)
         op_block = displace(qblockbasis, α, noise)
         @test op_pair isa GaussianChannel && op_block isa GaussianChannel
         @test displace(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, α, noise) isa GaussianChannel
         @test displace(Array, qpairbasis, α, noise) isa GaussianChannel
+        @test isapprox(displace(qblockbasis, α, noise), changebasis(QuadBlockBasis, op_pair))
+        @test isapprox(displace(qblockbasis, alphas_vec, noise), changebasis(QuadBlockBasis, displace(qpairbasis, alphas_vec, noise)))
     end
 
     @testset "Symbolic Squeeze and Phase-Shift Operators" begin
@@ -38,6 +40,7 @@
                 @test iszero(simplify(op_block.disp - changebasis(QuadBlockBasis, op_pair).disp))
                 @test op(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, single_params..., noise) isa GaussianChannel
                 @test op(Array, qpairbasis, single_params..., noise) isa GaussianChannel
+                @test isapprox(op(qblockbasis, single_params..., noise), changebasis(QuadBlockBasis, op_pair))
             end
             @testset "$desc" begin
                 op_pair_multi  = op(qpairbasis, multi_params..., noise)
@@ -47,6 +50,7 @@
                 @test iszero(simplify(op_block_multi.disp - changebasis(QuadBlockBasis, op_pair_multi).disp))
                 @test op(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, multi_params..., noise) isa GaussianChannel
                 @test op(Array, qpairbasis, multi_params..., noise) isa GaussianChannel
+                @test isapprox(op(qblockbasis, multi_params..., noise), changebasis(QuadBlockBasis, op(qpairbasis, multi_params..., noise)))
             end
         end
     end
