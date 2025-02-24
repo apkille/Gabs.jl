@@ -28,14 +28,13 @@
         @variables θps
         @variables thetas_ps[1:nmodes]
         thetas_ps_vec = collect(thetas_ps)
-        sub_dict(params_tuple) = Dict(vcat([p .=> 0 for p in params_tuple]...)...)
         test_configs = [(squeeze, (r, θs), (rs_vec, thetas_vec), "Squeeze Operator"), (phaseshift, (θps,), (thetas_ps_vec,), "Phase-Shift Operator")]
         for (op, single_params, multi_params, desc) in test_configs
             @testset "$desc" begin
                 op_pair   = op(qpairbasis, single_params..., noise)
                 op_block  = op(qblockbasis, single_params..., noise)
                 @test op_pair isa GaussianChannel && op_block isa GaussianChannel
-                @test iszero(simplify(substitute(op_block.transform - changebasis(QuadBlockBasis, op_pair).transform, sub_dict(single_params))))
+                @test iszero(simplify(op_block.transform - changebasis(QuadBlockBasis, op_pair).transform))
                 @test iszero(simplify(op_block.disp - changebasis(QuadBlockBasis, op_pair).disp))
                 @test op(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, single_params..., noise) isa GaussianChannel
                 @test op(Array, qpairbasis, single_params..., noise) isa GaussianChannel
@@ -44,7 +43,7 @@
                 op_pair_multi  = op(qpairbasis, multi_params..., noise)
                 op_block_multi = op(qblockbasis, multi_params..., noise)
                 @test op_pair_multi isa GaussianChannel && op_block_multi isa GaussianChannel
-                @test iszero(simplify(substitute(op_block_multi.transform - changebasis(QuadBlockBasis, op_pair_multi).transform, sub_dict(multi_params))))
+                @test iszero(simplify(op_block_multi.transform - changebasis(QuadBlockBasis, op_pair_multi).transform))
                 @test iszero(simplify(op_block_multi.disp - changebasis(QuadBlockBasis, op_pair_multi).disp))
                 @test op(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, multi_params..., noise) isa GaussianChannel
                 @test op(Array, qpairbasis, multi_params..., noise) isa GaussianChannel
@@ -60,20 +59,20 @@
         @variables θ_bs
         @variables thetas_bs[1:nmodes]
         thetas_bs_vec = collect(thetas_bs)
-        sub_dict(params_tuple) = Dict(vcat([p .=> 0 for p in params_tuple]...)...)
         test_configs = [(op = twosqueeze, single_params = (r, θ), multi_params = (rs_vec, thetas_vec), desc = "Two-Mode Squeeze Operator"),
                         (op = beamsplitter, single_params = (θ_bs,), multi_params = (thetas_bs_vec,), desc = "Beamsplitter Operator")]
         for (op, single_params, multi_params, desc) in test_configs
             @testset "$desc" begin
                 op_single = op(2*qpairbasis, single_params..., noise_ds)
                 @test op_single isa GaussianChannel
-                @test iszero(simplify(substitute(op_single.transform - changebasis(QuadBlockBasis, op_single).transform, sub_dict(single_params))))
+                @test iszero(simplify(op_single.transform - changebasis(QuadBlockBasis, op_single).transform))
                 @test iszero(simplify(op_single.disp - changebasis(QuadBlockBasis, op_single).disp))
                 @test op(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, 2*qpairbasis, single_params..., noise_ds) isa GaussianChannel
                 @test op(Array, 2*qpairbasis, single_params..., noise_ds) isa GaussianChannel
                 op_multi = op(2*qpairbasis, multi_params..., noise_ds)
                 @test op_multi isa GaussianChannel
-                @test iszero(simplify(substitute(op_multi.transform - changebasis(QuadBlockBasis, op_multi).transform, sub_dict(multi_params))))
+                @test iszero(simplify(op_multi.transform - changebasis(QuadBlockBasis, op_multi).transform))
+                println(changebasis(QuadBlockBasis, op_multi).transform)
                 @test iszero(simplify(op_multi.disp - changebasis(QuadBlockBasis, op_multi).disp))
                 @test op(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, 2*qpairbasis, multi_params..., noise_ds) isa GaussianChannel
                 @test op(Array, 2*qpairbasis, multi_params..., noise_ds) isa GaussianChannel
