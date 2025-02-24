@@ -82,7 +82,7 @@
         end
     end
 
-    @testset "Symbolic Gaussian Channels" begin
+    @testset "Symbolic Gaussian Amplifier and Attenuator" begin
         @variables r θ
         @variables rs[1:nmodes] thetas[1:nmodes]
         rs_vec = collect(rs)
