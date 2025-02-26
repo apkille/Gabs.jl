@@ -289,6 +289,7 @@ function _tensor(op1::GaussianChannel{B1,D1,T1}, op2::GaussianChannel{B2,D2,T2})
     @inbounds for i in block2
         disp′[i+2*nmodes1] = disp2[i]
     end
+    # initialize direct sum of transform and noise matrices
     trans1, trans2 = op1.transform, op2.transform
     elT1 = eltype(trans1) isa Type ? eltype(trans1) : Float64
     elT2 = eltype(trans2) isa Type ? eltype(trans2) : Float64
@@ -305,6 +306,7 @@ function _tensor(op1::GaussianChannel{B1,D1,T1}, op2::GaussianChannel{B2,D2,T2})
         transform′[i+2*nmodes1,j+2*nmodes1] = trans2[i,j]
         noise′[i+2*nmodes1,j+2*nmodes1] = noise2[i,j]
     end
+    # extract output array types
     disp′′ = _promote_output_vector(typeof(disp1), typeof(disp2), disp′)
     transform′′ = _promote_output_matrix(typeof(trans1), typeof(trans2), transform′)
     noise′′ = _promote_output_matrix(typeof(noise1), typeof(noise2), noise′)

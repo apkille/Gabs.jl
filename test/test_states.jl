@@ -74,25 +74,25 @@
         vs = tensor(v, v)
         @test vs isa GaussianState
         @test tensor(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, v, v) isa GaussianState
-        #@test vs == v ⊗ v
-        #@test isapprox(vs, v ⊗ v, atol = 1e-10)
+        @test vs == v ⊗ v
+        @test isapprox(vs, v ⊗ v, atol = 1e-10)
 
         alpha = rand(ComplexF64)
         c = coherentstate(qpairbasis, alpha)
-       # @test tensor(c, tensor(v, v)) == c ⊗ v ⊗ v
+        @test tensor(c, tensor(v, v)) == c ⊗ v ⊗ v
 
         r, theta = rand(Float64), rand(Float64)
         sq = squeezedstate(qblockbasis, r, theta)
         sqs = squeezedstate(2*qblockbasis, repeat([r], 2*nmodes), repeat([theta], 2*nmodes))
-        #@test sq ⊗ sq == sqs
+        @test sq ⊗ sq == sqs
 
         vstatic = vacuumstate(SVector, SMatrix, qpairbasis)
         tpstatic = vstatic ⊗ vstatic ⊗ vstatic
-        #@test tpstatic.mean isa SVector{6*nmodes}
-        #@test tpstatic.covar isa SMatrix{6*nmodes,6*nmodes}
+        @test tpstatic.mean isa SVector{6*nmodes}
+        @test tpstatic.covar isa SMatrix{6*nmodes,6*nmodes}
         tp = vstatic ⊗ v ⊗ vstatic
-        #@test tp.mean isa Vector
-        #@test tp.covar isa Matrix
+        @test tp.mean isa Vector
+        @test tp.covar isa SMatrix
     end
 
     @testset "partial trace" begin

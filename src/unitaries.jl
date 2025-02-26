@@ -584,6 +584,7 @@ function _tensor(op1::GaussianUnitary{B1,D1,S1}, op2::GaussianUnitary{B2,D2,S2})
     nmodes1, nmodes2 = basis1.nmodes, basis2.nmodes
     nmodes = nmodes1 + nmodes2
     block1, block2 = Base.OneTo(2*nmodes1), Base.OneTo(2*nmodes2)
+    # initialize direct sum of displacement vectors
     disp1, disp2 = op1.disp, op2.disp
     elD1 = eltype(disp1) isa Type ? eltype(disp1) : Float64
     elD2 = eltype(disp2) isa Type ? eltype(disp2) : Float64
@@ -596,6 +597,7 @@ function _tensor(op1::GaussianUnitary{B1,D1,S1}, op2::GaussianUnitary{B2,D2,S2})
     @inbounds for i in block2
         disp′[i+2*nmodes1] = disp2[i]
     end
+    # initialize direct sum of symplectic matrices
     symp1, symp2 = op1.symplectic, op2.symplectic
     elS1 = eltype(symp1) isa Type ? eltype(symp1) : Float64
     elS2 = eltype(symp2) isa Type ? eltype(symp2) : Float64
@@ -608,6 +610,7 @@ function _tensor(op1::GaussianUnitary{B1,D1,S1}, op2::GaussianUnitary{B2,D2,S2})
     @inbounds for i in block2, j in block2
         symp′[i+2*nmodes1,j+2*nmodes1] = symp2[i,j]
     end
+    # extract output array types
     disp′′ = _promote_output_vector(typeof(disp1), typeof(disp2), disp′)
     symp′′ = _promote_output_matrix(typeof(symp1), typeof(symp2), symp′)
     return disp′′, symp′′
@@ -618,6 +621,7 @@ function _tensor(op1::GaussianUnitary{B1,D1,S1}, op2::GaussianUnitary{B2,D2,S2})
     nmodes1, nmodes2 = basis1.nmodes, basis2.nmodes
     nmodes = nmodes1 + nmodes2
     block1, block2 = Base.OneTo(nmodes1), Base.OneTo(nmodes2)
+    # initialize direct sum of displacement vectors
     disp1, disp2 = op1.disp, op2.disp
     elD1 = eltype(disp1) isa Type ? eltype(disp1) : Float64
     elD2 = eltype(disp2) isa Type ? eltype(disp2) : Float64
@@ -632,6 +636,7 @@ function _tensor(op1::GaussianUnitary{B1,D1,S1}, op2::GaussianUnitary{B2,D2,S2})
         disp′[i+nmodes1] = disp2[i]
         disp′[i+nmodes+nmodes1] = disp2[i+nmodes2]
     end
+    # initialize direct sum of symplectic matrices
     symp1, symp2 = op1.symplectic, op2.symplectic
     elS1 = eltype(symp1) isa Type ? eltype(symp1) : Float64
     elS2 = eltype(symp2) isa Type ? eltype(symp2) : Float64
@@ -650,6 +655,7 @@ function _tensor(op1::GaussianUnitary{B1,D1,S1}, op2::GaussianUnitary{B2,D2,S2})
         symp′[i+nmodes+nmodes1,j+nmodes1] = symp2[i+nmodes2,j]
         symp′[i+nmodes+nmodes1,j+nmodes+nmodes1] = symp2[i+nmodes2,j+nmodes2]
     end
+    # extract output array types
     disp′′ = _promote_output_vector(typeof(disp1), typeof(disp2), disp′)
     symp′′ = _promote_output_matrix(typeof(symp1), typeof(symp2), symp′)
     return disp′′, symp′′

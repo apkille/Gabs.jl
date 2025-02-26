@@ -30,8 +30,8 @@ Base.@propagate_inbounds function _promote_output_vector(::Type{Vector}, vec_out
     return Vector{eltype(vec_out)}(vec_out)
 end
 
-
 abstract type ArrayTrait end
+
 struct DenseArrayTrait <: ArrayTrait end
 struct StaticArrayTrait <: ArrayTrait end
 
@@ -44,13 +44,11 @@ function _infer_types(::DenseArrayTrait, nmodes, T = Float64)
     transform_type = Matrix{T}
     return disp_type, transform_type
 end
-
 function _infer_types(::StaticArrayTrait, nmodes, T = Float64)
     disp_type = SArray{Tuple{2*nmodes}, T}
     transform_type = SArray{Tuple{2*nmodes, 2*nmodes}, T}
     return disp_type, transform_type
 end
-
 function _infer_types(T1, T2, basis)
     nmodes = basis.nmodes
     elT1 = eltype(T1)
@@ -59,11 +57,9 @@ function _infer_types(T1, T2, basis)
     _, transform_type2 = _infer_types(array_trait(T2), nmodes, elT2)
     return disp_type1, transform_type2
 end
-
 function _infer_types(T, basis)
     nmodes = basis.nmodes
     elT = eltype(T)
     disp_type, transform_type = _infer_types(array_trait(T), nmodes, elT)
     return disp_type, transform_type
 end
-
