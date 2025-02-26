@@ -277,9 +277,11 @@ function _tensor(op1::GaussianChannel{B1,D1,T1}, op2::GaussianChannel{B2,D2,T2})
     nmodes1, nmodes2 = basis1.nmodes, basis2.nmodes
     nmodes = nmodes1 + nmodes2
     block1, block2 = Base.OneTo(2*nmodes1), Base.OneTo(2*nmodes2)
-    # initialize direct sum of displacement vectors
     disp1, disp2 = op1.disp, op2.disp
-    Dt = promote_type(eltype(disp1), eltype(disp2))
+    elD1 = eltype(disp1) isa Type ? eltype(disp1) : Float64
+    elD2 = eltype(disp2) isa Type ? eltype(disp2) : Float64
+    Dt = promote_type(elD1, elD2)
+    Dt = Dt == Any ? Float64 : Dt
     disp′ = zeros(Dt, 2*nmodes)
     @inbounds for i in block1
         disp′[i] = disp1[i]
@@ -287,9 +289,11 @@ function _tensor(op1::GaussianChannel{B1,D1,T1}, op2::GaussianChannel{B2,D2,T2})
     @inbounds for i in block2
         disp′[i+2*nmodes1] = disp2[i]
     end
-    # initialize direct sum of transform and noise matrices
     trans1, trans2 = op1.transform, op2.transform
-    Tt = promote_type(eltype(trans1), eltype(trans2))
+    elT1 = eltype(trans1) isa Type ? eltype(trans1) : Float64
+    elT2 = eltype(trans2) isa Type ? eltype(trans2) : Float64
+    Tt = promote_type(elT1, elT2)
+    Tt = Tt == Any ? Float64 : Tt
     transform′ = zeros(Tt, 2*nmodes, 2*nmodes)
     noise1, noise2 = op1.noise, op2.noise
     noise′ = zeros(Tt, 2*nmodes, 2*nmodes)
@@ -301,7 +305,6 @@ function _tensor(op1::GaussianChannel{B1,D1,T1}, op2::GaussianChannel{B2,D2,T2})
         transform′[i+2*nmodes1,j+2*nmodes1] = trans2[i,j]
         noise′[i+2*nmodes1,j+2*nmodes1] = noise2[i,j]
     end
-    # extract output array types
     disp′′ = _promote_output_vector(typeof(disp1), typeof(disp2), disp′)
     transform′′ = _promote_output_matrix(typeof(trans1), typeof(trans2), transform′)
     noise′′ = _promote_output_matrix(typeof(noise1), typeof(noise2), noise′)
@@ -314,7 +317,10 @@ function _tensor(op1::GaussianChannel{B1,D1,T1}, op2::GaussianChannel{B2,D2,T2})
     block1, block2 = Base.OneTo(nmodes1), Base.OneTo(nmodes2)
     # initialize direct sum of displacement vectors
     disp1, disp2 = op1.disp, op2.disp
-    Dt = promote_type(eltype(disp1), eltype(disp2))
+    elD1 = eltype(disp1) isa Type ? eltype(disp1) : Float64
+    elD2 = eltype(disp2) isa Type ? eltype(disp2) : Float64
+    Dt = promote_type(elD1, elD2)
+    Dt = Dt == Any ? Float64 : Dt
     disp′ = zeros(Dt, 2*nmodes)
     @inbounds for i in block1
         disp′[i] = disp1[i]
@@ -326,7 +332,10 @@ function _tensor(op1::GaussianChannel{B1,D1,T1}, op2::GaussianChannel{B2,D2,T2})
     end
     # initialize direct sum of transform and noise matrices
     trans1, trans2 = op1.transform, op2.transform
-    Tt = promote_type(eltype(trans1), eltype(trans2))
+    elT1 = eltype(trans1) isa Type ? eltype(trans1) : Float64
+    elT2 = eltype(trans2) isa Type ? eltype(trans2) : Float64
+    Tt = promote_type(elT1, elT2)
+    Tt = Tt == Any ? Float64 : Tt
     transform′ = zeros(Tt, 2*nmodes, 2*nmodes)
     noise1, noise2 = op1.noise, op2.noise
     noise′ = zeros(Tt, 2*nmodes, 2*nmodes)

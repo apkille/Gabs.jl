@@ -15,6 +15,21 @@ end
 Base.@propagate_inbounds function _promote_output_matrix(::Type{<:SMatrix}, mat_out, out_dim::Tuple)
     return SMatrix{out_dim[1],out_dim[2]}(mat_out)
 end
+Base.@propagate_inbounds function _promote_output_matrix(::Type{T1}, ::Type{T2}, mat_out) where {T1<:SMatrix, T2<:AbstractMatrix}
+    return SMatrix{size(mat_out,1), size(mat_out,2)}(mat_out)
+end
+Base.@propagate_inbounds function _promote_output_vector(::Type{T1}, ::Type{T2}, vec_out) where {T1<:SVector, T2<:AbstractVector}
+    return collect(vec_out)
+end
+
+Base.@propagate_inbounds function _promote_output_vector(::Type{T1}, ::Type{T2}, vec_out) where {T1<:AbstractVector, T2<:SVector}
+    return collect(vec_out)
+end
+
+Base.@propagate_inbounds function _promote_output_vector(::Type{Vector}, vec_out, vec_length::Int)
+    return Vector{eltype(vec_out)}(vec_out)
+end
+
 
 abstract type ArrayTrait end
 struct DenseArrayTrait <: ArrayTrait end

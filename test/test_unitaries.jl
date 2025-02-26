@@ -95,7 +95,7 @@
         @test tpstatic.symplectic isa SMatrix{6*nmodes,6*nmodes}
         tp = dstatic ⊗ d1 ⊗ dstatic
         @test tp.disp isa Vector
-        @test tp.symplectic isa Matrix
+        @test tp.symplectic isa SMatrix
     end
 
     @testset "actions" begin
