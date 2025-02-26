@@ -19,15 +19,7 @@ Base.@propagate_inbounds function _promote_output_matrix(::Type{T1}, ::Type{T2},
     return SMatrix{size(mat_out,1), size(mat_out,2)}(mat_out)
 end
 Base.@propagate_inbounds function _promote_output_vector(::Type{T1}, ::Type{T2}, vec_out) where {T1<:SVector, T2<:AbstractVector}
-    return collect(vec_out)
-end
-
-Base.@propagate_inbounds function _promote_output_vector(::Type{T1}, ::Type{T2}, vec_out) where {T1<:AbstractVector, T2<:SVector}
-    return collect(vec_out)
-end
-
-Base.@propagate_inbounds function _promote_output_vector(::Type{Vector}, vec_out, vec_length::Int)
-    return Vector{eltype(vec_out)}(vec_out)
+    return SVector{length(vec_out)}(vec_out)
 end
 
 abstract type ArrayTrait end

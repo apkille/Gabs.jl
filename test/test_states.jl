@@ -91,7 +91,7 @@
         @test tpstatic.mean isa SVector{6*nmodes}
         @test tpstatic.covar isa SMatrix{6*nmodes,6*nmodes}
         tp = vstatic ⊗ v ⊗ vstatic
-        @test tp.mean isa Vector
+        @test tp.mean isa SVector
         @test tp.covar isa SMatrix
     end
 

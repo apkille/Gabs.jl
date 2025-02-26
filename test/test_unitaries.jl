@@ -94,7 +94,7 @@
         @test tpstatic.disp isa SVector{6*nmodes}
         @test tpstatic.symplectic isa SMatrix{6*nmodes,6*nmodes}
         tp = dstatic ⊗ d1 ⊗ dstatic
-        @test tp.disp isa Vector
+        @test tp.disp isa SVector
         @test tp.symplectic isa SMatrix
     end
 

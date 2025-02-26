@@ -139,7 +139,7 @@
         @test tpstatic.transform isa SMatrix{6*nmodes,6*nmodes}
         @test tpstatic.noise isa SMatrix{6*nmodes,6*nmodes}
         tp = dstatic ⊗ d1 ⊗ dstatic
-        @test tp.disp isa Vector
+        @test tp.disp isa SVector
         @test tp.transform isa SMatrix
         @test tp.noise isa SMatrix
     end
