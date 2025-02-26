@@ -483,6 +483,7 @@ function tensor(state1::GaussianState, state2::GaussianState)
     return GaussianState(state1.basis ⊕ state2.basis, mean, covar; ħ = state1.ħ)
 end
 function _tensor(state1::GaussianState{B1,M1,V1}, state2::GaussianState{B2,M2,V2}) where {B1<:QuadPairBasis,B2<:QuadPairBasis,M1,M2,V1,V2}
+    # initialize direct sum of mean vectors
     mean1, mean2 = state1.mean, state2.mean
     elT1 = eltype(mean1) isa Type ? eltype(mean1) : Float64
     elT2 = eltype(mean2) isa Type ? eltype(mean2) : Float64
@@ -492,7 +493,6 @@ function _tensor(state1::GaussianState{B1,M1,V1}, state2::GaussianState{B2,M2,V2
     nmodes1, nmodes2 = basis1.nmodes, basis2.nmodes
     nmodes = nmodes1 + nmodes2
     block1, block2 = Base.OneTo(2*nmodes1), Base.OneTo(2*nmodes2)
-    # initialize direct sum of mean vectors
     mean′ = zeros(Mt, 2*nmodes)
     @inbounds for i in block1
         mean′[i] = mean1[i]
@@ -537,6 +537,7 @@ function _tensor(state1::GaussianState{B1,M1,V1}, state2::GaussianState{B2,M2,V2
         mean′[i+nmodes1] = mean2[i]
         mean′[i+nmodes+nmodes1] = mean2[i+nmodes2]
     end
+    # initialize direct sum of covariance matrices
     covar1, covar2 = state1.covar, state2.covar
     elV1 = eltype(covar1) isa Type ? eltype(covar1) : Float64
     elV2 = eltype(covar2) isa Type ? eltype(covar2) : Float64
@@ -555,6 +556,7 @@ function _tensor(state1::GaussianState{B1,M1,V1}, state2::GaussianState{B2,M2,V2
         covar′[i+nmodes+nmodes1,j+nmodes1] = covar2[i+nmodes2,j]
         covar′[i+nmodes+nmodes1,j+nmodes+nmodes1] = covar2[i+nmodes2,j+nmodes2]
     end
+    # extract output array types
     mean′′ = _promote_output_vector(typeof(mean1), typeof(mean2), mean′)
     covar′′ = _promote_output_matrix(typeof(covar1), typeof(covar2), covar′)
     return mean′′, covar′′

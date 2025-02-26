@@ -277,6 +277,7 @@ function _tensor(op1::GaussianChannel{B1,D1,T1}, op2::GaussianChannel{B2,D2,T2})
     nmodes1, nmodes2 = basis1.nmodes, basis2.nmodes
     nmodes = nmodes1 + nmodes2
     block1, block2 = Base.OneTo(2*nmodes1), Base.OneTo(2*nmodes2)
+    # initialize direct sum of displacement vectors
     disp1, disp2 = op1.disp, op2.disp
     elD1 = eltype(disp1) isa Type ? eltype(disp1) : Float64
     elD2 = eltype(disp2) isa Type ? eltype(disp2) : Float64
