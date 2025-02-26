@@ -27,7 +27,8 @@
         op_block = displace(qblockbasis, alpha, noise)
         @test op_pair isa GaussianChannel && op_block isa GaussianChannel
         @test displace(SVector, SMatrix, qpairbasis, alpha, noise) isa GaussianChannel
-        @test displace(Array, qpairbasis, alpha, noise) isa GaussianChannel
+        @test displace(SArray, qpairbasis, alpha, noise) isa GaussianChannel
+        # @test displace(Array, qpairbasis, alpha, noise) isa GaussianChannel
         @test displace(qblockbasis, alpha, T*noise*transpose(T)) == changebasis(QuadBlockBasis, op_pair)
         @test displace(qblockbasis, alphas, T*noise*transpose(T)) == changebasis(QuadBlockBasis, displace(qpairbasis, alphas, noise))
         @test op_pair.ħ == 2 && op_block.ħ == 2

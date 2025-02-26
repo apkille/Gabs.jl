@@ -15,3 +15,5 @@ end
 Base.@propagate_inbounds function _promote_output_matrix(::Type{T}, mat_out, out_dim::Td) where {T,Td<:Tuple}
     T <: Matrix{Float64} ? mat_out : T(mat_out)
 end
+
+function _infer_types end

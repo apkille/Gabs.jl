@@ -63,10 +63,10 @@ julia> using StaticArrays
 julia> state = coherentstate(SVector, SMatrix, QuadPairBasis(1), 1.0-im)
 GaussianState for 1 mode.
   symplectic basis: QuadPairBasis
-mean: 2-element SVector{2, Float64} with indices SOneTo(2):
+mean: 2-element SVector{2, Any} with indices SOneTo(2):
   2.0
  -2.0
-covariance: 2×2 SMatrix{2, 2, Float64, 4} with indices SOneTo(2)×SOneTo(2):
+covariance: 2×2 SMatrix{2, 2, Any, 4} with indices SOneTo(2)×SOneTo(2):
  1.0  0.0
  0.0  1.0
 

@@ -16,27 +16,39 @@ Base.@propagate_inbounds function _promote_output_matrix(::Type{<:SMatrix}, mat_
     return SMatrix{out_dim[1],out_dim[2]}(mat_out)
 end
 
-function infer_mean_type(::Type{SVector}, basis::Gabs.SymplecticBasis{N}) where {N}
-    nmodes = basis.nmodes
-    return SVector{2*nmodes, Float64}
+abstract type ArrayTrait end
+struct DenseArrayTrait <: ArrayTrait end
+struct StaticArrayTrait <: ArrayTrait end
+
+array_trait(::Type{<:Array}) = DenseArrayTrait()
+array_trait(::Type{<:SArray}) = StaticArrayTrait()
+array_trait(::Type{<:UnionAll}) = StaticArrayTrait()
+
+function _infer_types(::DenseArrayTrait, nmodes, T = Float64)
+    disp_type = Vector{T}
+    transform_type = Matrix{T}
+    return disp_type, transform_type
 end
 
-function infer_covar_type(::Type{SMatrix}, basis::Gabs.SymplecticBasis{N}) where {N}
-    nmodes = basis.nmodes
-    return SMatrix{2*nmodes, 2*nmodes, Float64, 4*nmodes*nmodes}
+function _infer_types(::StaticArrayTrait, nmodes, T = Float64)
+    disp_type = SArray{Tuple{2*nmodes}, T}
+    transform_type = SArray{Tuple{2*nmodes, 2*nmodes}, T}
+    return disp_type, transform_type
 end
 
-function infer_displacement_type(::Type{SVector}, basis::Gabs.QuadPairBasis{N}) where {N}
+function _infer_types(T1, T2, basis)
     nmodes = basis.nmodes
-    return SVector{2*nmodes, Float64}
+    elT1 = eltype(T1)
+    elT2 = eltype(T2)
+    disp_type1, _ = _infer_types(array_trait(T1), nmodes, elT1)
+    _, transform_type2 = _infer_types(array_trait(T2), nmodes, elT2)
+    return disp_type1, transform_type2
 end
 
-function infer_symplectic_type(::Type{SMatrix}, basis::Gabs.QuadPairBasis{N}) where {N}
+function _infer_types(T, basis)
     nmodes = basis.nmodes
-    return SMatrix{2*nmodes, 2*nmodes, Float64, 4*nmodes*nmodes}
+    elT = eltype(T)
+    disp_type, transform_type = _infer_types(array_trait(T), nmodes, elT)
+    return disp_type, transform_type
 end
 
-function infer_transform_type(::Type{SMatrix}, basis::Gabs.SymplecticBasis{N}) where {N}
-    nmodes = basis.nmodes
-    return SMatrix{2*nmodes, 2*nmodes, Float64, 4*nmodes*nmodes}
-end
