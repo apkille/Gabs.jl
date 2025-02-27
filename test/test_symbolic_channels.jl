@@ -71,7 +71,7 @@
     end
 
     @testset "Symbolic actions" begin
-        @variables alpha1
+        @variables alpha1 alpha2
         d = displace(qpairbasis, alpha1, noise)
         v = vacuumstate(qpairbasis)
         c = coherentstate(qpairbasis, alpha1)
