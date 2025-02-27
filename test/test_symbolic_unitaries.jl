@@ -41,7 +41,7 @@
             @test isequal(op_func(factor * qblockbasis, theta).disp, changebasis(QuadBlockBasis, op).disp)
             @test isequal(op_func(factor * qblockbasis, theta).symplectic, changebasis(QuadBlockBasis, op).symplectic)
             @variables thetas[1:nmodes]
-            thetas_vec = vcat([real(thetas[i]) for i in 1:nmodes], [imag(thetas[i]) for i in 1:nmodes])
+            thetas_vec = collect(thetas)
             op_arr = op_func(factor * qpairbasis, thetas_vec)
             op_block_arr = op_func(factor * qblockbasis, thetas_vec)
             @test op_arr isa GaussianUnitary && op_block_arr isa GaussianUnitary
