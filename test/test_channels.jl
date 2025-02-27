@@ -25,11 +25,11 @@
         alphas = rand(ComplexF64, nmodes)
         op_pair = displace(qpairbasis, alpha, noise)
         op_block = displace(qblockbasis, alpha, noise)
+        op, op_array, op_static = displace(qpairbasis, alpha, noise), displace(Array, qpairbasis, alpha, noise), displace(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, alpha, noise)
+        op_static1, op_static2 = displace(SArray, qpairbasis, alpha, noise), displace(SVector, SMatrix, qpairbasis, alpha, noise)
+        @test op isa GaussianChannel && op_array isa GaussianChannel && op_static isa GaussianChannel
+        @test op_static1 isa GaussianChannel &&  op_static2 isa GaussianChannel
         @test op_pair isa GaussianChannel && op_block isa GaussianChannel
-        @test displace(SVector, SMatrix, qpairbasis, alpha, noise) isa GaussianChannel
-        @test displace(SArray, qpairbasis, alpha, noise) isa GaussianChannel
-        @test displace(Array, qpairbasis, alpha, noise) isa GaussianChannel
-        @test displace(Vector, Matrix, qpairbasis, alpha, noise) isa GaussianChannel
         @test displace(qblockbasis, alpha, T*noise*transpose(T)) == changebasis(QuadBlockBasis, op_pair)
         @test displace(qblockbasis, alphas, T*noise*transpose(T)) == changebasis(QuadBlockBasis, displace(qpairbasis, alphas, noise))
         @test op_pair.ħ == 2 && op_block.ħ == 2
@@ -40,11 +40,11 @@
         rs, thetas = rand(Float64, nmodes), rand(Float64, nmodes)
         op_pair = squeeze(qpairbasis, r, theta, noise)
         op_block = squeeze(qblockbasis, r, theta, noise)
+        op, op_array, op_static = squeeze(qpairbasis, r, theta, noise), squeeze(Array, qpairbasis, r, theta, noise), squeeze(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, r, theta, noise)
+        op_static1, op_static2 = squeeze(SArray, qpairbasis, r, theta, noise), squeeze(SVector, SMatrix, qpairbasis, r, theta, noise)
+        @test op isa GaussianChannel && op_array isa GaussianChannel && op_static isa GaussianChannel
+        @test op_static1 isa GaussianChannel &&  op_static2 isa GaussianChannel
         @test op_pair isa GaussianChannel && op_block isa GaussianChannel
-        @test squeeze(SVector, SMatrix, qpairbasis, r, theta, noise) isa GaussianChannel
-        @test squeeze(SArray, qpairbasis, r, theta, noise) isa GaussianChannel
-        @test squeeze(Array, qpairbasis, r, theta, noise) isa GaussianChannel
-        @test squeeze(Vector, Matrix, qpairbasis, r, theta, noise) isa GaussianChannel
         @test squeeze(qblockbasis, r, theta, T*noise*transpose(T)) == changebasis(QuadBlockBasis, op_pair)
         @test squeeze(qblockbasis, rs, thetas, T*noise*transpose(T)) == changebasis(QuadBlockBasis, squeeze(qpairbasis, rs, thetas, noise))
         @test op_pair.ħ == 2 && op_block.ħ == 2
@@ -91,11 +91,11 @@
         ns = rand(1:10, nmodes)
         op_pair = attenuator(qpairbasis, theta, n)
         op_block = attenuator(qblockbasis, theta, n)
+        op, op_array, op_static = attenuator(qpairbasis, theta, n), attenuator(Array, qpairbasis, theta, n), attenuator(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, theta, n)
+        op_static1, op_static2 = attenuator(SArray, qpairbasis, theta, n), attenuator(SVector, SMatrix, qpairbasis, theta, n)
+        @test op isa GaussianChannel && op_array isa GaussianChannel && op_static isa GaussianChannel
+        @test op_static1 isa GaussianChannel &&  op_static2 isa GaussianChannel
         @test op_pair isa GaussianChannel && op_block isa GaussianChannel
-        @test attenuator(SVector, SMatrix, qpairbasis, theta, n) isa GaussianChannel
-        @test attenuator(SArray, qpairbasis, theta, n) isa GaussianChannel
-        @test attenuator(Array, qpairbasis, theta, n) isa GaussianChannel
-        @test attenuator(Vector, Matrix, qpairbasis, theta, n) isa GaussianChannel
         @test op_pair == changebasis(QuadPairBasis, op_block) && op_block == changebasis(QuadBlockBasis, op_pair)
         @test op_pair == changebasis(QuadPairBasis, op_pair) && op_block == changebasis(QuadBlockBasis, op_block)
         @test attenuator(qblockbasis, theta, n) == changebasis(QuadBlockBasis, op_pair)
@@ -111,11 +111,12 @@
         ns = rand(1:10, nmodes)
         op_pair = amplifier(qpairbasis, r, n)
         op_block = amplifier(qblockbasis, r, n)
+        op, op_array, op_static = amplifier(qpairbasis, r, n), amplifier(Array, qpairbasis, r, n), amplifier(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, r, n)
+        op_static1, op_static2 = amplifier(SArray, qpairbasis, r, n), amplifier(SVector, SMatrix, qpairbasis, r, n)
+        @test op isa GaussianChannel && op_array isa GaussianChannel && op_static isa GaussianChannel
+        @test op_static1 isa GaussianChannel &&  op_static2 isa GaussianChannel
         @test op_pair isa GaussianChannel && op_block isa GaussianChannel
-        @test amplifier(SVector, SMatrix, qpairbasis, r, n) isa GaussianChannel
-        @test amplifier(SArray, qpairbasis, r, n) isa GaussianChannel
-        @test amplifier(Array, qpairbasis, r, n) isa GaussianChannel
-        @test amplifier(Vector, Matrix, qpairbasis, r, n) isa GaussianChannel
+        @test op_pair isa GaussianChannel && op_block isa GaussianChannel
         @test op_pair == changebasis(QuadPairBasis, op_block) && op_block == changebasis(QuadBlockBasis, op_pair)
         @test op_pair == changebasis(QuadPairBasis, op_pair) && op_block == changebasis(QuadBlockBasis, op_block)
         @test amplifier(qblockbasis, r, n) == changebasis(QuadBlockBasis, op_pair)

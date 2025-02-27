@@ -508,10 +508,10 @@ function _tensor(state1::GaussianState{B1,M1,V1}, state2::GaussianState{B2,M2,V2
     Vt = Vt == Any ? Float64 : Vt
     covar′ = zeros(Vt, 2*nmodes, 2*nmodes)
     @inbounds for i in block1, j in block1
-        covar′[i, j] = covar1[i, j]
+        covar′[i,j] = covar1[i,j]
     end
     @inbounds for i in block2, j in block2
-        covar′[i+2*nmodes1, j+2*nmodes1] = covar2[i, j]
+        covar′[i+2*nmodes1,j+2*nmodes1] = covar2[i,j]
     end
     # extract output array types
     mean′′ = _promote_output_vector(typeof(mean1), typeof(mean2), mean′)
