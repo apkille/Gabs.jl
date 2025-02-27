@@ -94,6 +94,7 @@
         sqs = squeezedstate(2*qblockbasis, repeat([r], 2*nmodes), repeat([theta], 2*nmodes))
         @test sq ⊗ sq == sqs
 
+        vstatic = vacuumstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis)
         vstatic = vacuumstate(SVector, SMatrix, qpairbasis)
         tpstatic = vstatic ⊗ vstatic ⊗ vstatic
         @test tpstatic.mean isa SVector{6*nmodes}
@@ -127,6 +128,7 @@
         @test ptrace(state_qblock, [1, 3]) == s1_qblock ⊗ s3_qblock
         @test ptrace(state_qblock, [2, 3]) == s2_qblock ⊗ s3_qblock
 
+        sstatic = coherentstate(SVector{2}, SMatrix{2,2}, qpairbasis1, alpha)
         sstatic = coherentstate(SVector, SMatrix, qpairbasis1, alpha)
         tpstatic = sstatic ⊗ sstatic ⊗ sstatic
         @test ptrace(tpstatic, 1) == sstatic

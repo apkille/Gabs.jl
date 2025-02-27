@@ -85,6 +85,7 @@
         state_pair = thermalstate(qpairbasis, n)
         state_block = thermalstate(qblockbasis, n)
         @test state_pair isa GaussianState && state_block isa GaussianState
+        @test thermalstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, n) isa GaussianState
         @test thermalstate(SVector, SMatrix, qpairbasis, n) isa GaussianState
         @test isequal(thermalstate(qblockbasis, n).covar, changebasis(QuadBlockBasis, state_pair).covar)
         @test isequal(thermalstate(qblockbasis, n).mean, changebasis(QuadBlockBasis, state_pair).mean)
