@@ -137,6 +137,7 @@
         p_blocks = phaseshift(2*qblockbasis, repeat([theta], 2*nmodes), T_ds * noise_ds * transpose(T_ds))
         @test p_block ⊗ p_block == p_blocks
 
+        dstatic = displace(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, alpha1, noise)
         dstatic = displace(SVector, SMatrix, qpairbasis, alpha1, noise)
         tpstatic = dstatic ⊗ dstatic ⊗ dstatic
         @test tpstatic.disp isa SVector{6*nmodes}
