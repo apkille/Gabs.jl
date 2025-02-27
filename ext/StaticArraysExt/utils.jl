@@ -22,36 +22,15 @@ Base.@propagate_inbounds function _promote_output_vector(::Type{T1}, ::Type{T2},
     return SVector{length(vec_out)}(vec_out)
 end
 
-abstract type ArrayTrait end
-
-struct DenseArrayTrait <: ArrayTrait end
-struct StaticArrayTrait <: ArrayTrait end
-
-array_trait(::Type{<:Array}) = DenseArrayTrait()
-array_trait(::Type{<:SArray}) = StaticArrayTrait()
-array_trait(::Type{<:UnionAll}) = StaticArrayTrait()
-
-function _infer_types(::DenseArrayTrait, nmodes, T = Float64)
-    disp_type = Vector{T}
-    transform_type = Matrix{T}
-    return disp_type, transform_type
-end
-function _infer_types(::StaticArrayTrait, nmodes, T = Float64)
-    disp_type = SArray{Tuple{2*nmodes}, T}
-    transform_type = SArray{Tuple{2*nmodes, 2*nmodes}, T}
-    return disp_type, transform_type
-end
-function _infer_types(T1, T2, basis)
+function _infer_types(::Type{T1}, ::Type{T2}, basis) where {T1<:SVector, T2<:SMatrix}
     nmodes = basis.nmodes
-    elT1 = eltype(T1)
-    elT2 = eltype(T2)
-    disp_type1, _ = _infer_types(array_trait(T1), nmodes, elT1)
-    _, transform_type2 = _infer_types(array_trait(T2), nmodes, elT2)
-    return disp_type1, transform_type2
+    return T1{2*nmodes}, T2{2*nmodes,2*nmodes}
 end
-function _infer_types(T, basis)
+function _infer_types(::Type{T1}, ::Type{T2}, basis) where {T1<:SVector{<:Int}, T2<:SMatrix{<:Int, <:Int}}
     nmodes = basis.nmodes
-    elT = eltype(T)
-    disp_type, transform_type = _infer_types(array_trait(T), nmodes, elT)
-    return disp_type, transform_type
+    return T1, T2
+end
+function _infer_types(::Type{T}, basis) where {T<:SArray}
+    nmodes = basis.nmodes
+    return SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}
 end
