@@ -189,6 +189,8 @@ function _amplifier(basis::QuadPairBasis{N}, r::R, n::M) where {N<:Int,R,M}
     disp = zeros(Rt, 2*nmodes) 
     transform = zeros(Rt, 2*nmodes, 2*nmodes)
     noise = zeros(Rt, 2*nmodes, 2*nmodes)
+    r = isa(r, Number) ? fill(r, nmodes) : r
+    n = isa(n, Number) ? fill(n, nmodes) : n
     @inbounds for i in Base.OneTo(nmodes)
         cr, sr = cosh(r[i]), sinh(r[i])
         ni = n[i]
@@ -207,6 +209,8 @@ function _amplifier(basis::QuadBlockBasis{N}, r::R, n::M) where {N<:Int,R<:Vecto
     disp = zeros(Rt, 2*nmodes) 
     transform = zeros(Rt, 2*nmodes, 2*nmodes)
     noise = zeros(Rt, 2*nmodes, 2*nmodes)
+    r = isa(r, Number) ? fill(r, nmodes) : r
+    n = isa(n, Number) ? fill(n, nmodes) : n
     @inbounds for i in Base.OneTo(nmodes)
         cr, sr = cosh(r[i]), sinh(r[i])
         ni = n[i]
