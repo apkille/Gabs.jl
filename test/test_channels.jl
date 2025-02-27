@@ -53,8 +53,10 @@
     @testset "two-mode squeeze operator" begin
         r, theta = rand(Float64), rand(Float64)
         rs, thetas = rand(Float64, nmodes), rand(Float64, nmodes)
-        op, op_array, op_static_array, op_static = twosqueeze(2*qpairbasis, r, theta, noise_ds), twosqueeze(Array, 2*qpairbasis, r, theta, noise_ds), twosqueeze(SArray, 2*qpairbasis, r, theta, noise_ds), twosqueeze(SVector, SMatrix, 2*qpairbasis, r, theta, noise_ds)
-        @test op isa GaussianChannel && op_array isa GaussianChannel && op_static isa GaussianChannel && op_static_array isa GaussianChannel
+        op, op_array, op_static = twosqueeze(2*qpairbasis, r, theta, noise_ds), twosqueeze(Array, 2*qpairbasis, r, theta, noise_ds), twosqueeze(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, 2*qpairbasis, r, theta, noise_ds)
+        op_static1, op_static2 = twosqueeze(SArray, 2*qpairbasis, r, theta, noise_ds), twosqueeze(SVector, SMatrix, 2*qpairbasis, r, theta, noise_ds)
+        @test op isa GaussianChannel && op_array isa GaussianChannel && op_static isa GaussianChannel
+        @test op_static1 isa GaussianChannel &&  op_static2 isa GaussianChannel
         @test twosqueeze(2*qblockbasis, r, theta, T_ds*noise_ds*transpose(T_ds)) == changebasis(QuadBlockBasis, op)
         @test twosqueeze(2*qblockbasis, rs, thetas, T_ds*noise_ds*transpose(T_ds)) == changebasis(QuadBlockBasis, twosqueeze(2*qpairbasis, rs, thetas, noise_ds))
         @test op.ħ == 2 && op_array.ħ == 2 && op_static.ħ == 2
@@ -73,8 +75,10 @@
     @testset "beamsplitter operator" begin
         theta = rand(Float64)
         thetas = rand(Float64, nmodes)
-        op, op_array, op_static_array, op_static = beamsplitter(2*qpairbasis, theta, noise_ds), beamsplitter(Array, 2*qpairbasis, theta, noise_ds), beamsplitter(SArray, 2*qpairbasis, theta, noise_ds), beamsplitter(SVector, SMatrix, 2*qpairbasis, theta, noise_ds)
-        @test op isa GaussianChannel && op_array isa GaussianChannel && op_static isa GaussianChannel && op_static_array isa GaussianChannel
+        op, op_array, op_static = beamsplitter(2*qpairbasis, theta, noise_ds), beamsplitter(Array, 2*qpairbasis, theta, noise_ds), beamsplitter(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, 2*qpairbasis, theta, noise_ds)
+        op_static1, op_static2 = beamsplitter(SArray, 2*qpairbasis, theta, noise_ds), beamsplitter(SVector, SMatrix, 2*qpairbasis, theta, noise_ds)
+        @test op isa GaussianChannel && op_array isa GaussianChannel && op_static isa GaussianChannel
+        @test op_static1 isa GaussianChannel &&  op_static2 isa GaussianChannel
         @test beamsplitter(2*qblockbasis, theta, T_ds*noise_ds*transpose(T_ds)) == changebasis(QuadBlockBasis, op)
         @test beamsplitter(2*qblockbasis, thetas, T_ds*noise_ds*transpose(T_ds)) == changebasis(QuadBlockBasis, beamsplitter(2*qpairbasis, thetas, noise_ds))
         @test op.ħ == 2 && op_array.ħ == 2 && op_static.ħ == 2

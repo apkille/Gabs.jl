@@ -8,8 +8,10 @@
     qblockbasis = QuadBlockBasis(nmodes)
 
     @testset "vacuum states" begin
-        state, array_state, static_array, static_state = vacuumstate(qpairbasis), vacuumstate(Array, qpairbasis),vacuumstate(SArray, qpairbasis), vacuumstate(SVector, SMatrix, qpairbasis)
+        state, array_state, static_state = vacuumstate(qpairbasis), vacuumstate(Array, qpairbasis), vacuumstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis)
+        static_state1, static_state2  = vacuumstate(SArray, qpairbasis), vacuumstate(SVector, SMatrix, qpairbasis)
         @test state isa GaussianState && array_state isa GaussianState && static_state isa GaussianState
+        @test static_state1 isa GaussianState && static_state2 isa GaussianState
         @test vacuumstate(qblockbasis) == changebasis(QuadBlockBasis, state)
         @test state.ħ == 2 && array_state.ħ == 2 && static_state.ħ == 2
     end
@@ -19,12 +21,11 @@
         ns = rand(1:5, nmodes)
         state_pair = thermalstate(qpairbasis, n)
         state_block = thermalstate(qblockbasis, n)
+        state, array_state, static_state = thermalstate(qpairbasis, n), thermalstate(Array, qpairbasis, n), thermalstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, n)
+        static_state1, static_state2  = thermalstate(SArray, qpairbasis, n), thermalstate(SVector, SMatrix, qpairbasis, n)
+        @test state isa GaussianState && array_state isa GaussianState && static_state isa GaussianState
+        @test static_state1 isa GaussianState && static_state2 isa GaussianState
         @test state_pair isa GaussianState && state_block isa GaussianState
-        @test thermalstate(Array, qpairbasis, n) isa GaussianState
-        @test thermalstate(Vector, Matrix, qpairbasis, n) isa GaussianState
-        @test thermalstate(SArray, qpairbasis, n) isa GaussianState
-        @test thermalstate(SVector, SMatrix, qpairbasis, n) isa GaussianState
-        @test thermalstate(qblockbasis, n) == changebasis(QuadBlockBasis, state_pair)
         @test state_pair == changebasis(QuadPairBasis, state_block) && state_block == changebasis(QuadBlockBasis, state_pair)
         @test state_pair == changebasis(QuadPairBasis, state_pair) && state_block == changebasis(QuadBlockBasis, state_block)
         @test thermalstate(qblockbasis, ns) == changebasis(QuadBlockBasis, thermalstate(qpairbasis, ns))
@@ -37,11 +38,11 @@
         alphas = rand(ComplexF64, nmodes)
         state_pair = coherentstate(qpairbasis, alpha)
         state_block = coherentstate(qblockbasis, alpha)
+        state, array_state, static_state =  coherentstate(qpairbasis, alpha), coherentstate(Array, qpairbasis, alpha), coherentstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, alpha)
+        static_state1, static_state2  = coherentstate(SArray, qpairbasis, alpha), coherentstate(SVector, SMatrix, qpairbasis, alpha)
         @test state_pair isa GaussianState && state_block isa GaussianState
-        @test coherentstate(Array, qpairbasis, alpha) isa GaussianState
-        @test coherentstate(Vector, Matrix, qpairbasis, alpha) isa GaussianState
-        @test coherentstate(SArray, qpairbasis, alpha) isa GaussianState
-        @test coherentstate(SVector, SMatrix, qpairbasis, alpha) isa GaussianState
+        @test state isa GaussianState && array_state isa GaussianState && static_state isa GaussianState
+        @test static_state1 isa GaussianState && static_state2 isa GaussianState
         @test coherentstate(qblockbasis, alpha) == changebasis(QuadBlockBasis, state_pair)
         @test state_pair == changebasis(QuadPairBasis, state_block) && state_block == changebasis(QuadBlockBasis, state_pair)
         @test state_pair == changebasis(QuadPairBasis, state_pair) && state_block == changebasis(QuadBlockBasis, state_block)
@@ -53,8 +54,10 @@
     @testset "squeezed states" begin
         r, theta = rand(Float64), rand(Float64)
         rs, thetas = rand(Float64, nmodes), rand(Float64, nmodes)
-        state, array_state, static_array, static_state = squeezedstate(qpairbasis, r, theta), squeezedstate(Array, qpairbasis, r, theta),squeezedstate(SArray, qpairbasis, r, theta),  squeezedstate(SVector, SMatrix, qpairbasis, r, theta)
-        @test state isa GaussianState && array_state isa GaussianState && static_state isa GaussianState && static_array isa GaussianState
+       state, array_state, static_state = squeezedstate(qpairbasis, r, theta), squeezedstate(Array, qpairbasis, r, theta), squeezedstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, r, theta)
+        static_state1, static_state2  = squeezedstate(SArray, qpairbasis, r, theta), squeezedstate(SVector, SMatrix, qpairbasis, r, theta)
+        @test state isa GaussianState && array_state isa GaussianState && static_state isa GaussianState
+        @test static_state1 isa GaussianState && static_state2 isa GaussianState
         @test squeezedstate(qblockbasis, r, theta) == changebasis(QuadBlockBasis, state)
         @test squeezedstate(qblockbasis, rs, thetas) == changebasis(QuadBlockBasis, squeezedstate(qpairbasis, rs, thetas))
         @test state.ħ == 2 && array_state.ħ == 2 && static_state.ħ == 2
@@ -63,8 +66,11 @@
     @testset "epr states" begin
         r, theta = rand(Float64), rand(Float64)
         rs, thetas = rand(Float64, nmodes), rand(Float64, nmodes)
-        state, array_state, static_array, static_state = eprstate(2*qpairbasis, r, theta), eprstate(Array, 2*qpairbasis, r, theta), eprstate(SArray, 2*qpairbasis, r, theta),  eprstate(SVector, SMatrix, 2*qpairbasis, r, theta)
-        @test state isa GaussianState && array_state isa GaussianState && static_state isa GaussianState && static_array isa GaussianState
+        state, array_state, static_state = eprstate(2*qpairbasis, r, theta), eprstate(Array, 2*qpairbasis, r, theta), eprstate(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, 2*qpairbasis, r, theta)
+        static_state1, static_state2  = eprstate(SArray, 2*qpairbasis, r, theta), eprstate(SVector, SMatrix, 2*qpairbasis, r, theta)
+        @test state isa GaussianState && array_state isa GaussianState && static_state isa GaussianState
+        @test static_state1 isa GaussianState && static_state2 isa GaussianState
+        @test eprstate(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, 2*qpairbasis, r, theta) isa GaussianState
         @test eprstate(SVector, SMatrix, 2*qpairbasis, r, theta) isa GaussianState
         @test eprstate(2*qblockbasis, r, theta) == changebasis(QuadBlockBasis, state)
         @test eprstate(2*qblockbasis, rs, thetas) == changebasis(QuadBlockBasis, eprstate(2*qpairbasis, rs, thetas))
