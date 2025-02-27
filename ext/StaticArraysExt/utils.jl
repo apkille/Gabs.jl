@@ -24,7 +24,9 @@ end
 
 function _infer_types(::Type{T1}, ::Type{T2}, basis) where {T1<:SVector, T2<:SMatrix}
     nmodes = basis.nmodes
-    return T1{2*nmodes}, T2{2*nmodes,2*nmodes}
+    eltype_T1 = eltype(T1)
+    eltype_T2 = eltype(T2)
+    return SVector{2*nmodes, eltype_T1}, SMatrix{2*nmodes, 2*nmodes, eltype_T2}
 end
 function _infer_types(::Type{T1}, ::Type{T2}, basis) where {T1<:SVector{<:Int}, T2<:SMatrix{<:Int, <:Int}}
     nmodes = basis.nmodes
@@ -32,5 +34,6 @@ function _infer_types(::Type{T1}, ::Type{T2}, basis) where {T1<:SVector{<:Int}, 
 end
 function _infer_types(::Type{T}, basis) where {T<:SArray}
     nmodes = basis.nmodes
-    return SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}
+    eltype_T = eltype(T)
+    return SVector{2*nmodes, eltype_T}, SMatrix{2*nmodes, 2*nmodes, eltype_T}
 end
