@@ -50,7 +50,8 @@ end
 function _displace(basis::QuadPairBasis{N}, alpha::A; ħ = 2) where {N<:Int,A<:Vector}
     nmodes = basis.nmodes
     Rt = real(eltype(A))
-    disp = sqrt(2*ħ) * reinterpret(Rt, alpha)
+    disp = collect(Iterators.flatten((real(i), imag(i)) for i in alpha))
+    disp .*= sqrt(2*ħ)
     symplectic = Matrix{Rt}(I, 2*nmodes, 2*nmodes)
     return disp, symplectic
 end
@@ -64,7 +65,7 @@ end
 function _displace(basis::QuadBlockBasis{N}, alpha::A; ħ = 2) where {N<:Int,A<:Vector}
     nmodes = basis.nmodes
     Rt = real(eltype(A))
-    re = reinterpret(Rt, alpha)
+    re = collect(Iterators.flatten((real(i), imag(i)) for i in alpha))
     disp = vcat(@view(re[1:2:end]), @view(re[2:2:end]))
     disp .*= sqrt(2*ħ)
     symplectic = Matrix{Rt}(I, 2*nmodes, 2*nmodes)
