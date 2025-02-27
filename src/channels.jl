@@ -3,7 +3,7 @@
 ##
 
 function displace(::Type{Td}, ::Type{Tt}, basis::SymplecticBasis{N}, alpha::A, noise::M) where {Td,Tt,N<:Int,A,M}
-    disp_type, transform_type = _infer_types(Td, Tt, basis)
+    dtype, ttype = _infer_types(Td, Tt, basis)
     disp, transform = _displace(basis, alpha)
     return GaussianChannel(basis, disp_type(disp), transform_type(transform), transform_type(noise))
 end
