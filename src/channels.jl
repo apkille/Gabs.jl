@@ -92,7 +92,7 @@ function attenuator(basis::SymplecticBasis{N}, theta::R, n::M; ħ = 2) where {N<
     disp, transform, noise = _attenuator(basis, theta, n)
     return GaussianChannel(basis, disp, transform, noise; ħ = ħ)
 end
-function _attenuator(basis::Union{QuadPairBasis{N},QuadBlockBasis{N}}, theta::R, n::M) where {N<:Int,R<:Real,M<:Int}
+function _attenuator(basis::Union{QuadPairBasis{N},QuadBlockBasis{N}}, theta::R, n::M) where {N<:Int,R,M}
     nmodes = basis.nmodes
     disp = zeros(R, 2*nmodes)
     transform = Matrix{R}(cos(theta) * I, 2*nmodes, 2*nmodes)
@@ -176,21 +176,21 @@ function amplifier(basis::SymplecticBasis{N}, r::R, n::M; ħ = 2) where {N<:Int,
     disp, transform, noise = _amplifier(basis, r, n)
     return GaussianChannel(basis, disp, transform, noise; ħ = ħ)
 end
-function _amplifier(basis::Union{QuadPairBasis{N},QuadBlockBasis{N}}, r::R, n::M) where {N<:Int,R<:Real,M<:Int}
+function _amplifier(basis::Union{QuadPairBasis{N},QuadBlockBasis{N}}, r::R, n::M) where {N<:Int,R,M}
     nmodes = basis.nmodes
     disp = zeros(R, 2*nmodes) 
     transform = Matrix{R}(cosh(r) * I, 2*nmodes, 2*nmodes)
     noise = Matrix{R}((sinh(r))^2 * n * I, 2*nmodes, 2*nmodes)
     return disp, transform, noise
 end
-function _amplifier(basis::QuadPairBasis{N}, r::R, n::M) where {N<:Int,R<:Vector,M<:Vector}
+function _amplifier(basis::QuadPairBasis{N}, r::R, n::M) where {N<:Int,R,M}
     nmodes = basis.nmodes
     Rt = eltype(R)
     disp = zeros(Rt, 2*nmodes) 
     transform = zeros(Rt, 2*nmodes, 2*nmodes)
     noise = zeros(Rt, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
-        cr, sr = cos(r[i]), sin(r[i])
+        cr, sr = cosh(r[i]), sinh(r[i])
         ni = n[i]
 
         transform[2*i-1, 2*i-1] = cr
@@ -208,7 +208,7 @@ function _amplifier(basis::QuadBlockBasis{N}, r::R, n::M) where {N<:Int,R<:Vecto
     transform = zeros(Rt, 2*nmodes, 2*nmodes)
     noise = zeros(Rt, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
-        cr, sr = cos(r[i]), sin(r[i])
+        cr, sr = cosh(r[i]), sinh(r[i])
         ni = n[i]
 
         transform[i, i] = cr
@@ -374,10 +374,11 @@ noise: 4×4 Matrix{Float64}:
 function changebasis(::Type{B1}, op::GaussianChannel{B2,D,S}) where {B1<:QuadBlockBasis,B2<:QuadPairBasis,D,S}
     basis = op.basis
     nmodes = basis.nmodes
-    T = zeros(eltype(S), 2*nmodes, 2*nmodes)
+    St = eltype(S)
+    T = zeros(St, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(2*nmodes), j in Base.OneTo(2*nmodes)
         if (j == 2*i-1) || (j + 2*nmodes == 2*i)
-            T[i,j] = 1.0
+            T[i,j] = oneunit(St)
         end
     end
     T = typeof(T) == S ? T : S(T)
@@ -389,10 +390,11 @@ end
 function changebasis(::Type{B1}, op::GaussianChannel{B2,D,S}) where {B1<:QuadPairBasis,B2<:QuadBlockBasis,D,S}
     basis = op.basis
     nmodes = basis.nmodes
-    T = zeros(eltype(S), 2*nmodes, 2*nmodes)
+    St = eltype(S)
+    T = zeros(St, 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(2*nmodes), j in Base.OneTo(2*nmodes)
         if (i == 2*j-1) || (i + 2*nmodes == 2*j)
-            T[i,j] = 1.0
+            T[i,j] = oneunit(St)
         end
     end
     T = typeof(T) == S ? T : S(T)
