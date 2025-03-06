@@ -12,11 +12,13 @@ using SymplecticFactorizations: williamson, Williamson, polar, Polar, blochmessi
 
 export
     # types
-    GaussianState, GaussianUnitary, GaussianChannel, Generaldyne,
+    GaussianState, GaussianUnitary, GaussianChannel,
+    # Gaussian measurements
+    generaldyne, Generaldyne,
     # symplectic representations
     QuadPairBasis, QuadBlockBasis, changebasis,
     # operations
-    tensor, ⊗, directsum, ⊕, apply!, ptrace, output, prob,
+    tensor, ⊗, directsum, ⊕, apply!, ptrace,
     # predefined Gaussian states
     vacuumstate, thermalstate, coherentstate, squeezedstate, eprstate,
     # predefined Gaussian channels
