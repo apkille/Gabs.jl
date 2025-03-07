@@ -7,6 +7,9 @@ using LinearAlgebra: I, det, mul!, diag, qr, eigvals, Diagonal
 
 import QuantumInterface: StateVector, AbstractOperator, apply!, tensor, ⊗, directsum, ⊕
 
+# metrics
+import QuantumInterface: entropy_vn, fidelity, logarithmic_negativity
+
 import SymplecticFactorizations: williamson, Williamson, polar, Polar, blochmessiah, BlochMessiah, randsymplectic, symplecticform, issymplectic
 using SymplecticFactorizations: williamson, Williamson, polar, Polar, blochmessiah, BlochMessiah, BlockForm, PairForm
 
@@ -31,7 +34,7 @@ export
     # factorizations
     williamson, Williamson, polar, Polar, blochmessiah, BlochMessiah,
     # metrics
-    purity
+    purity, entropy_vn, fidelity, logarithmic_negativity
 
 include("errors.jl")
 
