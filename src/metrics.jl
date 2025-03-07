@@ -48,7 +48,7 @@ See: Banchi, Braunstein, and Pirandola, Phys. Rev. Lett. 115, 260501 (2015)
 * `state1`, `state2`: Gaussian states whose joint fidelity is to be calculated.
 * `tol=1e-15`: Tolerance for spectrum values above the square root singularity.
 """
-function fidelity(state1::GaussianState, state2::GaussianState)
+function fidelity(state1::GaussianState, state2::GaussianState, tol=1e-15)
     state1.basis == state2.basis || throw(ArgumentError(SYMPLECTIC_ERROR))
     state1.ħ == state2.ħ || throw(ArgumentError(HBAR_ERROR))
     delta = state2.mean - state1.mean
