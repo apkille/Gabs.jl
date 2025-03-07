@@ -720,10 +720,9 @@ function changebasis(::Type{B1}, state::GaussianState{B2,M,V}) where {B1<:QuadBl
     basis = state.basis
     nmodes = basis.nmodes
     T = zeros(eltype(V), 2*nmodes, 2*nmodes)
-    @inbounds for i in Base.OneTo(2*nmodes), j in Base.OneTo(2*nmodes)
-        if (j == 2*i-1) || (j + 2*nmodes == 2*i)
-            T[i,j] = 1.0
-        end
+    @inbounds for i in Base.OneTo(nmodes)
+        T[i, 2*i - 1] = 1.0
+        T[nmodes + i, 2*i] = 1.0
     end
     T = typeof(T) == V ? T : V(T)
     mean = T * state.mean
@@ -734,10 +733,9 @@ function changebasis(::Type{B1}, state::GaussianState{B2,M,V}) where {B1<:QuadPa
     basis = state.basis
     nmodes = basis.nmodes
     T = zeros(eltype(V), 2*nmodes, 2*nmodes)
-    @inbounds for i in Base.OneTo(2*nmodes), j in Base.OneTo(2*nmodes)
-        if (i == 2*j-1) || (i + 2*nmodes == 2*j)
-            T[i,j] = 1.0
-        end
+    @inbounds for i in Base.OneTo(nmodes)
+        T[2*i - 1, i] = 1.0
+        T[2*i, nmodes + i] = 1.0
     end
     T = typeof(T) == V ? T : V(T)
     mean = T * state.mean
