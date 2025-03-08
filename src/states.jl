@@ -717,29 +717,41 @@ covariance: 4×4 Matrix{Float64}:
 ```
 """
 function changebasis(::Type{B1}, state::GaussianState{B2,M,V}) where {B1<:QuadBlockBasis,B2<:QuadPairBasis,M,V}
-    basis = state.basis
-    nmodes = basis.nmodes
-    T = zeros(eltype(V), 2*nmodes, 2*nmodes)
+    nmodes = state.basis.nmodes
+    mean = zeros(eltype(M), 2*nmodes)
+    covar = zeros(eltype(V), 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
-        T[i, 2*i - 1] = 1.0
-        T[nmodes + i, 2*i] = 1.0
+        mean[i] = state.mean[2*i - 1]
+        mean[nmodes + i] = state.mean[2*i]
+        # split into two loops for better cache efficiency
+        @inbounds for j in Base.OneTo(nmodes)
+            covar[j, i] = state.covar[2*j - 1, 2*i - 1]
+            covar[nmodes + j, i] = state.covar[2*j, 2*i - 1]
+        end
+        @inbounds for j in Base.OneTo(nmodes)
+            covar[j, nmodes + i] = state.covar[2*j - 1, 2*i]
+            covar[nmodes + j, nmodes + i] = state.covar[2*j, 2*i]
+        end
     end
-    T = typeof(T) == V ? T : V(T)
-    mean = T * state.mean
-    covar = T * state.covar * transpose(T)
     return GaussianState(B1(nmodes), mean, covar)
 end
 function changebasis(::Type{B1}, state::GaussianState{B2,M,V}) where {B1<:QuadPairBasis,B2<:QuadBlockBasis,M,V}
-    basis = state.basis
-    nmodes = basis.nmodes
-    T = zeros(eltype(V), 2*nmodes, 2*nmodes)
+    nmodes = state.basis.nmodes
+    mean = zeros(eltype(M), 2*nmodes)
+    covar = zeros(eltype(V), 2*nmodes, 2*nmodes)
     @inbounds for i in Base.OneTo(nmodes)
-        T[2*i - 1, i] = 1.0
-        T[2*i, nmodes + i] = 1.0
+        mean[2*i - 1] = state.mean[i]
+        mean[2*i] = state.mean[nmodes + i]
+        # split into two loops for better cache efficiency
+        @inbounds for j in Base.OneTo(nmodes)
+            covar[2*j - 1, 2*i - 1] = state.covar[j, i]
+            covar[2*j, 2*i - 1] = state.covar[nmodes + j, i]
+        end
+        @inbounds for j in Base.OneTo(nmodes)
+            covar[2*j - 1, 2*i] = state.covar[j, nmodes + i]
+            covar[2*j, 2*i] = state.covar[nmodes + j, nmodes + i]
+        end
     end
-    T = typeof(T) == V ? T : V(T)
-    mean = T * state.mean
-    covar = T * state.covar * transpose(T)
     return GaussianState(B1(nmodes), mean, covar)
 end
 changebasis(::Type{<:QuadBlockBasis}, state::GaussianState{<:QuadBlockBasis,M,V}) where {M,V} = state
