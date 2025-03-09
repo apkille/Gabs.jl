@@ -5,10 +5,7 @@ using BlockArrays: BlockedArray, BlockArray, Block, mortar
 import LinearAlgebra
 using LinearAlgebra: I, det, mul!, diag, qr, eigvals, Diagonal
 
-import QuantumInterface: StateVector, AbstractOperator, apply!, tensor, ⊗, directsum, ⊕
-
-# metrics
-import QuantumInterface: entropy_vn, fidelity, logarithmic_negativity
+import QuantumInterface: StateVector, AbstractOperator, apply!, tensor, ⊗, directsum, ⊕, entropy_vn, fidelity, logarithmic_negativity
 
 import SymplecticFactorizations: williamson, Williamson, polar, Polar, blochmessiah, BlochMessiah, randsymplectic, symplecticform, issymplectic
 using SymplecticFactorizations: williamson, Williamson, polar, Polar, blochmessiah, BlochMessiah, BlockForm, PairForm
