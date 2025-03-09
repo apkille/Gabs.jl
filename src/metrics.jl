@@ -88,14 +88,14 @@ Therein, ``\\mathbf{\\tilde{V}} = \\mathbf{T} \\mathbf{V} \\mathbf{T}`` where
 * `indices`: Integer or collection thereof, specifying the binary partition.
 * `tol=1e15`: Tolerance above the logarithmic singularity.
 """
-function logarithmic_negativity(state::GaussianState, indices=1, tol=1e-15)
-    tilde = _tilde(state)
+function logarithmic_negativity(state::GaussianState, indices, tol=1e-15)
+    tilde = _tilde(state, indices)
     M = symplecticform(state.basis) * tilde
     spectrum = filter(x -> x > 0, imag.(eigvals(M))) ./ state.ħ
     return -reduce(+, log.(filter(x -> x > tol && x < 1/2, spectrum)))
 end
 
-function _tilde(state::GaussianState{B,M,V}, indices=1) where {B<:QuadPairBasis,M,V}
+function _tilde(state::GaussianState{B,M,V}, indices) where {B<:QuadPairBasis,M,V}
     T = state.covar
     nmodes = state.basis.nmodes
     for i in indices
@@ -109,7 +109,7 @@ function _tilde(state::GaussianState{B,M,V}, indices=1) where {B<:QuadPairBasis,
     end
     return T
 end
-function _tilde(state::GaussianState{B,M,V}, indices=1) where {B<:QuadBlockBasis,M,V}
+function _tilde(state::GaussianState{B,M,V}, indices) where {B<:QuadBlockBasis,M,V}
     T = state.covar
     nmodes = state.basis.nmodes
     for i in indices
