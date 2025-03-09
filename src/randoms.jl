@@ -4,10 +4,15 @@
 Calculate a random Gaussian state in symplectic representation defined by `basis`.
 """
 function randstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}; pure = false, ħ = 2) where {Tm,Tc,N<:Int}
+    mtype, ctype = _infer_types(Tm, Tc, basis)
     mean, covar = _randstate(basis; pure = pure, ħ = ħ)
-    return GaussianState(basis, Tm(mean), Tc(covar), ħ = ħ)
+    return GaussianState(basis, mtype(mean), ctype(covar), ħ = ħ)
 end
-randstate(::Type{T}, basis::SymplecticBasis{N}; pure = false, ħ = 2) where {T,N<:Int} = randstate(T,T,basis; pure = pure, ħ = ħ)
+function randstate(::Type{T}, basis::SymplecticBasis{N}; pure = false, ħ = 2) where {T,N<:Int}
+    mtype, ctype = _infer_types(T, basis)
+    mean, covar = _randstate(basis; pure = pure, ħ = ħ)
+    return GaussianState(basis, mtype(mean), ctype(covar), ħ = ħ)
+end
 function randstate(basis::SymplecticBasis{N}; pure = false, ħ = 2) where {N<:Int}
     mean, covar = _randstate(basis; pure = pure, ħ = ħ)
     return GaussianState(basis, mean, covar, ħ = ħ)
@@ -57,10 +62,15 @@ end
 Calculate a random Gaussian unitary operator in symplectic representation defined by `basis`.
 """
 function randunitary(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}; passive = false, ħ = 2) where {Td,Ts,N<:Int}
+    dtype, stype = _infer_types(Td, Ts, basis)
     disp, symp = _randunitary(basis, passive = passive)
-    return GaussianUnitary(basis, Td(disp), Ts(symp), ħ = ħ)
+    return GaussianUnitary(basis, dtype(disp), stype(symp), ħ = ħ)
 end
-randunitary(::Type{T}, basis::SymplecticBasis{N}; passive = false, ħ = 2) where {T,N<:Int} = randunitary(T,T,basis; passive = passive, ħ = ħ)
+function randunitary(::Type{T}, basis::SymplecticBasis{N}; passive = false, ħ = 2) where {T,N<:Int}
+    dtype, stype = _infer_types(T, T, basis)
+    disp, symp = _randunitary(basis, passive = passive)
+    return GaussianUnitary(basis, dtype(disp), stype(symp), ħ = ħ)
+end
 function randunitary(basis::SymplecticBasis{N}; passive = false, ħ = 2) where {N<:Int}
     disp, symp = _randunitary(basis, passive = passive)
     return GaussianUnitary(basis, disp, symp, ħ = ħ)
@@ -78,10 +88,15 @@ end
 Calculate a random Gaussian channel in symplectic representation defined by `basis`.
 """
 function randchannel(::Type{Td}, ::Type{Tt}, basis::SymplecticBasis{N}; ħ = 2) where {Td,Tt,N<:Int}
+    dtype, ttype = _infer_types(Td, Tt, basis)
     disp, transform, noise = _randchannel(basis)
-    return GaussianChannel(basis, Td(disp), Tt(transform), Tt(noise), ħ = ħ)
+    return GaussianChannel(basis, dtype(disp), ttype(transform), ttype(noise), ħ = ħ)
 end
-randchannel(::Type{T}, basis::SymplecticBasis{N}; ħ = 2) where {T,N<:Int} = randchannel(T,T,basis; ħ = ħ)
+function randchannel(::Type{T}, basis::SymplecticBasis{N}; ħ = 2) where {T,N<:Int}
+    dtype, ttype = _infer_types(T, T, basis)
+    disp, transform, noise = _randchannel(basis)
+    return GaussianChannel(basis, dtype(disp), ttype(transform), ttype(noise), ħ = ħ)
+end
 function randchannel(basis::SymplecticBasis{N}; ħ = 2) where {N<:Int}
     disp, transform, noise = _randchannel(basis)
     return GaussianChannel(basis, disp, transform, noise, ħ = ħ)
