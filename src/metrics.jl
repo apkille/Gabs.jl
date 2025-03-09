@@ -85,7 +85,7 @@ Therein, ``\\mathbf{\\tilde{V}} = \\mathbf{T} \\mathbf{V} \\mathbf{T}`` where
 
 # Arguments
 * `state`: Gaussian state whose logarithmic negativity is to be calculated.
-* `indices`: integer or collection thereof, specifying the binary partition.
+* `indices`: Integer or collection thereof, specifying the binary partition.
 * `tol=1e15`: Tolerance above the logarithmic singularity.
 """
 function logarithmic_negativity(state::GaussianState, indices=1, tol=1e-15)
