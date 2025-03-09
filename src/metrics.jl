@@ -27,7 +27,7 @@ wherein it is understood that ``0 \\log(0) \\equiv 0``.
 * `tol=1e-15`: Tolerance above the logarithmic singularity.
 """
 function entropy_vn(state::GaussianState, tol=1e-15)
-    spectrum = symspectrum(state) ./ state.ħ
+    spectrum = sympspectrum(state) ./ state.ħ
     return reduce(+, _entropy_vn.(filter(x -> x-(1/2) > tol, spectrum)))
 end
 
