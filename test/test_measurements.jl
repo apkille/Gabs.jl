@@ -31,6 +31,7 @@
         @test isapprox(out3, GaussianState(basis, out3_mean, out3_covar))
 
         sstatic = vacuumstate(SVector{2}, SMatrix{2,2}, basis)
+        sstatic = vacuumstate(SVector, SMatrix, basis)
         statestatic = sstatic ⊗ sstatic ⊗ sstatic ⊗ sstatic
         gdstatic = Generaldyne(statestatic, sstatic, [2])
         outstatic = output(gdstatic)
