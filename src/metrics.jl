@@ -51,15 +51,14 @@ See: Banchi, Braunstein, and Pirandola, Phys. Rev. Lett. 115, 260501 (2015)
 function fidelity(state1::GaussianState, state2::GaussianState, tol=1e-15)
     state1.basis == state2.basis || throw(ArgumentError(SYMPLECTIC_ERROR))
     state1.ħ == state2.ħ || throw(ArgumentError(HBAR_ERROR))
-    delta = state2.mean - state1.mean
-    V_sum = state1.covar + state2.covar
-    Omega = symplecticform(state1.basis)
+    A = state2.mean - state1.mean
+    B = state1.covar + state2.covar
+    output = exp(- (transpose(A) * (B \ A)) / 4) / (det(B))^(1/4)
+    A = symplecticform(state1.basis)
     # slightly different from Banachi, Braunstein, and Pirandola
-    V_aux = (V_sum \ ((Omega ./ 4) + (state2.covar * Omega * state1.covar)))
-    spectrum = filter(x -> x > 0, imag.(eigvals(V_aux))) .* (2/state.ħ)
-    F_tot = sqrt(reduce(*, _fidelity.(filter(x -> x-1 > tol, spectrum))))
-    prefactor = F_tot / (det(V_sum))^(1/4)
-    return prefactor * exp(- (transpose(delta) * (V_sum \ delta)) / 4)
+    B = (B \ ((A ./ 4) + (state2.covar * A * state1.covar)))
+    B = filter(x -> x > 0, imag.(eigvals(B))) .* (2/state.ħ)
+    return output * sqrt(reduce(*, _fidelity.(filter(x -> x-1 > tol, B))))
 end
 
 _fidelity(x) = x + sqrt(x^2 - 1)
@@ -86,13 +85,13 @@ Therein, ``\\mathbf{\\tilde{V}} = \\mathbf{T} \\mathbf{V} \\mathbf{T}`` where
 # Arguments
 * `state`: Gaussian state whose logarithmic negativity is to be calculated.
 * `indices`: Integer or collection thereof, specifying the binary partition.
-* `tol=1e15`: Tolerance above the logarithmic singularity.
+* `tol=1e-15`: Tolerance above the logarithmic singularity.
 """
 function logarithmic_negativity(state::GaussianState, indices, tol=1e-15)
-    tilde = _tilde(state, indices)
-    M = symplecticform(state.basis) * tilde
-    spectrum = filter(x -> x > 0, imag.(eigvals(M))) ./ state.ħ
-    return -reduce(+, log.(filter(x -> x > tol && x < 1/2, spectrum)))
+    M = _tilde(state, indices)
+    M = symplecticform(state.basis) * M
+    M = filter(x -> x > 0, imag.(eigvals(M))) ./ state.ħ
+    return -reduce(+, log.(filter(x -> x > tol && x < 1/2, M)))
 end
 
 function _tilde(state::GaussianState{B,M,V}, indices) where {B<:QuadPairBasis,M,V}
