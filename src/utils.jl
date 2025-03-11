@@ -26,7 +26,7 @@ function _infer_types(::Type{Array}, basis)
     return Vector{Float64}, Matrix{Float64}
 end
 
-function _infer_types(::Type{Array{T, N}}, basis) where {T, N}
+function _infer_types(::Type{Array{T}}, basis) where {T}
     nmodes = basis.nmodes
     return Vector{T}, Matrix{T}
 end
