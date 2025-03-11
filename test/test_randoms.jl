@@ -90,9 +90,9 @@
         @test isapprox(rupassive.symplectic', inv(rupassive.symplectic), atol = 1e-5)
         @test isgaussian(rupassive, atol = 1e-5)
 
-        ru_array = randunitary(SArray, qpairbasis)
-        @test ru_array.ħ == 2
-        @test isgaussian(ru_array, atol = 1e-5)
+        ru_array, ru_array_static = randunitary(Array, qpairbasis), randunitary(SArray, qpairbasis)
+        @test ru_array.ħ == 2 && ru_array_static.ħ == 2
+        @test isgaussian(ru_array, atol = 1e-5) && isgaussian(ru_array_static, atol = 1e-5)
 
         rupassive_array = randunitary(qpairbasis, passive = true)
         @test isapprox(rupassive_array.symplectic', inv(rupassive_array.symplectic), atol = 1e-5)
@@ -114,9 +114,9 @@
         rc = randchannel(qpairbasis, ħ = ħ)
         @test isgaussian(rc, atol = 1e-5)
 
-        rc_array = randchannel(SArray, qpairbasis)
-        @test rc_array.ħ == 2
-        @test isgaussian(rc_array, atol = 1e-5)
+        rc_array, rc_array_static = randchannel(Array, qpairbasis), randchannel(SArray, qpairbasis)
+        @test rc_array.ħ == 2 && rc_array_static.ħ == 2
+        @test isgaussian(rc_array, atol = 1e-5) && isgaussian(rc_array_static, atol = 1e-5)
 
         rc_static = randchannel(SVector, SMatrix, qpairbasis)
         @test rc_static.ħ == 2
