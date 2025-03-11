@@ -55,23 +55,23 @@
         @test isgaussian(rspure_block, atol = 1e-5)
         @test isapprox(purity(rspure_block), 1.0, atol = 1e-5)
 
-        rs_array = randstate(SArray, qpairbasis)
-        rc_array = randchannel(SArray, qpairbasis)
-        @test rc_array isa GaussianChannel
-        @test rc_array.ħ == 2
-        @test rc_array * rs_array isa GaussianState
-        @test isgaussian(rs_array, atol = 1e-5)
+        rs_array, rs_array_static  = randstate(Array, qpairbasis), randstate(SArray, qpairbasis)
+        rc_array, rc_array_static = randchannel(Array, qpairbasis),  randchannel(SArray, qpairbasis)
+        @test rc_array isa GaussianChannel &&  rc_array_static isa GaussianChannel
+        @test rc_array.ħ == 2 && rc_array_static.ħ == 2
+        @test rc_array * rs_array isa GaussianState && rc_array_static * rs_array_static isa GaussianState
+        @test isgaussian(rs_array, atol = 1e-5) && isgaussian(rs_array_static, atol = 1e-5)
 
         rspure_array = randstate(SArray, qpairbasis, pure = true)
         @test isgaussian(rspure_array, atol = 1e-5)
-        # @test isapprox(purity(rspure_array), 1.0, atol = 1e-3)
+        @test_broken isapprox(purity(rspure_array), 1.0, atol = 1e-3)
 
-        rs_static = randstate(SVector{2*nmodes, Float64}, SMatrix{2*nmodes,2*nmodes, Float64}, qpairbasis)
-        rc_static = randchannel(SVector{2*nmodes, Float64}, SMatrix{2*nmodes,2*nmodes, Float64}, qpairbasis)
-        @test rc_static isa GaussianChannel
-        @test rs_static isa GaussianState
-        @test rc_static * rs_static isa GaussianState
-        @test isgaussian(rs_static, atol = 1e-5)
+        rs_static, rs_static1, rs_static2,  = randstate(SVector{2*nmodes, Float64}, SMatrix{2*nmodes,2*nmodes, Float64}, qpairbasis), randstate(SVector, SMatrix, qpairbasis), randstate(SArray, qpairbasis)
+        rc_static, rc_static1, rc_static2 = randchannel(SVector{2*nmodes, Float64}, SMatrix{2*nmodes,2*nmodes, Float64}, qpairbasis), randchannel(SVector, SMatrix, qpairbasis), randchannel(SArray, qpairbasis)
+        @test rc_static isa GaussianChannel && rc_static1 isa GaussianChannel && rc_static2 isa GaussianChannel
+        @test rs_static isa GaussianState && rs_static1 isa GaussianState && rs_static2 isa GaussianState
+        @test rc_static * rs_static isa GaussianState && rc_static1 * rs_static1 isa GaussianState && rc_static2 * rs_static2 isa GaussianState
+        @test isgaussian(rs_static, atol = 1e-5) && isgaussian(rs_static1, atol = 1e-5) && isgaussian(rs_static2, atol = 1e-5)
 
         rspure_static = randstate(SVector{2*nmodes, Float64}, SMatrix{2*nmodes,2*nmodes, Float64}, qpairbasis, pure = true)
         @test isgaussian(rspure_static, atol = 1e-5)
