@@ -98,9 +98,9 @@
         @test isapprox(rupassive_array.symplectic', inv(rupassive_array.symplectic), atol = 1e-5)
         @test isgaussian(rupassive_array, atol = 1e-5)
 
-        ru_static = randunitary(SVector, SMatrix, qpairbasis)
-        @test ru_static.ħ == 2
-        @test isgaussian(ru_static, atol = 1e-5)
+        ru_static, ru_static1 = randunitary(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis), randunitary(SVector, SMatrix, qpairbasis)
+        @test ru_static.ħ == 2 && ru_static1.ħ == 2
+        @test isgaussian(ru_static, atol = 1e-5) && isgaussian(ru_static1, atol = 1e-5)
 
         rupassive_static = randunitary(SVector{2*nmodes, Float64}, SMatrix{2*nmodes, 2*nmodes, Float64}, qpairbasis, passive = true)
         @test isapprox(rupassive_static.symplectic', inv(rupassive_static.symplectic), atol = 1e-5)
