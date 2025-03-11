@@ -65,7 +65,7 @@
     @testset "phase-shift operator" begin
         theta = rand(Float64)
         thetas = rand(Float64, nmodes)
-        op, op_array, op_static_array, op_static = phaseshift(qpairbasis, theta, noise), phaseshift(SArray, qpairbasis, theta, noise), phaseshift(SArray, qpairbasis, theta, noise),  phaseshift(SVector, SMatrix, qpairbasis, theta, noise)
+        op, op_array, op_static_array, op_static = phaseshift(qpairbasis, theta, noise), phaseshift(Array, qpairbasis, theta, noise), phaseshift(SArray, qpairbasis, theta, noise),  phaseshift(SVector, SMatrix, qpairbasis, theta, noise)
         @test op isa GaussianChannel && op_array isa GaussianChannel && op_static isa GaussianChannel && op_static_array isa GaussianChannel
         @test phaseshift(qblockbasis, theta, T*noise*transpose(T)) == changebasis(QuadBlockBasis, op)
         @test phaseshift(qblockbasis, thetas, T*noise*transpose(T)) == changebasis(QuadBlockBasis, phaseshift(qpairbasis, thetas, noise))

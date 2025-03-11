@@ -53,7 +53,7 @@ function phaseshift(::Type{Td}, ::Type{Tt}, basis::SymplecticBasis{N}, theta::R,
     return GaussianChannel(basis, dtype(disp), ttype(transform), ttype(noise))
 end
 function phaseshift(::Type{T}, basis::SymplecticBasis{N}, theta::R, noise::M) where {T,N<:Int,R,M}
-    dtype, ttype = _infer_types(T, T, basis)
+    dtype, ttype = _infer_types(T, basis)
     disp, transform = _phaseshift(basis, theta)
     return GaussianChannel(basis, dtype(disp), ttype(transform), ttype(noise))
 end
