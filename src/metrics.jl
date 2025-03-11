@@ -69,10 +69,10 @@ _fidelity(x) = x + sqrt(x^2 - 1)
 Calculate the logarithmic negativity of a Gaussian state partition, defined as
 
 ```math
-N(\\rho) = \\log\\|\\rho^{T_B}\\|_1 = - \\sum_i \\log(\\tilde{v}_<^i)
+N(\\rho) = \\log\\|\\rho^{T_B}\\|_1 = - \\sum_i \\log(\\tilde{v}_i^<)
 ```
 
-such that ``\\log`` denotes the natural logarithm, ``\\tilde{v}_<^i`` is the
+such that ``\\log`` denotes the natural logarithm, ``\\tilde{v}_i^<`` is the
 symplectic spectrum of ``\\mathbf{\\tilde{V}}/\\hbar`` which is ``< 1/2``.
 
 Therein, ``\\mathbf{\\tilde{V}} = \\mathbf{T} \\mathbf{V} \\mathbf{T}`` where
@@ -95,9 +95,11 @@ function logarithmic_negativity(state::GaussianState, indices, tol=1e-15)
 end
 
 function _tilde(state::GaussianState{B,M,V}, indices) where {B<:QuadPairBasis,M,V}
-    T = state.covar
     nmodes = state.basis.nmodes
-    for i in indices
+    indices = collect(indices)
+    all(x -> x >= 1 && x <= nmodes, indices) || throw(ArgumentError(INDEX_ERROR))
+    T = state.covar
+    @inbounds for i in indices
         # first loop is cache friendly, second one thrashes
         @inbounds for j in Base.OneTo(2*nmodes)
 	    T[j, 2*i] *= -1
@@ -109,9 +111,11 @@ function _tilde(state::GaussianState{B,M,V}, indices) where {B<:QuadPairBasis,M,
     return T
 end
 function _tilde(state::GaussianState{B,M,V}, indices) where {B<:QuadBlockBasis,M,V}
-    T = state.covar
     nmodes = state.basis.nmodes
-    for i in indices
+    indices = collect(indices)
+    all(x -> x >= 1 && x <= nmodes, indices) || throw(ArgumentError(INDEX_ERROR))
+    T = state.covar
+    @inbounds for i in indices
         # first loop is cache friendly, second one thrashes
         @inbounds for j in Base.OneTo(2*nmodes)
 	    T[j, nmodes + i] *= -1

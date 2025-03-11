@@ -33,3 +33,5 @@ HEATMAP_ERROR = lazy"The input Gaussian state describes more than one mode.
 
 HBAR_ERROR = lazy"There are at least two different conventions for `ħ` used in this operation. Make sure
     that each Gaussian object has the same convention for `ħ`."
+
+INDEX_ERROR = lazy"The provided indices must all be positive integer values that are no greater than the number of modes encompassed within the Gaussian state."
