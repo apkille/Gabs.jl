@@ -67,7 +67,7 @@ function randunitary(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}; passive 
     return GaussianUnitary(basis, dtype(disp), stype(symp), ħ = ħ)
 end
 function randunitary(::Type{T}, basis::SymplecticBasis{N}; passive = false, ħ = 2) where {T,N<:Int}
-    dtype, stype = _infer_types(T, T, basis)
+    dtype, stype = _infer_types(T, basis)
     disp, symp = _randunitary(basis, passive = passive)
     return GaussianUnitary(basis, dtype(disp), stype(symp), ħ = ħ)
 end
@@ -93,7 +93,7 @@ function randchannel(::Type{Td}, ::Type{Tt}, basis::SymplecticBasis{N}; ħ = 2) 
     return GaussianChannel(basis, dtype(disp), ttype(transform), ttype(noise), ħ = ħ)
 end
 function randchannel(::Type{T}, basis::SymplecticBasis{N}; ħ = 2) where {T,N<:Int}
-    dtype, ttype = _infer_types(T, T, basis)
+    dtype, ttype = _infer_types(T, basis)
     disp, transform, noise = _randchannel(basis)
     return GaussianChannel(basis, dtype(disp), ttype(transform), ttype(noise), ħ = ħ)
 end
