@@ -52,10 +52,11 @@ function fidelity(state1::GaussianState, state2::GaussianState)
     state1.ħ == state2.ħ || throw(ArgumentError(HBAR_ERROR))
     A = state2.mean - state1.mean
     B = state1.covar + state2.covar
-    output = exp(- (transpose(A) * (B \ A)) / 4) / (det(B))^(1/4)
+    # many nasty factors of ħ ahead, tread carefully
+    output = state1.ħ^(state1.basis.nmodes/2) * exp(- (transpose(A) * (B \ A)) / 4) / (det(B))^(1/4)
     A = symplecticform(state1.basis)
     # slightly different from Banachi, Braunstein, and Pirandola
-    B = (B \ ((A ./ 4) + (state2.covar * A * state1.covar)))
+    B = (B \ ((A .* ((state1.ħ^2) /4)) + (state2.covar * A * state1.covar)))
     B = filter(x -> x > 0, imag.(eigvals(B))) .* (2/state.ħ)
     return output * sqrt(reduce(*, _fidelity.(filter(x -> x >= 1, B))))
 end
