@@ -11,11 +11,11 @@
         alphas = rand(ComplexF64, nmodes)
         op_pair = displace(qpairbasis, alpha)
         op_block = displace(qblockbasis, alpha)
+        op, op_array, op_static = displace(qpairbasis, alpha), displace(Array, qpairbasis, alpha), displace(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, alpha)
+        op_static_array, op_static_vec = displace(SArray, qpairbasis,alpha), displace(SVector, SMatrix, qpairbasis, alpha)
         @test op_pair isa GaussianUnitary && op_block isa GaussianUnitary
-        @test displace(Array, qpairbasis, alpha) isa GaussianUnitary
-        @test displace(Vector, Matrix , qpairbasis, alpha) isa GaussianUnitary
-        @test displace(SArray, qpairbasis, alpha) isa GaussianUnitary
-        @test displace(SVector, SMatrix, qpairbasis, alpha) isa GaussianUnitary
+        @test op isa GaussianUnitary && op_array isa GaussianUnitary && op_static isa GaussianUnitary
+        @test op_static_array isa GaussianUnitary && op_static_vec isa GaussianUnitary
         @test displace(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, alpha) isa GaussianUnitary
         @test op_pair == changebasis(QuadPairBasis, op_block) && op_block == changebasis(QuadBlockBasis, op_pair)
         @test op_pair == changebasis(QuadPairBasis, op_pair) && op_block == changebasis(QuadBlockBasis, op_block)
@@ -31,12 +31,11 @@
         rs, thetas = rand(Float64, nmodes), rand(Float64, nmodes)
         op_pair = squeeze(qpairbasis, r, theta)
         op_block = squeeze(qblockbasis, r, theta)
+        op, op_array, op_static = squeeze(2*qpairbasis, r, theta), squeeze(Array, 2*qpairbasis, r, theta), squeeze(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, 2*qpairbasis, r, theta)
+        op_static_array, op_static_vec = squeeze(SArray, 2*qpairbasis, r, theta), squeeze(SVector, SMatrix, 2*qpairbasis, r, theta)
         @test op_pair isa GaussianUnitary && op_block isa GaussianUnitary
-        @test squeeze(Array, qpairbasis, r, theta) isa GaussianUnitary
-        @test squeeze(Vector, Matrix, qpairbasis, r, theta) isa GaussianUnitary
-        @test squeeze(SArray, qpairbasis, r, theta) isa GaussianUnitary
-        @test squeeze(SVector, SMatrix, qpairbasis, r, theta) isa GaussianUnitary
-        @test squeeze(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, r, theta) isa GaussianUnitary
+        @test op isa GaussianUnitary && op_array isa GaussianUnitary && op_static isa GaussianUnitary
+        @test op_static_array isa GaussianUnitary && op_static_vec isa GaussianUnitary
         @test op_pair == changebasis(QuadPairBasis, op_block) && op_block == changebasis(QuadBlockBasis, op_pair)
         @test op_pair == changebasis(QuadPairBasis, op_pair) && op_block == changebasis(QuadBlockBasis, op_block)
         @test squeeze(qblockbasis, r, theta) == changebasis(QuadBlockBasis, op_pair)
@@ -99,14 +98,13 @@
         p_blocks = phaseshift(2*qblockbasis, repeat([theta], 2*nmodes))
         @test p_block ⊗ p_block == p_blocks
 
-        dstatic = displace(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, alpha1)
-        dstatic = displace(SVector, SMatrix, qpairbasis, alpha1)
-        tpstatic = dstatic ⊗ dstatic ⊗ dstatic
-        @test tpstatic.disp isa SVector{6*nmodes}
-        @test tpstatic.symplectic isa SMatrix{6*nmodes,6*nmodes}
-        tp = dstatic ⊗ d1 ⊗ dstatic
-        @test tp.disp isa SVector
-        @test tp.symplectic isa SMatrix
+        dstatic, dstatic1 = displace(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, alpha1), displace(SVector, SMatrix, qpairbasis, alpha1)
+        tpstatic, tpstatic1 = dstatic ⊗ dstatic ⊗ dstatic,  dstatic1 ⊗ dstatic1 ⊗ dstatic1
+        @test tpstatic.disp isa SVector{6*nmodes} && tpstatic1.disp isa SVector{6*nmodes}
+        @test tpstatic.symplectic isa SMatrix{6*nmodes,6*nmodes} && tpstatic1.symplectic isa SMatrix{6*nmodes,6*nmodes}
+        tp, tp1 = dstatic ⊗ d1 ⊗ dstatic, dstatic1 ⊗ d1 ⊗ dstatic1
+        @test tp.disp isa SVector && tp1.disp isa SVector
+        @test tp.symplectic isa SMatrix && tp1.symplectic isa SMatrix
     end
 
     @testset "actions" begin
