@@ -6,7 +6,7 @@ Calculate the purity of a Gaussian state, defined by `1/sqrt((2/ħ) det(V))`.
 purity(x::GaussianState) = (b = x.basis; (x.ħ/2)^(b.nmodes)/sqrt(det(x.covar)))
 
 """
-    entropy_vn(state::GaussianState, tol=1e-15)
+    entropy_vn(state::GaussianState, tol=1e-10)
 
 Calculate the Von Neumann entropy of a Gaussian state, defined as
 
@@ -24,9 +24,9 @@ wherein it is understood that ``0 \\log(0) \\equiv 0``.
 
 # Arguments
 * `state`: Gaussian state whose Von Neumann entropy is to be calculated.
-* `tol=1e-15`: Tolerance above the logarithmic singularity.
+* `tol=1e-10`: Tolerance above the logarithmic singularity.
 """
-function entropy_vn(state::GaussianState, tol=1e-15)
+function entropy_vn(state::GaussianState, tol=1e-10)
     spectrum = sympspectrum(state) ./ state.ħ
     return reduce(+, _entropy_vn.(filter(x -> x-(1/2) > tol, spectrum)))
 end
@@ -34,7 +34,7 @@ end
 _entropy_vn(x) = (x+(1/2)) * log(x+(1/2)) - (x-(1/2)) * log(x-(1/2))
 
 """
-    fidelity(state1::GaussianState, state2::GaussianState, tol=1e-15)
+    fidelity(state1::GaussianState, state2::GaussianState)
 
 Calculate the joint fidelity of two Gaussian states, defined as
 
@@ -46,9 +46,8 @@ See: Banchi, Braunstein, and Pirandola, Phys. Rev. Lett. 115, 260501 (2015)
 
 # Arguments
 * `state1`, `state2`: Gaussian states whose joint fidelity is to be calculated.
-* `tol=1e-15`: Tolerance above the square root singularity.
 """
-function fidelity(state1::GaussianState, state2::GaussianState, tol=1e-15)
+function fidelity(state1::GaussianState, state2::GaussianState)
     state1.basis == state2.basis || throw(ArgumentError(SYMPLECTIC_ERROR))
     state1.ħ == state2.ħ || throw(ArgumentError(HBAR_ERROR))
     A = state2.mean - state1.mean
@@ -58,13 +57,13 @@ function fidelity(state1::GaussianState, state2::GaussianState, tol=1e-15)
     # slightly different from Banachi, Braunstein, and Pirandola
     B = (B \ ((A ./ 4) + (state2.covar * A * state1.covar)))
     B = filter(x -> x > 0, imag.(eigvals(B))) .* (2/state.ħ)
-    return output * sqrt(reduce(*, _fidelity.(filter(x -> x-1 > tol, B))))
+    return output * sqrt(reduce(*, _fidelity.(filter(x -> x >= 1, B))))
 end
 
 _fidelity(x) = x + sqrt(x^2 - 1)
 
 """
-    logarithmic_negativity(state::GaussianState, indices=1, tol=1e-15)
+    logarithmic_negativity(state::GaussianState, indices=1, tola=1e-10, tolb=1e-10)
 
 Calculate the logarithmic negativity of a Gaussian state partition, defined as
 
@@ -85,13 +84,14 @@ Therein, ``\\mathbf{\\tilde{V}} = \\mathbf{T} \\mathbf{V} \\mathbf{T}`` where
 # Arguments
 * `state`: Gaussian state whose logarithmic negativity is to be calculated.
 * `indices`: Integer or collection thereof, specifying the binary partition.
-* `tol=1e-15`: Tolerance above the logarithmic singularity.
+* `tola=1e-10`: Tolerance above the logarithmic singularity.
+* `tolb=1e-10`: Tolerance below the ``1/2`` cutoff.
 """
-function logarithmic_negativity(state::GaussianState, indices, tol=1e-15)
+function logarithmic_negativity(state::GaussianState, indices, tola=1e-10, tolb=1e-10)
     M = _tilde(state, indices)
     M = symplecticform(state.basis) * M
     M = filter(x -> x > 0, imag.(eigvals(M))) ./ state.ħ
-    return -reduce(+, log.(filter(x -> x > tol && x < 1/2, M)))
+    return -reduce(+, log.(filter(x -> x > tola && (x+tolb) < 1/2, M)))
 end
 
 function _tilde(state::GaussianState{B,M,V}, indices) where {B<:QuadPairBasis,M,V}
