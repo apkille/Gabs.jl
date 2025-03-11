@@ -30,3 +30,15 @@ function _infer_types(::Type{Array{T}}, basis) where {T}
     nmodes = basis.nmodes
     return Vector{T}, Matrix{T}
 end
+
+function _infer_types(::Type{Vector{T}}, ::Type{Matrix{T}}, basis) where {T}
+    return Vector{T}, Matrix{T}
+end
+
+function _infer_types(::Type{Vector{T}}, basis) where {T}
+    return Vector{T}, Matrix{T}
+end
+
+function _infer_types(::Type{Matrix{T}}, basis) where {T}
+    return Vector{T}, Matrix{T}
+end
