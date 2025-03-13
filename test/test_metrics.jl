@@ -65,8 +65,8 @@
         Y = rand(Float64, count)
 
         @test isapprox(
-                   logarithmic_negativity.(EPR.(X, Y .* pi), 2),
-                   X .* 2;
-                   atol=atol)
+            logarithmic_negativity.(EPR.(X, Y .* pi), 2),
+            X .* 2;
+            atol=atol)
     end
 end
