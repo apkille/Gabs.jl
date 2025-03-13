@@ -6,7 +6,7 @@ Calculate the purity of a Gaussian state, defined by `1/sqrt((2/ħ) det(V))`.
 purity(x::GaussianState) = (b = x.basis; (x.ħ/2)^(b.nmodes)/sqrt(det(x.covar)))
 
 """
-    entropy_vn(state::GaussianState, tol=1e-10)
+    entropy_vn(state::GaussianState)
 
 Calculate the Von Neumann entropy of a Gaussian state, defined as
 
@@ -24,14 +24,17 @@ wherein it is understood that ``0 \\log(0) \\equiv 0``.
 
 # Arguments
 * `state`: Gaussian state whose Von Neumann entropy is to be calculated.
-* `tol=1e-10`: Tolerance above the logarithmic singularity.
 """
-function entropy_vn(state::GaussianState, tol=1e-10)
-    spectrum = sympspectrum(state) ./ state.ħ
-    return reduce(+, _entropy_vn.(filter(x -> x-(1/2) > tol, spectrum)))
+function entropy_vn(state::GaussianState)
+    T = symplecticform(state.basis) * state.covar
+    T = filter(x -> x > 1/2, imag.(eigvals(T)) ./ state.ħ)
+    return reduce(+, _entropy_vn.(T))
 end
 
-_entropy_vn(x) = (x+(1/2)) * log(x+(1/2)) - (x-(1/2)) * log(x-(1/2))
+# this is the same as f(x)
+_entropy_vn(x) = x < 19 ?
+    (x + (1/2)) * log(x + (1/2)) - (x - (1/2)) * log(x - (1/2)) :
+    log(x) + 1 - (1/(24 * x^2)) - (1/(320 * x^4)) - (1/(2688 * x^6))
 
 """
     fidelity(state1::GaussianState, state2::GaussianState)
@@ -56,20 +59,21 @@ function fidelity(state1::GaussianState, state2::GaussianState)
     output = state1.ħ^(state1.basis.nmodes/2) * exp(- (transpose(A) * (B \ A)) / 4) / (det(B))^(1/4)
     A = symplecticform(state1.basis)
     # slightly different from Banachi, Braunstein, and Pirandola
-    B = (B \ ((A .* ((state1.ħ^2) /4)) + (state2.covar * A * state1.covar)))
-    B = filter(x -> x > 0, imag.(eigvals(B))) .* (2/state.ħ)
-    return output * sqrt(reduce(*, _fidelity.(filter(x -> x >= 1, B))))
+    B = (B \ ((A .* ((state1.ħ^2)/4)) + (state2.covar * A * state1.covar)))
+    B = filter(x -> x > 1, imag.(eigvals(B)) .* (2/state1.ħ))
+    return output * sqrt(reduce(*, _fidelity.(B)))
 end
 
-_fidelity(x) = x + sqrt(x^2 - 1)
+# this is the same as x + sqrt(x^2 - 1) when x > 0, but overflows gradually
+_fidelity(x) = x^2 < floatmax(typeof(x)) ? x + sqrt(x^2 - 1) : 2 * x
 
 """
-    logarithmic_negativity(state::GaussianState, indices=1, tola=1e-10, tolb=1e-10)
+    logarithmic_negativity(state::GaussianState, indices=1)
 
 Calculate the logarithmic negativity of a Gaussian state partition, defined as
 
 ```math
-N(\\rho) = \\log\\|\\rho^{T_B}\\|_1 = - \\sum_i \\log(\\tilde{v}_i^<)
+N(\\rho) = \\log\\|\\rho^{T_B}\\|_1 = - \\sum_i \\log(2 \\tilde{v}_i^<)
 ```
 
 such that ``\\log`` denotes the natural logarithm, ``\\tilde{v}_i^<`` is the
@@ -85,25 +89,25 @@ Therein, ``\\mathbf{\\tilde{V}} = \\mathbf{T} \\mathbf{V} \\mathbf{T}`` where
 # Arguments
 * `state`: Gaussian state whose logarithmic negativity is to be calculated.
 * `indices`: Integer or collection thereof, specifying the binary partition.
-* `tola=1e-10`: Tolerance above the logarithmic singularity.
-* `tolb=1e-10`: Tolerance below the ``1/2`` cutoff.
 """
-function logarithmic_negativity(state::GaussianState, indices, tola=1e-10, tolb=1e-10)
-    M = _tilde(state, indices)
-    M = symplecticform(state.basis) * M
-    M = filter(x -> x > 0, imag.(eigvals(M))) ./ state.ħ
-    return -reduce(+, log.(filter(x -> x > tola && (x+tolb) < 1/2, M)))
+function logarithmic_negativity(state::GaussianState, indices)
+    T = _tilde(state, indices)
+    T = symplecticform(state.basis) * T
+    T = filter(x -> x > 0 && x < 1, imag.(eigvals(T)) .* (2/state.ħ))
+    T = reduce(+, log.(T))
+    # in case the reduction happened over an empty set
+    return T < 0 ? -T : T
 end
 
 function _tilde(state::GaussianState{B,M,V}, indices) where {B<:QuadPairBasis,M,V}
     nmodes = state.basis.nmodes
     indices = collect(indices)
     all(x -> x >= 1 && x <= nmodes, indices) || throw(ArgumentError(INDEX_ERROR))
-    T = state.covar
+    T = copy(state.covar)
     @inbounds for i in indices
         # first loop is cache friendly, second one thrashes
         @inbounds for j in Base.OneTo(2*nmodes)
-	    T[j, 2*i] *= -1
+            T[j, 2*i] *= -1
         end
         @inbounds for j in Base.OneTo(2*nmodes)
             T[2*i, j] *= -1
@@ -115,11 +119,11 @@ function _tilde(state::GaussianState{B,M,V}, indices) where {B<:QuadBlockBasis,M
     nmodes = state.basis.nmodes
     indices = collect(indices)
     all(x -> x >= 1 && x <= nmodes, indices) || throw(ArgumentError(INDEX_ERROR))
-    T = state.covar
+    T = copy(state.covar)
     @inbounds for i in indices
         # first loop is cache friendly, second one thrashes
         @inbounds for j in Base.OneTo(2*nmodes)
-	    T[j, nmodes + i] *= -1
+            T[j, nmodes + i] *= -1
         end
         @inbounds for j in Base.OneTo(2*nmodes)
             T[nmodes + i, j] *= -1

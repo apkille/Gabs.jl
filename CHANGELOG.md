@@ -6,7 +6,7 @@
 - **(breaking)** Add `hbar=2` as default convention in Gabs.
 - Add kwarg to predefined Gaussian methods to specify `hbar`.
 - Clean up docstrings to no longer include uncompiled LaTeX.
-- Add support for `vn_entropy`, `fidelity`, and `logarithmic_negativity` metrics.
+- Add support for `entropy_vn`, `fidelity`, and `logarithmic_negativity` metrics.
 - Optimised `changebasis` to avoid matrix multiplication.
 
 ## v1.2.8 - 2025-02-06

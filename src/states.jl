@@ -718,8 +718,8 @@ covariance: 4×4 Matrix{Float64}:
 """
 function changebasis(::Type{B1}, state::GaussianState{B2,M,V}) where {B1<:QuadBlockBasis,B2<:QuadPairBasis,M,V}
     nmodes = state.basis.nmodes
-    mean = zeros(eltype(M), 2*nmodes)
-    covar = zeros(eltype(V), 2*nmodes, 2*nmodes)
+    mean = similar(state.mean)
+    covar = similar(state.covar)
     @inbounds for i in Base.OneTo(nmodes)
         mean[i] = state.mean[2*i - 1]
         mean[nmodes + i] = state.mean[2*i]
@@ -737,8 +737,8 @@ function changebasis(::Type{B1}, state::GaussianState{B2,M,V}) where {B1<:QuadBl
 end
 function changebasis(::Type{B1}, state::GaussianState{B2,M,V}) where {B1<:QuadPairBasis,B2<:QuadBlockBasis,M,V}
     nmodes = state.basis.nmodes
-    mean = zeros(eltype(M), 2*nmodes)
-    covar = zeros(eltype(V), 2*nmodes, 2*nmodes)
+    mean = similar(state.mean)
+    covar = similar(state.covar)
     @inbounds for i in Base.OneTo(nmodes)
         mean[2*i - 1] = state.mean[i]
         mean[2*i] = state.mean[nmodes + i]
