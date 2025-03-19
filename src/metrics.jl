@@ -68,7 +68,7 @@ end
 _fidelity(x) = x^2 < floatmax(typeof(x)) ? x + sqrt(x^2 - 1) : 2 * x
 
 """
-    logarithmic_negativity(state::GaussianState, indices=1)
+    logarithmic_negativity(state::GaussianState, indices)
 
 Calculate the logarithmic negativity of a Gaussian state partition, defined as
 

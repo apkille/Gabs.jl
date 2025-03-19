@@ -14,7 +14,8 @@
     count = 10
 
     @testset "Von Neumann entropy" begin
-        entropy_vn_thermal(x) = log1p(x) - x * log(x / (x + 1))
+        # rand samples [0, 1), set entropy_vn_thermal(0) to 0
+        entropy_vn_thermal(x) = x > 0 ? log1p(x) - x * log(x / (x + 1)) : 0
         X = rand(Float64, count)
         Y = rand(Float64, count)
         Z = X .* 10 + Y .* (10 * im)
