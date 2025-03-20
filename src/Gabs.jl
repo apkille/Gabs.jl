@@ -1,11 +1,12 @@
 module Gabs
 
-using BlockArrays: BlockedArray, BlockArray, Block, mortar
-
 import LinearAlgebra
-using LinearAlgebra: I, det, mul!, diag, qr, eigvals, Diagonal
+using LinearAlgebra: I, det, mul!, diag, qr, eigvals, Diagonal, cholesky, Symmetric
 
 import QuantumInterface: StateVector, AbstractOperator, apply!, tensor, ⊗, directsum, ⊕
+
+import Random
+using Random: randn!
 
 import SymplecticFactorizations: williamson, Williamson, polar, Polar, blochmessiah, BlochMessiah, randsymplectic, symplecticform, issymplectic
 using SymplecticFactorizations: williamson, Williamson, polar, Polar, blochmessiah, BlochMessiah, BlockForm, PairForm
@@ -53,7 +54,7 @@ include("randoms.jl")
 
 include("factorizations.jl")
 
-include("measurements.jl")
+include("generaldyne.jl")
 
 include("wigner.jl")
 
