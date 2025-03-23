@@ -39,7 +39,11 @@
     end
 
     @testset "fidelity" begin
-        fidelity_thermal_thermal(x, y) = 1/(sqrt((x + 1) * (y + 1)) - sqrt(x * y))
+        # the expression is numerically unstable and would need a dozen branches
+        function fidelity_thermal_thermal(a, b)
+            x = BigFloat(a); y = BigFloat(b);
+            return 1/(sqrt((x + 1) * (y + 1)) - sqrt(x * y))
+        end
         fidelity_thermal_coherent(x, y) = exp(- abs(y)^2 / (2 * (x + 1))) / sqrt(x + 1)
         fidelity_coherent_coherent(x, y) = exp(- abs(x - y)^2 / 2)
         X = rand(Float64, count)

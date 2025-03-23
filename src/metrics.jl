@@ -6,7 +6,7 @@ Calculate the purity of a Gaussian state, defined by `1/sqrt((2/ħ) det(V))`.
 purity(x::GaussianState) = (b = x.basis; (x.ħ/2)^(b.nmodes)/sqrt(det(x.covar)))
 
 """
-    entropy_vn(state::GaussianState)
+    entropy_vn(state::GaussianState; refine = x -> true)
 
 Calculate the Von Neumann entropy of a Gaussian state, defined as
 
@@ -24,10 +24,18 @@ wherein it is understood that ``0 \\log(0) \\equiv 0``.
 
 # Arguments
 * `state`: Gaussian state whose Von Neumann entropy is to be calculated.
+* `refine: (Optional) Function(::Number)::Bool used for narrowing down the
+	   range of input values passed to f(x).
+
+## Example
+
+```julia
+entropy_vn_smoothed(state, tol) = entropy_vn(state; x -> (x - (1/2)) > tol)
+```
 """
-function entropy_vn(state::GaussianState)
+function entropy_vn(state::GaussianState; refine = x -> true)
     T = symplecticform(state.basis) * state.covar
-    T = filter(x -> x > 1/2, imag.(eigvals(T)) ./ state.ħ)
+    T = filter(x -> x > 1/2 && refine(x), imag.(eigvals(T)) ./ state.ħ)
     return reduce(+, _entropy_vn.(T))
 end
 
@@ -37,7 +45,7 @@ _entropy_vn(x) = x < 19 ?
     log(x) + 1 - (1/(24 * x^2)) - (1/(320 * x^4)) - (1/(2688 * x^6))
 
 """
-    fidelity(state1::GaussianState, state2::GaussianState)
+    fidelity(state1::GaussianState, state2::GaussianState; refine = x -> true)
 
 Calculate the joint fidelity of two Gaussian states, defined as
 
@@ -49,8 +57,15 @@ See: Banchi, Braunstein, and Pirandola, Phys. Rev. Lett. 115, 260501 (2015)
 
 # Arguments
 * `state1`, `state2`: Gaussian states whose joint fidelity is to be calculated.
+* `refine: (Optional) Function(::Number)::Bool used for narrowing down the
+	   range of input values passed to `x -> x + sqrt(x^2 - 1)`.
+
+## Example
+```julia
+fidelity_smoothed(state1, state2, tol) = fidelity(state1, state2; x -> (x - 1) > tol)
+```
 """
-function fidelity(state1::GaussianState, state2::GaussianState)
+function fidelity(state1::GaussianState, state2::GaussianState; refine = x -> true)
     state1.basis == state2.basis || throw(ArgumentError(SYMPLECTIC_ERROR))
     state1.ħ == state2.ħ || throw(ArgumentError(HBAR_ERROR))
     A = state2.mean - state1.mean
@@ -60,7 +75,7 @@ function fidelity(state1::GaussianState, state2::GaussianState)
     A = symplecticform(state1.basis)
     # slightly different from Banachi, Braunstein, and Pirandola
     B = (B \ ((A .* ((state1.ħ^2)/4)) + (state2.covar * A * state1.covar)))
-    B = filter(x -> x > 1, imag.(eigvals(B)) .* (2/state1.ħ))
+    B = filter(x -> x > 1 && refine(x), imag.(eigvals(B)) .* (2/state1.ħ))
     return output * sqrt(reduce(*, _fidelity.(B)))
 end
 
@@ -68,7 +83,7 @@ end
 _fidelity(x) = x^2 < floatmax(typeof(x)) ? x + sqrt(x^2 - 1) : 2 * x
 
 """
-    logarithmic_negativity(state::GaussianState, indices)
+    logarithmic_negativity(state::GaussianState, indices; refine = x -> true)
 
 Calculate the logarithmic negativity of a Gaussian state partition, defined as
 
@@ -89,11 +104,21 @@ Therein, ``\\mathbf{\\tilde{V}} = \\mathbf{T} \\mathbf{V} \\mathbf{T}`` where
 # Arguments
 * `state`: Gaussian state whose logarithmic negativity is to be calculated.
 * `indices`: Integer or collection thereof, specifying the binary partition.
+* `refine: (Optional) Function(::Number)::Bool used for narrowing down the
+	   range of input values passed to log(x).
+
+## Example
+
+```julia
+function logarithmic_negativity_smoothed(state, indices, tol1, tol2)
+    logarithmic_negativity(state, indices; x -> (x > tol1 && (1 - x) > tol2))
+end
+```
 """
-function logarithmic_negativity(state::GaussianState, indices)
+function logarithmic_negativity(state::GaussianState, indices; refine = x -> true)
     T = _tilde(state, indices)
     T = symplecticform(state.basis) * T
-    T = filter(x -> x > 0 && x < 1, imag.(eigvals(T)) .* (2/state.ħ))
+    T = filter(x -> x < 1 && refine(x), imag.(eigvals(T)) .* (2/state.ħ))
     T = reduce(+, log.(T))
     # in case the reduction happened over an empty set
     return T < 0 ? -T : T
