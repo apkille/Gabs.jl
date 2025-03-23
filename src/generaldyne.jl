@@ -127,7 +127,7 @@ function Base.rand(::Type{Generaldyne}, state::GaussianState{<:QuadPairBasis,Tm,
 	results = zeros(2*indlength, shots)
 	@inbounds for i in Base.OneTo(shots)
 		mul!(@view(results[:,i]), L, randn!(buf))
-		@view(results[i,:]) .+= b
+		@view(results[:,i]) .+= b
 	end
 	return results
 end
