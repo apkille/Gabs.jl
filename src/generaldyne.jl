@@ -22,8 +22,8 @@ function Base.show(io::IO, mime::MIME{Symbol("text/plain")}, H::Generaldyne{<:An
 end
 
 """
-    generaldyne(state::GaussianState, indices::Vector; select) -> Generaldyne
-    generaldyne(state::GaussianState, index::Int; select) -> Generaldyne
+    generaldyne(state::GaussianState, indices::Vector; select = (ħ/2)I) -> Generaldyne
+    generaldyne(state::GaussianState, index::Int; select = (ħ/2)I) -> Generaldyne
 
 Compute the projection of the subsystem of a Gaussian state `state` indicated by `indices`
 on `select` and return a `Generaldyne` object. The keyword argument `select` can take the following forms:
@@ -38,17 +38,24 @@ Iterating the decomposition produces the components `result` and `output`.
 ```jldoctest
 julia> st = squeezedstate(QuadPairBasis(3), 1.0, pi/4);
 
-julia> M = generaldyne(st, [1, 3], Matrix{Float64}(I, 4, 4))
-Generaldyne{Vector{Float64}, GaussianState{QuadBlockBasis{Int64}, Vector{Float64}, Matrix{Float64}}}
+julia> M = generaldyne(st, [1, 3])
+Generaldyne{GaussianState{QuadPairBasis{Int64}, Vector{Float64}, Matrix{Float64}}, GaussianState{QuadPairBasis{Int64}, Vector{Float64}, Matrix{Float64}}}
 result:
-4-element Vector{Float64}:
-  0.7763070778411039
- -4.333442961163451
- -0.6052604156263252
-  1.041771385283006
+GaussianState for 2 modes.
+  symplectic basis: QuadPairBasis
+mean: 4-element Vector{Float64}:
+  1.8043368123964283
+  0.3252252843167054
+  1.2863262982923815
+ -4.341827634220767
+covariance: 4×4 Matrix{Float64}:
+ 1.0  0.0  0.0  0.0
+ 0.0  1.0  0.0  0.0
+ 0.0  0.0  1.0  0.0
+ 0.0  0.0  0.0  1.0
 output state:
 GaussianState for 1 mode.
-  symplectic basis: QuadBlockBasis
+  symplectic basis: QuadPairBasis
 mean: 2-element Vector{Float64}:
  0.0
  0.0
@@ -62,7 +69,8 @@ julia> result == M.result && output == M.output
 true
 ```
 """
-function generaldyne(state::GaussianState, indices::I; select::S) where {I,S<:Union{Matrix,GaussianState}}
+function generaldyne(state::GaussianState{<:SymplecticBasis,Tm,Tc}, indices::R; 
+					 select::S = Matrix{eltype(Tc)}((state.ħ/2)*I, 2*length(indices), 2*length(indices))) where {Tm,Tc,R,S<:Union{Matrix,GaussianState}}
 	basis = state.basis
 	indlength = length(indices)
 	nmodes′ = basis.nmodes - indlength
@@ -92,7 +100,8 @@ function generaldyne(state::GaussianState, indices::I; select::S) where {I,S<:Un
 	return Generaldyne(result′, state′)
 end
 
-function Base.rand(::Type{Generaldyne}, state::GaussianState{<:QuadPairBasis,Tm,Tc}, indices::I; shots::Int = 1, select::Matrix) where {Tm,Tc,I}
+function Base.rand(::Type{Generaldyne}, state::GaussianState{<:QuadPairBasis,Tm,Tc}, indices::R; 
+				   shots::Int = 1, select::S = Matrix{eltype(Tc)}((state.ħ/2)*I, 2*length(indices), 2*length(indices))) where {Tm,Tc,R,S<:Matrix}
 	indlength = length(indices)
 	basis = state.basis
 	nmodes′ = basis.nmodes - indlength
@@ -122,7 +131,8 @@ function Base.rand(::Type{Generaldyne}, state::GaussianState{<:QuadPairBasis,Tm,
 	end
 	return results
 end
-function Base.rand(::Type{Generaldyne}, state::GaussianState{<:QuadBlockBasis,Tm,Tc}, indices::I; shots::Int = 1, select::Matrix) where {Tm,Tc,I}
+function Base.rand(::Type{Generaldyne}, state::GaussianState{<:QuadBlockBasis,Tm,Tc}, indices::R;
+				   shots::Int = 1, select::S = Matrix{eltype(Tc)}((state.ħ/2)*I, 2*length(indices), 2*length(indices))) where {Tm,Tc,R,S<:Matrix}
 	indlength = length(indices)
 	basis = state.basis
 	nmodes = basis.nmodes
