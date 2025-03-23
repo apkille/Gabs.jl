@@ -30,7 +30,7 @@ wherein it is understood that ``0 \\log(0) \\equiv 0``.
 ## Example
 
 ```julia
-entropy_vn_smoothed(state, tol) = entropy_vn(state; x -> (x - (1/2)) > tol)
+entropy_vn_smoothed(state, tol) = entropy_vn(state; refine = x -> (x - (1/2)) > tol)
 ```
 """
 function entropy_vn(state::GaussianState; refine = x -> true)
@@ -62,7 +62,7 @@ See: Banchi, Braunstein, and Pirandola, Phys. Rev. Lett. 115, 260501 (2015)
 
 ## Example
 ```julia
-fidelity_smoothed(state1, state2, tol) = fidelity(state1, state2; x -> (x - 1) > tol)
+fidelity_smoothed(state1, state2, tol) = fidelity(state1, state2; refine = x -> (x - 1) > tol)
 ```
 """
 function fidelity(state1::GaussianState, state2::GaussianState; refine = x -> true)
@@ -111,7 +111,7 @@ Therein, ``\\mathbf{\\tilde{V}} = \\mathbf{T} \\mathbf{V} \\mathbf{T}`` where
 
 ```julia
 function logarithmic_negativity_smoothed(state, indices, tol1, tol2)
-    logarithmic_negativity(state, indices; x -> (x > tol1 && (1 - x) > tol2))
+    logarithmic_negativity(state, indices; refine = x -> (x > tol1 && (1 - x) > tol2))
 end
 ```
 """
