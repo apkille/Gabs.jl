@@ -124,10 +124,10 @@ function Base.rand(::Type{Generaldyne}, state::GaussianState{<:QuadPairBasis,Tm,
 	symB = Symmetric(B)
 	L = cholesky(symB).L
 	buf = zeros(2*indlength)
-	results = zeros(shots, 2*indlength)
+	results = zeros(2*indlength, shots)
 	@inbounds for i in Base.OneTo(shots)
-		mul!(@view(results[i,:]), L, randn!(buf))
-		@view(results[i, :]) .+= b
+		mul!(@view(results[:,i]), L, randn!(buf))
+		@view(results[i,:]) .+= b
 	end
 	return results
 end
@@ -168,10 +168,10 @@ function Base.rand(::Type{Generaldyne}, state::GaussianState{<:QuadBlockBasis,Tm
 	symB = Symmetric(B)
 	L = cholesky(symB).L
 	buf = zeros(2*indlength)
-	results = zeros(shots, 2*indlength)
+	results = zeros(2*indlength, shots)
 	@inbounds for i in Base.OneTo(shots)
-		mul!(@view(results[i,:]), L, randn!(buf))
-		@view(results[i, :]) .+= b
+		mul!(@view(results[:,i]), L, randn!(buf))
+		@view(results[:,i]) .+= b
 	end
 	return results
 end
