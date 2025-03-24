@@ -6,7 +6,7 @@ Calculate the purity of a Gaussian state, defined by `1/sqrt((2/ħ) det(V))`.
 purity(x::GaussianState) = (b = x.basis; (x.ħ/2)^(b.nmodes)/sqrt(det(x.covar)))
 
 """
-    entropy_vn(state::GaussianState; refine = x -> true)
+    entropy_vn(state::GaussianState; refine::Function = x -> true)
 
 Calculate the Von Neumann entropy of a Gaussian state, defined as
 
@@ -33,7 +33,7 @@ wherein it is understood that ``0 \\log(0) \\equiv 0``.
 entropy_vn_smoothed(state, tol) = entropy_vn(state; refine = x -> (x - (1/2)) > tol)
 ```
 """
-function entropy_vn(state::GaussianState; refine = x -> true)
+function entropy_vn(state::GaussianState; refine::Function = x -> true)
     T = symplecticform(state.basis) * state.covar
     T = filter(x -> x > 1/2 && refine(x), imag.(eigvals(T)) ./ state.ħ)
     return reduce(+, _entropy_vn.(T))
@@ -45,7 +45,7 @@ _entropy_vn(x) = x < 19 ?
     log(x) + 1 - (1/(24 * x^2)) - (1/(320 * x^4)) - (1/(2688 * x^6))
 
 """
-    fidelity(state1::GaussianState, state2::GaussianState; refine = x -> true)
+    fidelity(state1::GaussianState, state2::GaussianState; refine::Function = x -> true)
 
 Calculate the joint fidelity of two Gaussian states, defined as
 
@@ -65,7 +65,7 @@ See: Banchi, Braunstein, and Pirandola, Phys. Rev. Lett. 115, 260501 (2015)
 fidelity_smoothed(state1, state2, tol) = fidelity(state1, state2; refine = x -> (x - 1) > tol)
 ```
 """
-function fidelity(state1::GaussianState, state2::GaussianState; refine = x -> true)
+function fidelity(state1::GaussianState, state2::GaussianState; refine::Function = x -> true)
     state1.basis == state2.basis || throw(ArgumentError(SYMPLECTIC_ERROR))
     state1.ħ == state2.ħ || throw(ArgumentError(HBAR_ERROR))
     A = state2.mean - state1.mean
@@ -83,7 +83,7 @@ end
 _fidelity(x) = x^2 < floatmax(typeof(x)) ? x + sqrt(x^2 - 1) : 2 * x
 
 """
-    logarithmic_negativity(state::GaussianState, indices; refine = x -> true)
+    logarithmic_negativity(state::GaussianState, indices; refine::Function = x -> true)
 
 Calculate the logarithmic negativity of a Gaussian state partition, defined as
 
@@ -115,7 +115,7 @@ function logarithmic_negativity_smoothed(state, indices, tol1, tol2)
 end
 ```
 """
-function logarithmic_negativity(state::GaussianState, indices; refine = x -> true)
+function logarithmic_negativity(state::GaussianState, indices; refine::Function = x -> true)
     T = _tilde(state, indices)
     T = symplecticform(state.basis) * T
     T = filter(x -> x < 1 && refine(x), imag.(eigvals(T)) .* (2/state.ħ))
