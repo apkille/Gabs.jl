@@ -118,7 +118,7 @@ end
 function logarithmic_negativity(state::GaussianState, indices; refine::Function = x -> true)
     T = _tilde(state, indices)
     T = symplecticform(state.basis) * T
-    T = filter(x -> x < 1 && refine(x), imag.(eigvals(T)) .* (2/state.ħ))
+    T = filter(x -> x >= 0 && x < 1 && refine(x), imag.(eigvals(T)) .* (2/state.ħ))
     T = reduce(+, log.(T))
     # in case the reduction happened over an empty set
     return T < 0 ? -T : T
