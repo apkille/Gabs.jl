@@ -1,3 +1,5 @@
+using PDMats
+
 """
 Defines a Gaussian state for an N-mode bosonic system over a 2N-dimensional phase space.
 
@@ -32,6 +34,8 @@ covariance: 2×2 Matrix{Float64}:
         return new{B,M,V}(b, m, v, ħ)
     end
 end
+
+
 
 Base.:(==)(x::GaussianState, y::GaussianState) = x.basis == y.basis && x.mean == y.mean && x.covar == y.covar && x.ħ == y.ħ
 Base.isapprox(x::GaussianState, y::GaussianState; kwargs...) = x.basis == y.basis && isapprox(x.mean, y.mean; kwargs...) && isapprox(x.covar, y.covar; kwargs...) && x.ħ == y.ħ

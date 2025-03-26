@@ -760,3 +760,29 @@ function sympspectrum(state::GaussianState)
     spectrum = filter(x -> x > 0, imag.(eigvals(M)))
     return spectrum
 end
+
+function vacuumstate_pd(basis::SymplecticBasis{N}; ħ = 2) where {N<:Int}
+    mean = zeros(2*basis.nmodes)
+    return PDGaussianState(basis, mean, ScalMat(2*basis.nmodes, ħ/2); ħ = ħ)
+end
+
+function thermalstate_pd(basis::SymplecticBasis{N}, photons::P; ħ = 2) where {N<:Int,P<:Number}
+    mean = zeros(2*basis.nmodes)
+    return PDGaussianState(basis, mean, ScalMat(2*basis.nmodes, (2 * photons + 1) * (ħ/2)); ħ = ħ)
+end
+
+function thermalstate_pd(basis::QuadPairBasis{N}, photons::Vector{P}; ħ = 2) where {N<:Int,P<:Real}
+    mean = zeros(2*basis.nmodes)
+    diag_vals = Vector{Float64}(undef, 2*basis.nmodes)
+    for i in 1:basis.nmodes
+        val = (2 * photons[i] + 1) * (ħ/2)
+        diag_vals[2*i-1] = val
+        diag_vals[2*i] = val
+    end
+    return PDGaussianState(basis, mean, PDiagMat(diag_vals); ħ = ħ)
+end
+
+function coherentstate_pd(basis::SymplecticBasis{N}, alpha::A; ħ = 2) where {N<:Int,A}
+    mean, _ = _coherentstate(basis, alpha; ħ = ħ)
+    return PDGaussianState(basis, mean, ScalMat(2*basis.nmodes, ħ/2); ħ = ħ)
+end
