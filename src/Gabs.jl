@@ -10,15 +10,22 @@ import QuantumInterface: StateVector, AbstractOperator, apply!, tensor, ⊗, dir
 import SymplecticFactorizations: williamson, Williamson, polar, Polar, blochmessiah, BlochMessiah, randsymplectic, symplecticform, issymplectic
 using SymplecticFactorizations: williamson, Williamson, polar, Polar, blochmessiah, BlochMessiah, BlockForm, PairForm
 
+import PDMats
+import PDMats: AbstractPDMat, PDMat, PDiagMat, ScalMat, quad, invquad, whiten, unwhiten
+
 export
     # types
     GaussianState, GaussianUnitary, GaussianChannel, Generaldyne,
+    # PDMats integration types
+    PDGaussianState,
     # symplectic representations
     QuadPairBasis, QuadBlockBasis, changebasis,
     # operations
     tensor, ⊗, directsum, ⊕, apply!, ptrace, output, prob,
     # predefined Gaussian states
     vacuumstate, thermalstate, coherentstate, squeezedstate, eprstate,
+    # PDMats-optimized state constructors
+    vacuumstate_pd, thermalstate_pd, coherentstate_pd,
     # predefined Gaussian channels
     displace, squeeze, twosqueeze, phaseshift, beamsplitter,
     attenuator, amplifier,
@@ -41,6 +48,8 @@ include("symplectic.jl")
 
 include("types.jl")
 
+include("pdmats_types.jl")
+
 include("states.jl")
 
 include("unitaries.jl")
@@ -56,5 +65,7 @@ include("measurements.jl")
 include("wigner.jl")
 
 include("metrics.jl")
+
+include("pdmats_utils.jl")
 
 end
