@@ -29,7 +29,7 @@ wherein it is understood that ``0 \\log(0) \\equiv 0``.
 function entropy_vn(state::GaussianState{B, M, V}; tol::Real = real(eltype(V)) <: AbstractFloat ? 128 * eps(real(eltype(V))(1) / real(eltype(V))(2)) : 128 * eps(1/2)) where {B, M, V}
     T = real(eltype(V))
     T = T <: AbstractFloat ? T : typeof(1/1)
-    S = _sympspectrum(state.covar, x -> (x - (T(1) / T(2))) > tol; pre = symplecticform(state.basis), invscale = T(state.ħ))
+    S = _sympspectrum(state.covar, x -> (x - (T(1) / T(2))) > tol; pre = symplecticform(state.basis), invscale = state.ħ)
     return reduce(+, _entropy_vn.(S))
 end
 
@@ -65,7 +65,7 @@ function fidelity(state1::GaussianState{B1, M1, V1}, state2::GaussianState{B2, M
     B = (B \ ((A .* ((state1.ħ^2)/4)) + (state2.covar * A * state1.covar)))
     T = real(promote_type(eltype(V1), eltype(V2)))
     T = T <: AbstractFloat ? T : typeof(1/1)
-    B = _sympspectrum(B, x -> (x - T(1)) >= tol; invscale = (T(state1.ħ) / T(2)))
+    B = _sympspectrum(B, x -> (x - T(1)) >= tol; invscale = (state1.ħ / T(2)))
     return output * sqrt(reduce(*, _fidelity.(B)))
 end
 
@@ -101,7 +101,7 @@ function logarithmic_negativity(state::GaussianState{B, M, V}, indices; tola::Re
     S = _tilde(state, indices)
     T = real(eltype(V))
     T = T <: AbstractFloat ? T : typeof(1/1)
-    S = _sympspectrum(S, x -> x >= tola && (T(1) - x) >= tolb; pre = symplecticform(state.basis), invscale = (T(state.ħ) / T(2)))
+    S = _sympspectrum(S, x -> x >= tola && (T(1) - x) >= tolb; pre = symplecticform(state.basis), invscale = (state.ħ / T(2)))
     S = reduce(+, log.(S))
     # in case the reduction happened over an empty set
     return S < 0 ? -S : S
