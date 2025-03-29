@@ -763,10 +763,10 @@ changebasis(::Type{<:QuadPairBasis}, state::GaussianState{<:QuadPairBasis,M,V}) 
 
 Compute the symplectic spectrum of a Gaussian state.
 """
-function sympspectrum(state::GaussianState)
-    basis = state.basis
-    form = symplecticform(basis)
-    M = form * state.covar
-    spectrum = filter(x -> x > 0, imag.(eigvals(M)))
-    return spectrum
+sympspectrum(state::GaussianState) = _sympspectrum(state.covar, x -> x > 0; pre = symplecticform(state.basis))
+function _sympspectrum(M::Matrix{<:Number}, select::Function; pre::Union{Nothing, Matrix{<:Number}} = nothing, post::Union{Nothing, Matrix{<:Number}} = nothing, invscale::Union{Nothing, <:Real} = nothing)
+    M = isnothing(pre) ? M : pre * M
+    M = isnothing(post) ? M : M * post
+    M = isnothing(invscale) ? imag.(eigvals(M)) : imag.(eigvals(M)) ./ invscale
+    return filter(x -> select(x), M)
 end
