@@ -34,72 +34,109 @@ on `select` and return a `Generaldyne` object. The keyword argument `select` can
 The `result` and mapped state `output` can be obtained from the Generaldyne object `M` via `M.result` and `M.output`.
 Iterating the decomposition produces the components `result` and `output`.
 
+Note the measured modes are replaced with vacuum states after the general-dyne measurement.
+
 # Examples
 ```jldoctest
-julia> st = squeezedstate(QuadPairBasis(3), 1.0, pi/4);
-
 julia> M = generaldyne(st, [1, 3])
-Generaldyne{GaussianState{QuadPairBasis{Int64}, Vector{Float64}, Matrix{Float64}}, GaussianState{QuadPairBasis{Int64}, Vector{Float64}, Matrix{Float64}}}
+Generaldyne{GaussianState{QuadBlockBasis{Int64}, Vector{Float64}, Matrix{Float64}}, GaussianState{QuadBlockBasis{Int64}, Vector{Float64}, Matrix{Float64}}}
 result:
 GaussianState for 2 modes.
-  symplectic basis: QuadPairBasis
+  symplectic basis: QuadBlockBasis
 mean: 4-element Vector{Float64}:
-  1.8043368123964283
-  0.3252252843167054
-  1.2863262982923815
- -4.341827634220767
+ -3.2667979736291977
+  2.5501642587208146
+  6.749002691634104
+  0.33667597442342245
 covariance: 4×4 Matrix{Float64}:
  1.0  0.0  0.0  0.0
  0.0  1.0  0.0  0.0
  0.0  0.0  1.0  0.0
  0.0  0.0  0.0  1.0
 output state:
-GaussianState for 1 mode.
-  symplectic basis: QuadPairBasis
-mean: 2-element Vector{Float64}:
+GaussianState for 3 modes.
+  symplectic basis: QuadBlockBasis
+mean: 6-element Vector{Float64}:
  0.0
  0.0
-covariance: 2×2 Matrix{Float64}:
-  1.19762  -2.56458
- -2.56458   6.32677
+ 0.0
+ 0.0
+ 0.0
+ 0.0
+covariance: 6×6 Matrix{Float64}:
+ 1.0   0.0      0.0  0.0   0.0      0.0
+ 0.0   1.19762  0.0  0.0  -2.56458  0.0
+ 0.0   0.0      1.0  0.0   0.0      0.0
+ 0.0   0.0      0.0  1.0   0.0      0.0
+ 0.0  -2.56458  0.0  0.0   6.32677  0.0
+ 0.0   0.0      0.0  0.0   0.0      1.0
 
-julia> result, output = M; # destructuring via iteration
+julia> result, state = M; # destructuring via iteration
 
-julia> result == M.result && output == M.output
+julia> result == M.result && state == M.state
 true
 ```
 """
-function generaldyne(state::GaussianState{<:SymplecticBasis,Tm,Tc}, indices::R; 
+function generaldyne(state::GaussianState{<:QuadPairBasis,Tm,Tc}, indices::R; 
 					 select::S = Matrix{eltype(Tc)}((state.ħ/2)*I, 2*length(indices), 2*length(indices))) where {Tm,Tc,R,S<:Union{Matrix,GaussianState}}
 	basis = state.basis
-	indlength = length(indices)
-	nmodes′ = basis.nmodes - indlength
-	a, b, A, B, C = _part_state(state, indices)
-	if select isa Matrix
-		B .+= select
-		symB = Symmetric(B)
-		L = cholesky(symB).L
-		resultmean = L * randn(2*indlength) + b
-		meandiff = resultmean - b
-		buf = C * inv(symB)
-		a .+= buf * meandiff
-		A .-= buf * C'
-		result′ = GaussianState(typeof(basis)(indlength), resultmean, select, ħ = state.ħ)
-	elseif select isa GaussianState
-		B .+= select.covar
-		symB = Symmetric(B)
-		meandiff = select.mean - b
-		buf = C * inv(symB)
-		a .+= buf * meandiff
-		A .-= buf * C'
-		result′ = select
-	else
-		throw(ArgumentError("invalid `select`"))
+	result′, a, A = _generaldyne_filter(state, indices, select)
+	mean′, covar′ = zeros(eltype(Tm), 2*basis.nmodes), zeros(eltype(Tc), 2*basis.nmodes, 2*basis.nmodes)
+	idx = 1
+	@inbounds for i in Base.OneTo(basis.nmodes)
+		if !(i in indices)
+			copyto!(@view(mean′[2i-1:2i]), @view(a[2idx-1:2idx]))
+			copyto!(@view(covar′[2i-1:2i,2i-1:2i]), @view(A[2idx-1:2idx,2idx-1:2idx]))
+			idx += 1
+		else
+			covar′[2i-1,2i-1] = state.ħ/2
+			covar′[2i,2i] = state.ħ/2
+		end
 	end
-	state′ = GaussianState(typeof(basis)(nmodes′), a, A, ħ = state.ħ)
+	state′ = GaussianState(basis, mean′, covar′, ħ = state.ħ)
+	return Generaldyne(result′, state′)
+end
+function generaldyne(state::GaussianState{<:QuadBlockBasis,Tm,Tc}, indices::R; 
+	select::S = Matrix{eltype(Tc)}((state.ħ/2)*I, 2*length(indices), 2*length(indices))) where {Tm,Tc,R,S<:Union{Matrix,GaussianState}}
+	basis = state.basis
+	nmodes = basis.nmodes
+	result′, a, A = _generaldyne_filter(state, indices, select)
+	mean′, covar′ = zeros(eltype(Tm), 2*basis.nmodes), zeros(eltype(Tc), 2*basis.nmodes, 2*basis.nmodes)
+	idx, idxlength = 1, length(indices)
+	nmodes′ = basis.nmodes - idxlength
+	@inbounds for i in Base.OneTo(nmodes)
+		if !(i in indices)
+			mean′[i] = a[idx]
+			mean′[i+nmodes] = a[idx+nmodes′]
+			covar′[i,i] = A[idx,idx]
+			covar′[i+nmodes,i] = A[idx+nmodes′,idx]
+			covar′[i,i+nmodes] = A[idx,idx+nmodes′]
+			covar′[i+nmodes,i+nmodes] = A[idx+nmodes′,idx+nmodes′]
+			idx += 1
+		else
+			covar′[i,i] = state.ħ/2
+			covar′[i+nmodes,i+nmodes] = state.ħ/2
+		end
+	end
+	state′ = GaussianState(basis, mean′, covar′, ħ = state.ħ)
 	return Generaldyne(result′, state′)
 end
 
+"""
+	rand(::Type{Generaldyne}, state::GaussianState, indices::Vector; shots = 1, select = (ħ/2)I)
+
+# Examples
+```jldoctest
+julia > st = squeezedstate(QuadBlockBasis(3), 1.0, pi/4);
+
+julia> rand(Generaldyne, st, [1, 3], shots = 5)
+4×5 Matrix{Float64}:
+  0.760996   1.24663    1.785     2.89803  -0.873372
+  2.06074   -0.185524  -2.90446  -1.21932  -2.67317
+  0.979994   2.44556   -2.20969  -4.12306  -1.31005
+ -0.235823  -2.22807    1.11322   1.72146   1.37089
+```
+"""
 function Base.rand(::Type{Generaldyne}, state::GaussianState{<:QuadPairBasis,Tm,Tc}, indices::R; 
 				   shots::Int = 1, select::S = Matrix{eltype(Tc)}((state.ħ/2)*I, 2*length(indices), 2*length(indices))) where {Tm,Tc,R,S<:Matrix}
 	indlength = length(indices)
@@ -286,4 +323,34 @@ function _part_state(state::GaussianState{<:QuadBlockBasis,M,V}, indices::I) whe
 		end
 	end
 	return a, b, A, B, C
+end
+function _generaldyne_filter(state::GaussianState{<:SymplecticBasis,Tm,Tc}, indices::R, select::S) where {Tm,Tc,R,S<:Matrix}
+	basis = state.basis
+	indlength = length(indices)
+	nmodes′ = basis.nmodes - indlength
+	a, b, A, B, C = _part_state(state, indices)
+	B .+= select
+	symB = Symmetric(B)
+	L = cholesky(symB).L
+	resultmean = L * randn(2*indlength) + b
+	meandiff = resultmean - b
+	buf = C * inv(symB)
+	a .+= buf * meandiff
+	A .-= buf * C'
+	result′ = GaussianState(typeof(basis)(indlength), resultmean, select, ħ = state.ħ)
+	return result′, a, A
+end
+function _generaldyne_filter(state::GaussianState{<:SymplecticBasis,Tm,Tc}, indices::R, select::S) where {Tm,Tc,R,S<:GaussianState}
+	basis = state.basis
+	indlength = length(indices)
+	nmodes′ = basis.nmodes - indlength
+	a, b, A, B, C = _part_state(state, indices)
+	B .+= select.covar
+	symB = Symmetric(B)
+	meandiff = select.mean - b
+	buf = C * inv(symB)
+	a .+= buf * meandiff
+	A .-= buf * C'
+	result′ = select
+	return result′, a, A
 end
