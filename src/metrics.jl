@@ -73,7 +73,7 @@ end
 _fidelity(x) = x^2 < floatmax(typeof(x)) ? x + sqrt(x^2 - 1) : 2 * x
 
 """
-    logarithmic_negativity(state::GaussianState, indices; tola::Real = 0, tolb::Real = 128 * eps(1))
+    logarithmic_negativity(state::GaussianState, indices::Union{Integer, AbstractVector{<:Integer}}; tola::Real = 0, tolb::Real = 128 * eps(1))
 
 Calculate the logarithmic negativity of a Gaussian state partition, defined as
 
@@ -97,7 +97,7 @@ Therein, ``\\mathbf{\\tilde{V}} = \\mathbf{T} \\mathbf{V} \\mathbf{T}`` where
 * `tola`: Tolerance (inclusive) above the cut-off at ``0`` for computing ``\\log(x)``.
 * `tolb`: Tolerance (inclusive) below the cut-off at ``1`` for computing ``\\log(x)``.
 """
-function logarithmic_negativity(state::GaussianState{B, M, V}, indices; tola::Real = 0, tolb::Real = real(eltype(V)) <: AbstractFloat ? 128 * eps(real(eltype(V))) : 128 * eps(1/1)) where {B, M, V}
+function logarithmic_negativity(state::GaussianState{B, M, V}, indices::Union{Integer, AbstractVector{<:Integer}}; tola::Real = 0, tolb::Real = real(eltype(V)) <: AbstractFloat ? 128 * eps(real(eltype(V))) : 128 * eps(1/1)) where {B, M, V}
     S = _tilde(state, indices)
     T = real(eltype(V))
     T = T <: AbstractFloat ? T : Float64
@@ -107,7 +107,7 @@ function logarithmic_negativity(state::GaussianState{B, M, V}, indices; tola::Re
     return S < 0 ? -S : S
 end
 
-function _tilde(state::GaussianState{B,M,V}, indices) where {B<:QuadPairBasis,M,V}
+function _tilde(state::GaussianState{B,M,V}, indices::Union{Integer, AbstractVector{<:Integer}}) where {B<:QuadPairBasis,M,V}
     nmodes = state.basis.nmodes
     indices = collect(indices)
     all(x -> x >= 1 && x <= nmodes, indices) || throw(ArgumentError(INDEX_ERROR))
@@ -123,7 +123,7 @@ function _tilde(state::GaussianState{B,M,V}, indices) where {B<:QuadPairBasis,M,
     end
     return T
 end
-function _tilde(state::GaussianState{B,M,V}, indices) where {B<:QuadBlockBasis,M,V}
+function _tilde(state::GaussianState{B,M,V}, indices::Union{Integer, AbstractVector{<:Integer}}) where {B<:QuadBlockBasis,M,V}
     nmodes = state.basis.nmodes
     indices = collect(indices)
     all(x -> x >= 1 && x <= nmodes, indices) || throw(ArgumentError(INDEX_ERROR))
