@@ -1,4 +1,6 @@
-SYMPLECTIC_ERROR = lazy"The symplectic forms of the Gaussian objects do not match."
+SYMPLECTIC_ERROR = lazy"The symplectic forms of the Gaussian objects do not match.
+    To resolve this issue, either revise the Gaussian objects or consider using
+    the function `changebasis` to arrive at a common symplectic form."
 
 STATE_ERROR = lazy"Either the input covariance matrix is not
     square or its dimensions do not match the mean vector. An
@@ -31,3 +33,5 @@ HEATMAP_ERROR = lazy"The input Gaussian state describes more than one mode.
 
 HBAR_ERROR = lazy"There are at least two different conventions for `ħ` used in this operation. Make sure
     that each Gaussian object has the same convention for `ħ`."
+
+INDEX_ERROR = lazy"The provided indices must all be positive integer values that are no greater than the number of modes encompassed within the Gaussian state."
