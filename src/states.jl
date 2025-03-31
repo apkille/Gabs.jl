@@ -717,31 +717,41 @@ covariance: 4×4 Matrix{Float64}:
 ```
 """
 function changebasis(::Type{B1}, state::GaussianState{B2,M,V}) where {B1<:QuadBlockBasis,B2<:QuadPairBasis,M,V}
-    basis = state.basis
-    nmodes = basis.nmodes
-    T = zeros(eltype(V), 2*nmodes, 2*nmodes)
-    @inbounds for i in Base.OneTo(2*nmodes), j in Base.OneTo(2*nmodes)
-        if (j == 2*i-1) || (j + 2*nmodes == 2*i)
-            T[i,j] = 1.0
+    nmodes = state.basis.nmodes
+    mean = similar(state.mean)
+    covar = similar(state.covar)
+    @inbounds for i in Base.OneTo(nmodes)
+        mean[i] = state.mean[2*i - 1]
+        mean[nmodes + i] = state.mean[2*i]
+        # split into two loops for better cache efficiency
+        @inbounds for j in Base.OneTo(nmodes)
+            covar[j, i] = state.covar[2*j - 1, 2*i - 1]
+            covar[nmodes + j, i] = state.covar[2*j, 2*i - 1]
+        end
+        @inbounds for j in Base.OneTo(nmodes)
+            covar[j, nmodes + i] = state.covar[2*j - 1, 2*i]
+            covar[nmodes + j, nmodes + i] = state.covar[2*j, 2*i]
         end
     end
-    T = typeof(T) == V ? T : V(T)
-    mean = T * state.mean
-    covar = T * state.covar * transpose(T)
     return GaussianState(B1(nmodes), mean, covar)
 end
 function changebasis(::Type{B1}, state::GaussianState{B2,M,V}) where {B1<:QuadPairBasis,B2<:QuadBlockBasis,M,V}
-    basis = state.basis
-    nmodes = basis.nmodes
-    T = zeros(eltype(V), 2*nmodes, 2*nmodes)
-    @inbounds for i in Base.OneTo(2*nmodes), j in Base.OneTo(2*nmodes)
-        if (i == 2*j-1) || (i + 2*nmodes == 2*j)
-            T[i,j] = 1.0
+    nmodes = state.basis.nmodes
+    mean = similar(state.mean)
+    covar = similar(state.covar)
+    @inbounds for i in Base.OneTo(nmodes)
+        mean[2*i - 1] = state.mean[i]
+        mean[2*i] = state.mean[nmodes + i]
+        # split into two loops for better cache efficiency
+        @inbounds for j in Base.OneTo(nmodes)
+            covar[2*j - 1, 2*i - 1] = state.covar[j, i]
+            covar[2*j, 2*i - 1] = state.covar[nmodes + j, i]
+        end
+        @inbounds for j in Base.OneTo(nmodes)
+            covar[2*j - 1, 2*i] = state.covar[j, nmodes + i]
+            covar[2*j, 2*i] = state.covar[nmodes + j, nmodes + i]
         end
     end
-    T = typeof(T) == V ? T : V(T)
-    mean = T * state.mean
-    covar = T * state.covar * transpose(T)
     return GaussianState(B1(nmodes), mean, covar)
 end
 changebasis(::Type{<:QuadBlockBasis}, state::GaussianState{<:QuadBlockBasis,M,V}) where {M,V} = state
@@ -753,10 +763,10 @@ changebasis(::Type{<:QuadPairBasis}, state::GaussianState{<:QuadPairBasis,M,V}) 
 
 Compute the symplectic spectrum of a Gaussian state.
 """
-function sympspectrum(state::GaussianState)
-    basis = state.basis
-    form = symplecticform(basis)
-    M = form * state.covar
-    spectrum = filter(x -> x > 0, imag.(eigvals(M)))
-    return spectrum
+sympspectrum(state::GaussianState) = _sympspectrum(state.covar, x -> x > 0; pre = symplecticform(state.basis))
+function _sympspectrum(M::AbstractMatrix{<:Number}, select::Function; pre::Union{Nothing, AbstractMatrix{<:Number}} = nothing, post::Union{Nothing, AbstractMatrix{<:Number}} = nothing, invscale::Union{Nothing, Real} = nothing)
+    M = isnothing(pre) ? M : pre * M
+    M = isnothing(post) ? M : M * post
+    M = isnothing(invscale) ? imag.(eigvals(M)) : imag.(eigvals(M)) ./ invscale
+    return filter(x -> select(x), M)
 end

@@ -3,7 +3,7 @@ module Gabs
 import LinearAlgebra
 using LinearAlgebra: I, det, mul!, diag, qr, eigvals, Diagonal, cholesky, Symmetric
 
-import QuantumInterface: StateVector, AbstractOperator, apply!, tensor, ⊗, directsum, ⊕
+import QuantumInterface: StateVector, AbstractOperator, apply!, tensor, ⊗, directsum, ⊕, entropy_vn, fidelity, logarithmic_negativity
 
 import Random
 using Random: randn!
@@ -34,7 +34,7 @@ export
     # factorizations
     williamson, Williamson, polar, Polar, blochmessiah, BlochMessiah,
     # metrics
-    purity
+    purity, entropy_vn, fidelity, logarithmic_negativity
 
 include("errors.jl")
 
