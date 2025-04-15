@@ -1,6 +1,6 @@
 # News
 
-## v1.2.9 - dev
+## v1.2.9 - 2025-04-15
 
 - Add seminal papers section to documentation.
 - **(breaking)** Add `hbar=2` as default convention in Gabs.
@@ -9,6 +9,7 @@
 - Add support for `entropy_vn`, `fidelity`, and `logarithmic_negativity` metrics.
 - Optimised `changebasis` to avoid matrix multiplication.
 - **(breaking)** Implement revamped `generaldyne` interface.
+- **(fix)** Trace out indices in `ptrace` indicated by `indices` rather than `setdiff(1:nmodes, indices)`.
 
 ## v1.2.8 - 2025-02-06
 
