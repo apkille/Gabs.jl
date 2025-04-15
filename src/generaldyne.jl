@@ -81,13 +81,20 @@ function generaldyne(state::GaussianState{<:QuadPairBasis,Tm,Tc}, indices::R;
 					 proj::S = Matrix{eltype(Tc)}((state.ħ/2)*I, 2*length(indices), 2*length(indices))) where {Tm,Tc,R,S<:Union{Matrix,GaussianState}}
 	basis = state.basis
 	nmodes = basis.nmodes
+	indlength = length(indices)
+	indlength < nmodes || throw(ArgumentError(INDEX_ERROR))
+	if proj isa Matrix
+		2*indlength == size(proj)[1] == size(proj)[2] || throw(ArgumentError(GENERALDYNE_ERROR))
+	elseif proj isa GaussianState
+		2*indlength == length(proj.mean) || throw(ArgumentError(GENERALDYNE_ERROR))
+	end
 	result′, a, A = _generaldyne_filter(state, indices, proj)
 	mean′, covar′ = zeros(eltype(Tm), 2*nmodes), Matrix{eltype(Tc)}((state.ħ/2)*I, 2*nmodes, 2*nmodes)
 	notindices = setdiff(1:nmodes, indices)
-	for i in eachindex(notindices)
+	@inbounds for i in eachindex(notindices)
         idx = notindices[i]
 		copyto!(@view(mean′[2idx-1:2idx]), @view(a[2i-1:2i]))
-        for j in i:length(notindices)
+        @inbounds for j in i:length(notindices)
             otheridx = notindices[j]
             covar′[2*idx-1, 2*otheridx-1] = A[2*i-1, 2*j-1]
             covar′[2*idx-1, 2*otheridx] = A[2*i-1, 2*j]
@@ -108,6 +115,13 @@ function generaldyne(state::GaussianState{<:QuadBlockBasis,Tm,Tc}, indices::R;
 	proj::S = Matrix{eltype(Tc)}((state.ħ/2)*I, 2*length(indices), 2*length(indices))) where {Tm,Tc,R,S<:Union{Matrix,GaussianState}}
 	basis = state.basis
 	nmodes = basis.nmodes
+	indlength = length(indices)
+	indlength < nmodes || throw(ArgumentError(INDEX_ERROR))
+	if proj isa Matrix
+		2*indlength == size(proj)[1] == size(proj)[2] || throw(ArgumentError(GENERALDYNE_ERROR))
+	elseif proj isa GaussianState
+		2*indlength == length(proj.mean) || throw(ArgumentError(GENERALDYNE_ERROR))
+	end
 	result′, a, A = _generaldyne_filter(state, indices, proj)
 	mean′, covar′ = zeros(eltype(Tm), 2*nmodes), Matrix{eltype(Tc)}((state.ħ/2)*I, 2*nmodes, 2*nmodes)
 	nmodes′ = nmodes - length(indices)
@@ -151,11 +165,12 @@ julia> rand(Generaldyne, st, [1, 3], shots = 5)
 """
 function Base.rand(::Type{Generaldyne}, state::GaussianState{<:QuadPairBasis,Tm,Tc}, indices::R; 
 				   shots::Int = 1, proj::S = Matrix{eltype(Tc)}((state.ħ/2)*I, 2*length(indices), 2*length(indices))) where {Tm,Tc,R,S<:Matrix}
-	indlength = length(indices)
 	basis = state.basis
+	indlength = length(indices)
 	nmodes′ = basis.nmodes - indlength
+	indlength < basis.nmodes || throw(ArgumentError(INDEX_ERROR))
+	2*indlength == size(proj)[1] == size(proj)[2] || throw(ArgumentError(GENERALDYNE_ERROR))
 	mean, covar = state.mean, state.covar
-	idxlength = length(indices)
 	b, B = zeros(2*indlength), zeros(2*indlength, 2*indlength)
 	@inbounds for i in eachindex(indices)
 		idx = indices[i]
@@ -182,17 +197,18 @@ function Base.rand(::Type{Generaldyne}, state::GaussianState{<:QuadPairBasis,Tm,
 end
 function Base.rand(::Type{Generaldyne}, state::GaussianState{<:QuadBlockBasis,Tm,Tc}, indices::R;
 				   shots::Int = 1, proj::S = Matrix{eltype(Tc)}((state.ħ/2)*I, 2*length(indices), 2*length(indices))) where {Tm,Tc,R,S<:Matrix}
-	indlength = length(indices)
 	basis = state.basis
 	nmodes = basis.nmodes
+	indlength = length(indices)
 	nmodes′ = nmodes - indlength
+	indlength < nmodes || throw(ArgumentError(INDEX_ERROR))
+	2*indlength == size(proj)[1] == size(proj)[2] || throw(ArgumentError(GENERALDYNE_ERROR))
 	mean, covar = state.mean, state.covar
-	idxlength = length(indices)
 	b, B = zeros(2*indlength), zeros(2*indlength, 2*indlength)
 	@inbounds for i in eachindex(indices)
 		idx = indices[i]
 		b[i] = mean[idx]
-		b[i+nmodes′] = mean[idx+nmodes]
+		b[i+indlength] = mean[idx+nmodes]
 		@inbounds for j in eachindex(indices)
 			otheridx = indices[j]
 			if idx == otheridx
@@ -232,7 +248,6 @@ function _part_state(state::GaussianState{<:QuadPairBasis,M,V}, indices::I) wher
 	nmodes = basis.nmodes
 	nmodes′ = nmodes - indlength
 	mean, covar = state.mean, state.covar
-	idxlength = length(indices)
 	# partition state into subsystems A and B
 	A, B, C = zeros(2*nmodes′, 2*nmodes′), zeros(2*indlength, 2*indlength), zeros(2*nmodes′, 2*indlength)
 	a, b = zeros(2*nmodes′), zeros(2*indlength)
@@ -275,7 +290,6 @@ function _part_state(state::GaussianState{<:QuadBlockBasis,M,V}, indices::I) whe
 	nmodes = basis.nmodes
 	nmodes′ = nmodes - indlength
 	mean, covar = state.mean, state.covar
-	idxlength = length(indices)
 	# partition state into subsystems A and B
 	A, B, C = zeros(2*nmodes′, 2*nmodes′), zeros(2*indlength, 2*indlength), zeros(2*nmodes′, 2*indlength)
 	a, b = zeros(2*nmodes′), zeros(2*indlength)
