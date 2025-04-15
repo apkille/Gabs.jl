@@ -92,6 +92,7 @@ function generaldyne(state::GaussianState{<:QuadPairBasis,Tm,Tc}, indices::R;
 	end
 	result′, a, A = _generaldyne_filter(state, indices, proj)
 	mean′, covar′ = zeros(eltype(Tm), 2*nmodes), Matrix{eltype(Tc)}((state.ħ/2)*I, 2*nmodes, 2*nmodes)
+	# fill in measured modes with vacuum states
 	notindices = setdiff(1:nmodes, indices)
 	@inbounds for i in eachindex(notindices)
         idx = notindices[i]
@@ -127,6 +128,7 @@ function generaldyne(state::GaussianState{<:QuadBlockBasis,Tm,Tc}, indices::R;
 	result′, a, A = _generaldyne_filter(state, indices, proj)
 	mean′, covar′ = zeros(eltype(Tm), 2*nmodes), Matrix{eltype(Tc)}((state.ħ/2)*I, 2*nmodes, 2*nmodes)
 	nmodes′ = nmodes - length(indices)
+	# fill in measured modes with vacuum states
 	notindices = setdiff(1:nmodes, indices)
 	@inbounds for i in eachindex(notindices)
         idx = notindices[i]
@@ -173,6 +175,7 @@ function Base.rand(::Type{Generaldyne}, state::GaussianState{<:QuadPairBasis,Tm,
 	indlength < basis.nmodes || throw(ArgumentError(INDEX_ERROR))
 	2*indlength == size(proj)[1] == size(proj)[2] || throw(ArgumentError(GENERALDYNE_ERROR))
 	mean, covar = state.mean, state.covar
+	# write mean and covariance matrix of measured modes to vector `b` and matrix `B`, respectively
 	b, B = zeros(2*indlength), zeros(2*indlength, 2*indlength)
 	@inbounds for i in eachindex(indices)
 		idx = indices[i]
@@ -187,6 +190,7 @@ function Base.rand(::Type{Generaldyne}, state::GaussianState{<:QuadPairBasis,Tm,
 			end
 		end
 	end
+	# generate random mean vector samples
 	symB = Symmetric(B)
 	L = cholesky(symB).L
 	buf = zeros(2*indlength)
@@ -206,6 +210,7 @@ function Base.rand(::Type{Generaldyne}, state::GaussianState{<:QuadBlockBasis,Tm
 	indlength < nmodes || throw(ArgumentError(INDEX_ERROR))
 	2*indlength == size(proj)[1] == size(proj)[2] || throw(ArgumentError(GENERALDYNE_ERROR))
 	mean, covar = state.mean, state.covar
+	# write mean and covariance matrix of measured modes to vector `b` and matrix `B`, respectively
 	b, B = zeros(2*indlength), zeros(2*indlength, 2*indlength)
 	@inbounds for i in eachindex(indices)
 		idx = indices[i]
@@ -231,6 +236,7 @@ function Base.rand(::Type{Generaldyne}, state::GaussianState{<:QuadBlockBasis,Tm
 			end
 		end
 	end
+	# generate random mean vector samples
 	B .+= proj
 	symB = Symmetric(B)
 	L = cholesky(symB).L
@@ -357,11 +363,13 @@ function _generaldyne_filter(state::GaussianState{<:SymplecticBasis,Tm,Tc}, indi
 	indlength = length(indices)
 	nmodes′ = basis.nmodes - indlength
 	a, b, A, B, C = _part_state(state, indices)
+	# generate random mean vector samples
 	B .+= proj
 	symB = Symmetric(B)
 	L = cholesky(symB).L
 	resultmean = L * randn(2*indlength) + b
 	meandiff = resultmean - b
+	# conditional mapping (see Serafini's Quantum Continuous Variables textbook for reference)
 	buf = C * inv(symB)
 	a .+= buf * meandiff
 	A .-= buf * C'
@@ -377,6 +385,7 @@ function _generaldyne_filter(state::GaussianState{<:SymplecticBasis,Tm,Tc}, indi
 	B .+= proj.covar
 	symB = Symmetric(B)
 	meandiff = proj.mean - b
+	# conditional mapping (see Serafini's Quantum Continuous Variables textbook for reference)
 	buf = C * inv(symB)
 	a .+= buf * meandiff
 	A .-= buf * C'
