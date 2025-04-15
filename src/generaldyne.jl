@@ -37,17 +37,19 @@ Iterating the decomposition produces the components `result` and `output`.
 Note the measured modes are replaced with vacuum states after the general-dyne measurement.
 
 # Examples
-```jldoctest
+```
+julia> st = squeezedstate(QuadBlockBasis(3), 1.0, pi/4);
+
 julia> M = generaldyne(st, [1, 3])
 Generaldyne{GaussianState{QuadBlockBasis{Int64}, Vector{Float64}, Matrix{Float64}}, GaussianState{QuadBlockBasis{Int64}, Vector{Float64}, Matrix{Float64}}}
 result:
 GaussianState for 2 modes.
   symplectic basis: QuadBlockBasis
 mean: 4-element Vector{Float64}:
- -3.2667979736291977
-  2.5501642587208146
-  6.749002691634104
-  0.33667597442342245
+  0.26967410461090285
+  1.4683993027500133
+ -1.84631450059537
+  0.16832788926417352
 covariance: 4×4 Matrix{Float64}:
  1.0  0.0  0.0  0.0
  0.0  1.0  0.0  0.0
