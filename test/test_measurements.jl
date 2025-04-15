@@ -4,9 +4,13 @@
     using LinearAlgebra: det, I
 
     @testset "generaldyne" begin
+
         qpairbasis, qblockbasis = QuadPairBasis(1), QuadBlockBasis(1)
         for basis in [qpairbasis, qblockbasis]
             vac = vacuumstate(basis)
+            @test_throws ArgumentError generaldyne(vac, [1, 2])
+            @test_throws ArgumentError generaldyne(vac ⊗ vac, [1], proj = zeros(4, 4))
+            @test_throws ArgumentError generaldyne(vac ⊗ vac, [1], proj = GaussianState(basis ⊕ basis, zeros(4), zeros(4, 4)))
             vacs = vac ⊗ vac ⊗ vac ⊗ vac
             gd1 = generaldyne(vacs, [2, 4], proj = vac ⊗ vac)
             @test isapprox(gd1.result, vac ⊗ vac, atol = 1e-12)
@@ -51,5 +55,14 @@
         gdstatic = generaldyne(statestatic, [2])
         @test (gdstatic.state).mean isa SVector && (gdstatic.state).covar isa SMatrix
         @test isequal(gdstatic.state, statestatic)
+
+        # TODO: add more tests for random Generaldyne sampling
+        @test_throws ArgumentError rand(Generaldyne, rs_qpair, collect(1:11))
+        @test_throws ArgumentError rand(Generaldyne, rs_qblock, collect(1:11))
+        @test_throws ArgumentError rand(Generaldyne, rs_qpair, indices, proj = zeros(20, 20))
+        @test_throws ArgumentError rand(Generaldyne, rs_qblock, indices, proj = zeros(20, 20))
+        @test size(rand(Generaldyne, rs_qpair, [1, 3, 5], shots = 10)) == (6, 10)
+        @test size(rand(Generaldyne, rs_qblock, [1, 3, 5], shots = 10)) == (6, 10)
+        
     end
 end
