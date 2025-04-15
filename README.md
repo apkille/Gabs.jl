@@ -45,8 +45,8 @@ GaussianState for 2 modes.
 mean: 4-element Vector{Float64}:
   0.0
   0.0
-  1.4142135623730951
- -1.4142135623730951
+  2.0
+ -2.0
 covariance: 4×4 Matrix{Float64}:
  1.0  0.0  0.0  0.0
  0.0  1.0  0.0  0.0
@@ -71,10 +71,10 @@ julia> apply!(state, op)
 GaussianState for 2 modes.
   symplectic basis: QuadPairBasis
 mean: 4-element Vector{Float64}:
-  1.2247448713915892
- -1.2247448713915892
-  0.7071067811865476
- -0.7071067811865476
+  1.7320508075688772
+ -1.7320508075688772
+  1.0
+ -1.0
 covariance: 4×4 Matrix{Float64}:
  1.0  0.0  0.0  0.0
  0.0  1.0  0.0  0.0
@@ -85,8 +85,8 @@ julia> ptrace(state, 1)
 GaussianState for 1 mode.
   symplectic basis: QuadPairBasis
 mean: 2-element Vector{Float64}:
-  1.2247448713915892
- -1.2247448713915892
+  1.0
+ -1.0
 covariance: 2×2 Matrix{Float64}:
  1.0  0.0
  0.0  1.0
