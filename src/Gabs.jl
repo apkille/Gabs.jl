@@ -1,22 +1,25 @@
 module Gabs
 
-using BlockArrays: BlockedArray, BlockArray, Block, mortar
-
 import LinearAlgebra
-using LinearAlgebra: I, det, mul!, diag, qr, eigvals, Diagonal
+using LinearAlgebra: I, det, mul!, diag, qr, eigvals, Diagonal, cholesky, Symmetric
 
 import QuantumInterface: StateVector, AbstractOperator, apply!, tensor, ⊗, directsum, ⊕, entropy_vn, fidelity, logarithmic_negativity
+
+import Random
+using Random: randn!
 
 import SymplecticFactorizations: williamson, Williamson, polar, Polar, blochmessiah, BlochMessiah, randsymplectic, symplecticform, issymplectic
 using SymplecticFactorizations: williamson, Williamson, polar, Polar, blochmessiah, BlochMessiah, BlockForm, PairForm
 
 export
     # types
-    GaussianState, GaussianUnitary, GaussianChannel, Generaldyne,
+    GaussianState, GaussianUnitary, GaussianChannel,
+    # Gaussian measurements
+    generaldyne, Generaldyne,
     # symplectic representations
     QuadPairBasis, QuadBlockBasis, changebasis,
     # operations
-    tensor, ⊗, directsum, ⊕, apply!, ptrace, output, prob,
+    tensor, ⊗, directsum, ⊕, apply!, ptrace,
     # predefined Gaussian states
     vacuumstate, thermalstate, coherentstate, squeezedstate, eprstate,
     # predefined Gaussian channels
@@ -51,7 +54,7 @@ include("randoms.jl")
 
 include("factorizations.jl")
 
-include("measurements.jl")
+include("generaldyne.jl")
 
 include("wigner.jl")
 

@@ -8,6 +8,7 @@
 - Clean up docstrings to no longer include uncompiled LaTeX.
 - Add support for `entropy_vn`, `fidelity`, and `logarithmic_negativity` metrics.
 - Optimised `changebasis` to avoid matrix multiplication.
+- **(breaking)** Implement revamped `generaldyne` interface.
 
 ## v1.2.8 - 2025-02-06
 
