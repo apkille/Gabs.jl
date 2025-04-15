@@ -92,45 +92,34 @@
     end
 
     @testset "partial trace" begin
-        qpairbasis1 = QuadPairBasis(1)
-        qblockbasis1 = QuadBlockBasis(1)
+        qpairbasis, qblockbasis = QuadPairBasis(1), QuadBlockBasis(1)
         alpha = rand(Float64)
         r, theta = rand(Float64), rand(Float64)
         n = rand(Int)
-        s1_qpair, s2_qpair, s3_qpair = coherentstate(qpairbasis1, alpha), squeezedstate(qpairbasis1, r, theta), thermalstate(qpairbasis1, n)
-        state_qpair = s1_qpair ⊗ s2_qpair ⊗ s3_qpair
-        @test ptrace(state_qpair, 1) == s1_qpair
-        @test ptrace(state_qpair, 2) == s2_qpair
-        @test ptrace(state_qpair, 3) == s3_qpair
-        @test ptrace(state_qpair, [1, 2]) == s1_qpair ⊗ s2_qpair
-        @test ptrace(state_qpair, [1, 3]) == s1_qpair ⊗ s3_qpair
-        @test ptrace(state_qpair, [2, 3]) == s2_qpair ⊗ s3_qpair
 
-        s1_qblock, s2_qblock, s3_qblock = coherentstate(qblockbasis1, alpha), squeezedstate(qblockbasis1, r, theta), thermalstate(qblockbasis1, n)
-        state_qblock = s1_qblock ⊗ s2_qblock ⊗ s3_qblock
-        @test ptrace(state_qblock, 1) == s1_qblock
-        @test ptrace(state_qblock, 2) == s2_qblock
-        @test ptrace(state_qblock, 3) == s3_qblock
-        @test ptrace(state_qblock, [1, 2]) == s1_qblock ⊗ s2_qblock
-        @test ptrace(state_qblock, [1, 3]) == s1_qblock ⊗ s3_qblock
-        @test ptrace(state_qblock, [2, 3]) == s2_qblock ⊗ s3_qblock
+        for basis in [qpairbasis, qblockbasis]
+            s1, s2, s3 = coherentstate(basis, alpha), squeezedstate(basis, r, theta), thermalstate(basis, n)
+            state = s1 ⊗ s2 ⊗ s3
+            @test ptrace(state, 1) == s2 ⊗ s3
+            @test ptrace(state, 2) == s1 ⊗ s3
+            @test ptrace(state, 3) == s1 ⊗ s2
+            @test ptrace(state, [1, 2]) == s3
+            @test ptrace(state, [1, 3]) == s2
+            @test ptrace(state, [2, 3]) == s1
+            @test_throws ArgumentError ptrace(state, [1, 2, 3, 4])
 
-        sstatic = coherentstate(SVector{2}, SMatrix{2,2}, qpairbasis1, alpha)
-        tpstatic = sstatic ⊗ sstatic ⊗ sstatic
-        @test ptrace(tpstatic, 1) == sstatic
-        @test ptrace(tpstatic, [1,3]) == sstatic ⊗ sstatic
+            sstatic = coherentstate(SVector{2}, SMatrix{2,2}, basis, alpha)
+            tpstatic = sstatic ⊗ sstatic ⊗ sstatic
+            @test ptrace(tpstatic, 1) == sstatic ⊗ sstatic
+            @test ptrace(tpstatic, [1,3]) == sstatic
 
-        @test ptrace(SVector{2}, SMatrix{2,2}, state_qpair, 1) isa GaussianState
-        @test ptrace(SVector{4}, SMatrix{4,4}, state_qpair, [1, 3]) isa GaussianState
+            @test ptrace(SVector{2}, SMatrix{2,2}, state, [1, 3]) isa GaussianState
+            @test ptrace(SVector{4}, SMatrix{4,4}, state, 1) isa GaussianState
 
-        qpairbasis4 = QuadPairBasis(4)
-        qblockbasis4 = QuadBlockBasis(4)
+            eprstates = eprstate(basis ⊕ basis ⊕ basis ⊕ basis, r, theta)
 
-        eprstates_qpair = eprstate(qpairbasis4, r, theta)
-        eprstates_qblock = eprstate(qblockbasis4, r, theta)
-
-        @test ptrace(eprstates_qpair, [1, 2]) == eprstate(QuadPairBasis(2), r, theta)
-        @test ptrace(eprstates_qblock, [1, 2]) == eprstate(QuadBlockBasis(2), r, theta)
+            @test ptrace(eprstates, [1, 2]) == eprstate(basis ⊕ basis, r, theta)
+        end
     end
 
     @testset "symplectic spectrum" begin

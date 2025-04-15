@@ -166,8 +166,8 @@ Use [Latexify](https://github.com/korsbo/Latexify.jl) to render the covariance m
 \begin{equation}
 \left[
 \begin{array}{cc}
-\left( \cosh\left( 2 r \right) \sqrt{1 - \tau} - \cos\left( \theta \right) \sinh\left( 2 r \right) \sqrt{\tau} \right) \sqrt{1 - \tau} + \left( \sqrt{\tau} \cosh\left( 2 r \right) - \cos\left( \theta \right) \sinh\left( 2 r \right) \sqrt{1 - \tau} \right) \sqrt{\tau} &  - 2 \sinh\left( 2 r \right) \sin\left( \theta \right) \sqrt{\tau} \sqrt{1 - \tau} \\
- - 2 \sinh\left( 2 r \right) \sin\left( \theta \right) \sqrt{\tau} \sqrt{1 - \tau} & \left( \cosh\left( 2 r \right) \sqrt{1 - \tau} + \cos\left( \theta \right) \sinh\left( 2 r \right) \sqrt{\tau} \right) \sqrt{1 - \tau} + \left( \sqrt{\tau} \cosh\left( 2 r \right) + \cos\left( \theta \right) \sinh\left( 2 r \right) \sqrt{1 - \tau} \right) \sqrt{\tau} \\
+\left( \cosh\left( 2 r \right) \sqrt{1 - \tau} + \cos\left( \theta \right) \sinh\left( 2 r \right) \sqrt{\tau} \right) \sqrt{1 - \tau} - \left(  - \sqrt{\tau} \cosh\left( 2 r \right) - \cos\left( \theta \right) \sinh\left( 2 r \right) \sqrt{1 - \tau} \right) \sqrt{\tau} & 2 \sinh\left( 2 r \right) \sin\left( \theta \right) \sqrt{\tau} \sqrt{1 - \tau} \\
+2 \sinh\left( 2 r \right) \sin\left( \theta \right) \sqrt{\tau} \sqrt{1 - \tau} & \left( \cosh\left( 2 r \right) \sqrt{1 - \tau} - \cos\left( \theta \right) \sinh\left( 2 r \right) \sqrt{\tau} \right) \sqrt{1 - \tau} - \left(  - \sqrt{\tau} \cosh\left( 2 r \right) + \cos\left( \theta \right) \sinh\left( 2 r \right) \sqrt{1 - \tau} \right) \sqrt{\tau} \\
 \end{array}
 \right]
 \end{equation}
