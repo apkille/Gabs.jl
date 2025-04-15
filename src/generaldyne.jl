@@ -154,7 +154,7 @@ end
 	rand(::Type{Generaldyne}, state::GaussianState, indices::Vector; shots = 1, proj = (ħ/2)I)
 
 # Examples
-```jldoctest
+```
 julia > st = squeezedstate(QuadBlockBasis(3), 1.0, pi/4);
 
 julia> rand(Generaldyne, st, [1, 3], shots = 5)
