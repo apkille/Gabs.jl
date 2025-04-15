@@ -15,6 +15,8 @@
             gd1 = generaldyne(vacs, [2, 4], proj = vac ⊗ vac)
             @test isapprox(gd1.result, vac ⊗ vac, atol = 1e-12)
             @test isapprox(gd1.state, vacs, atol = 1e-12)
+            result, state = gd1
+            @test result == gd1.result && state == gd1.state
 
             coh = coherentstate(basis, 1.0+im)
             cohs = coh ⊗ vac ⊗ coh ⊗ vac
@@ -63,6 +65,6 @@
         @test_throws ArgumentError rand(Generaldyne, rs_qblock, indices, proj = zeros(20, 20))
         @test size(rand(Generaldyne, rs_qpair, [1, 3, 5], shots = 10)) == (6, 10)
         @test size(rand(Generaldyne, rs_qblock, [1, 3, 5], shots = 10)) == (6, 10)
-        
+
     end
 end
