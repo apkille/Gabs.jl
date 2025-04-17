@@ -54,6 +54,8 @@ include("randoms.jl")
 
 include("factorizations.jl")
 
+include("measurements.jl")
+
 include("generaldyne.jl")
 
 include("wigner.jl")
