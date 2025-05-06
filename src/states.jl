@@ -576,16 +576,6 @@ julia> basis = QuadPairBasis(1);
 julia> state = coherentstate(basis, 1.0+im) ⊗ thermalstate(basis, 2) ⊗ squeezedstate(basis, 3.0, pi/4);
 
 julia> ptrace(state, 2)
-GaussianState for 1 mode.
-  symplectic basis: QuadPairBasis
-mean: 2-element Vector{Float64}:
- 0.0
- 0.0
-covariance: 2×2 Matrix{Float64}:
- 5.0  0.0
- 0.0  5.0
-
-julia> ptrace(state, [1, 3])
 GaussianState for 2 modes.
   symplectic basis: QuadPairBasis
 mean: 4-element Vector{Float64}:
@@ -598,58 +588,47 @@ covariance: 4×4 Matrix{Float64}:
  0.0  1.0     0.0        0.0
  0.0  0.0    59.0829  -142.633
  0.0  0.0  -142.633    344.348
+
+julia> ptrace(state, [1, 3])
+GaussianState for 1 mode.
+  symplectic basis: QuadPairBasis
+mean: 2-element Vector{Float64}:
+ 0.0
+ 0.0
+covariance: 2×2 Matrix{Float64}:
+ 5.0  0.0
+ 0.0  5.0
 ```
 """
-function ptrace(::Type{Tm}, ::Type{Tc}, state::GaussianState, idx::N) where {Tm,Tc,N<:Int}
-    mean′, covar′ = _ptrace(state, idx)
-    return GaussianState(typeof(state.basis)(1), Tm(mean′), Tc(covar′); ħ = state.ħ)
-end
-ptrace(::Type{T}, state::GaussianState, idx::N) where {T,N<:Int} = ptrace(T, T, state, idx)
-function ptrace(state::GaussianState, idx::N) where {N<:Int}
-    mean′, covar′ = _ptrace(state, idx)
-    return GaussianState(typeof(state.basis)(1), mean′, covar′; ħ = state.ħ)
-end
-function ptrace(::Type{Tm}, ::Type{Tc}, state::GaussianState, indices::N) where {Tm,Tc,N<:AbstractVector}
+function ptrace(::Type{Tm}, ::Type{Tc}, state::GaussianState, indices::N) where {Tm,Tc,N}
+    basis = state.basis
     mean, covar = _ptrace(state, indices)
-    return GaussianState(typeof(state.basis)(length(indices)), Tm(mean), Tc(covar); ħ = state.ħ)
+    return GaussianState(typeof(basis)(basis.nmodes - length(indices)), Tm(mean), Tc(covar); ħ = state.ħ)
 end
-ptrace(::Type{T}, state::GaussianState, indices::N) where {T,N<:AbstractVector} = ptrace(T, T, state, indices)
-function ptrace(state::GaussianState, indices::T) where {T<:AbstractVector}
+ptrace(::Type{T}, state::GaussianState, indices::N) where {T,N} = ptrace(T, T, state, indices)
+function ptrace(state::GaussianState, indices::T) where {T}
+    basis = state.basis
     mean, covar = _ptrace(state, indices)
-    return GaussianState(typeof(state.basis)(length(indices)), mean, covar; ħ = state.ħ)
+    return GaussianState(typeof(basis)(basis.nmodes - length(indices)), mean, covar; ħ = state.ħ)
 end
-function _ptrace(state::GaussianState{B,M,V}, idx::T) where {B<:QuadPairBasis,M,V,T<:Int}
-    idxV = 2*idx-1:(2*idx)
-    mean = state.mean
-    covar = state.covar
+function _ptrace(state::GaussianState{B,M,V}, indices::T) where {B<:QuadPairBasis,M,V,T}
+    basis, mean, covar = state.basis, state.mean, state.covar
+    length(indices) < basis.nmodes || throw(ArgumentError(INDEX_ERROR))
+    notindices = setdiff(1:basis.nmodes, indices)
+    notidxlength = length(notindices)
     # initialize partial trace of mean vector
-    mean′ = mean[idxV]
-    # initialize partial trace of covariance matrix
-    covar′ = covar[idxV, idxV]
-    # extract output array types
-    mean′′ = _promote_output_vector(typeof(mean), mean′, 2)
-    covar′′ = _promote_output_matrix(typeof(covar), covar′, 2)
-    return mean′′, covar′′
-end
-function _ptrace(state::GaussianState{B,M,V}, indices::T) where {B<:QuadPairBasis,M,V,T<:AbstractVector}
-    idxlength = length(indices)
-    mean = state.mean
-    Mt = eltype(mean)
-    covar = state.covar
-    Vt = eltype(covar)
-    # initialize partial trace of mean vector
-    mean′ = zeros(Mt, 2*idxlength)
-    @inbounds for i in eachindex(indices)
-        idx = indices[i]
+    mean′ = zeros(eltype(mean), 2*notidxlength)
+    @inbounds for i in eachindex(notindices)
+        idx = notindices[i]
         mean′[2*i-1] = mean[2*idx-1]
         mean′[2*i] = mean[2*idx]
     end
     # initialize partial trace of covariance matrix
-    covar′ = zeros(Vt, 2*idxlength, 2*idxlength)
-    @inbounds for i in eachindex(indices)
-        idx = indices[i]
-        @inbounds for j in i:idxlength
-            otheridx = indices[j]
+    covar′ = zeros(eltype(covar), 2*notidxlength, 2*notidxlength)
+    @inbounds for i in eachindex(notindices)
+        idx = notindices[i]
+        @inbounds for j in i:notidxlength
+            otheridx = notindices[j]
             covar′[2*i-1, 2*j-1] = covar[2*idx-1, 2*otheridx-1]
             covar′[2*i-1, 2*j] = covar[2*idx-1, 2*otheridx]
             covar′[2*i, 2*j-1] = covar[2*idx, 2*otheridx-1]
@@ -660,57 +639,41 @@ function _ptrace(state::GaussianState{B,M,V}, indices::T) where {B<:QuadPairBasi
             covar′[2*j, 2*i] = covar[2*otheridx, 2*idx]
         end
     end 
-    mean′′ = _promote_output_vector(typeof(mean), mean′, 2*idxlength)
-    covar′′ = _promote_output_matrix(typeof(covar), covar′, 2*idxlength)
+    mean′′ = _promote_output_vector(typeof(mean), mean′, 2*notidxlength)
+    covar′′ = _promote_output_matrix(typeof(covar), covar′, 2*notidxlength)
     return mean′′, covar′′
 end
-function _ptrace(state::GaussianState{B,M,V}, idx::T) where {B<:QuadBlockBasis,M,V,T<:Int}
-    basis = state.basis
+function _ptrace(state::GaussianState{B,M,V}, indices::T) where {B<:QuadBlockBasis,M,V,T}
+    basis, mean, covar = state.basis, state.mean, state.covar
     nmodes = basis.nmodes
-    mean = state.mean
-    covar = state.covar
+    length(indices) < nmodes || throw(ArgumentError(INDEX_ERROR))
+    notindices = setdiff(1:basis.nmodes, indices)
+    notidxlength = length(notindices)
     # initialize partial trace of mean vector
-    mean′ = [mean[idx], mean[idx+nmodes]]
-    # initialize partial trace of covariance matrix
-    covar′ = [covar[idx,idx] covar[idx,idx+nmodes]; covar[idx+nmodes,idx] covar[idx+nmodes,idx+nmodes]]
-    # extract output array types
-    mean′′ = _promote_output_vector(typeof(mean), mean′, 2)
-    covar′′ = _promote_output_matrix(typeof(covar), covar′, 2)
-    return mean′′, covar′′
-end
-function _ptrace(state::GaussianState{B,M,V}, indices::T) where {B<:QuadBlockBasis,M,V,T<:AbstractVector}
-    basis = state.basis
-    nmodes = basis.nmodes
-    idxlength = length(indices)
-    mean = state.mean
-    Mt = eltype(mean)
-    covar = state.covar
-    Vt = eltype(covar)
-    # initialize partial trace of mean vector
-    mean′ = zeros(Mt, 2*idxlength)
-    @inbounds for i in eachindex(indices)
-        idx = indices[i]
+    mean′ = zeros(eltype(mean), 2*notidxlength)
+    @inbounds for i in eachindex(notindices)
+        idx = notindices[i]
         mean′[i] = mean[idx]
-        mean′[i+idxlength] = mean[idx+nmodes]
+        mean′[i+notidxlength] = mean[idx+nmodes]
     end
     # initialize partial trace of covariance matrix
-    covar′ = zeros(Vt, 2*idxlength, 2*idxlength)
-    @inbounds for i in Base.OneTo(idxlength)
-        idx = indices[i]
-        @inbounds for j in i:idxlength
-            otheridx = indices[j]
+    covar′ = zeros(eltype(covar), 2*notidxlength, 2*notidxlength)
+    @inbounds for i in Base.OneTo(notidxlength)
+        idx = notindices[i]
+        @inbounds for j in i:notidxlength
+            otheridx = notindices[j]
             covar′[i,j] = covar[idx,otheridx]
             covar′[j,i] = covar[otheridx,idx]
-            covar′[i+idxlength,j] = covar[idx+nmodes,otheridx]
-            covar′[i,j+idxlength] = covar[idx,otheridx+nmodes]
-            covar′[j,i+idxlength] = covar[otheridx,idx+nmodes]
-            covar′[j+idxlength,i] = covar[otheridx+nmodes,idx]
-            covar′[i+idxlength,j+idxlength] = covar[idx+nmodes, otheridx+nmodes]
-            covar′[j+idxlength,i+idxlength] = covar[otheridx+nmodes, idx+nmodes]
+            covar′[i+notidxlength,j] = covar[idx+nmodes,otheridx]
+            covar′[i,j+notidxlength] = covar[idx,otheridx+nmodes]
+            covar′[j,i+notidxlength] = covar[otheridx,idx+nmodes]
+            covar′[j+notidxlength,i] = covar[otheridx+nmodes,idx]
+            covar′[i+notidxlength,j+notidxlength] = covar[idx+nmodes, otheridx+nmodes]
+            covar′[j+notidxlength,i+notidxlength] = covar[otheridx+nmodes, idx+nmodes]
         end
     end 
-    mean′′ = _promote_output_vector(typeof(mean), mean′, 2*idxlength)
-    covar′′ = _promote_output_matrix(typeof(covar), covar′, 2*idxlength)
+    mean′′ = _promote_output_vector(typeof(mean), mean′, 2*notidxlength)
+    covar′′ = _promote_output_matrix(typeof(covar), covar′, 2*notidxlength)
     return mean′′, covar′′
 end
 
@@ -752,31 +715,41 @@ covariance: 4×4 Matrix{Float64}:
 ```
 """
 function changebasis(::Type{B1}, state::GaussianState{B2,M,V}) where {B1<:QuadBlockBasis,B2<:QuadPairBasis,M,V}
-    basis = state.basis
-    nmodes = basis.nmodes
-    T = zeros(eltype(V), 2*nmodes, 2*nmodes)
-    @inbounds for i in Base.OneTo(2*nmodes), j in Base.OneTo(2*nmodes)
-        if (j == 2*i-1) || (j + 2*nmodes == 2*i)
-            T[i,j] = 1.0
+    nmodes = state.basis.nmodes
+    mean = similar(state.mean)
+    covar = similar(state.covar)
+    @inbounds for i in Base.OneTo(nmodes)
+        mean[i] = state.mean[2*i - 1]
+        mean[nmodes + i] = state.mean[2*i]
+        # split into two loops for better cache efficiency
+        @inbounds for j in Base.OneTo(nmodes)
+            covar[j, i] = state.covar[2*j - 1, 2*i - 1]
+            covar[nmodes + j, i] = state.covar[2*j, 2*i - 1]
+        end
+        @inbounds for j in Base.OneTo(nmodes)
+            covar[j, nmodes + i] = state.covar[2*j - 1, 2*i]
+            covar[nmodes + j, nmodes + i] = state.covar[2*j, 2*i]
         end
     end
-    T = typeof(T) == V ? T : V(T)
-    mean = T * state.mean
-    covar = T * state.covar * transpose(T)
     return GaussianState(B1(nmodes), mean, covar)
 end
 function changebasis(::Type{B1}, state::GaussianState{B2,M,V}) where {B1<:QuadPairBasis,B2<:QuadBlockBasis,M,V}
-    basis = state.basis
-    nmodes = basis.nmodes
-    T = zeros(eltype(V), 2*nmodes, 2*nmodes)
-    @inbounds for i in Base.OneTo(2*nmodes), j in Base.OneTo(2*nmodes)
-        if (i == 2*j-1) || (i + 2*nmodes == 2*j)
-            T[i,j] = 1.0
+    nmodes = state.basis.nmodes
+    mean = similar(state.mean)
+    covar = similar(state.covar)
+    @inbounds for i in Base.OneTo(nmodes)
+        mean[2*i - 1] = state.mean[i]
+        mean[2*i] = state.mean[nmodes + i]
+        # split into two loops for better cache efficiency
+        @inbounds for j in Base.OneTo(nmodes)
+            covar[2*j - 1, 2*i - 1] = state.covar[j, i]
+            covar[2*j, 2*i - 1] = state.covar[nmodes + j, i]
+        end
+        @inbounds for j in Base.OneTo(nmodes)
+            covar[2*j - 1, 2*i] = state.covar[j, nmodes + i]
+            covar[2*j, 2*i] = state.covar[nmodes + j, nmodes + i]
         end
     end
-    T = typeof(T) == V ? T : V(T)
-    mean = T * state.mean
-    covar = T * state.covar * transpose(T)
     return GaussianState(B1(nmodes), mean, covar)
 end
 changebasis(::Type{<:QuadBlockBasis}, state::GaussianState{<:QuadBlockBasis,M,V}) where {M,V} = state
@@ -788,10 +761,10 @@ changebasis(::Type{<:QuadPairBasis}, state::GaussianState{<:QuadPairBasis,M,V}) 
 
 Compute the symplectic spectrum of a Gaussian state.
 """
-function sympspectrum(state::GaussianState)
-    basis = state.basis
-    form = symplecticform(basis)
-    M = form * state.covar
-    spectrum = filter(x -> x > 0, imag.(eigvals(M)))
-    return spectrum
+sympspectrum(state::GaussianState) = _sympspectrum(state.covar, x -> x > 0; pre = symplecticform(state.basis))
+function _sympspectrum(M::AbstractMatrix{<:Number}, select::Function; pre::Union{Nothing, AbstractMatrix{<:Number}} = nothing, post::Union{Nothing, AbstractMatrix{<:Number}} = nothing, invscale::Union{Nothing, Real} = nothing)
+    M = isnothing(pre) ? M : pre * M
+    M = isnothing(post) ? M : M * post
+    M = isnothing(invscale) ? imag.(eigvals(M)) : imag.(eigvals(M)) ./ invscale
+    return filter(x -> select(x), M)
 end

@@ -388,21 +388,29 @@ covariance: 8×8 Matrix{Float64}:
  0.0  0.0  0.0  0.0  -23.6338   13.645     0.0      27.3082
 
 julia> ptrace(state, 1)
-GaussianState for 1 mode.
+GaussianState for 3 modes.
   symplectic basis: QuadPairBasis
-mean: 2-element Vector{Float64}:
-  2.0
- -2.0
-covariance: 2×2 Matrix{Float64}:
- 1.0  0.0
- 0.0  1.0
+mean: 6-element Vector{Float64}:
+  4.0
+ -4.0
+  0.0
+  0.0
+  0.0
+  0.0
+covariance: 6×6 Matrix{Float64}:
+ 1.0  0.0    0.0       0.0       0.0       0.0
+ 0.0  1.0    0.0       0.0       0.0       0.0
+ 0.0  0.0   27.3082    0.0     -13.645   -23.6338
+ 0.0  0.0    0.0      27.3082  -23.6338   13.645
+ 0.0  0.0  -13.645   -23.6338   27.3082    0.0
+ 0.0  0.0  -23.6338   13.645     0.0      27.3082
 
 julia> ptrace(state, [1, 4])
 GaussianState for 2 modes.
   symplectic basis: QuadPairBasis
 mean: 4-element Vector{Float64}:
-  2.0
- -2.0
+  4.0
+ -4.0
   0.0
   0.0
 covariance: 4×4 Matrix{Float64}:
