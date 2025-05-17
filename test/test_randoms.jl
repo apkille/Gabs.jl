@@ -33,6 +33,9 @@
 
         S_array = randsymplectic(Array, qpairbasis)
         @test issymplectic(qpairbasis, S_array, atol = 1e-5)
+
+        S_array = randsymplectic(SArray, qpairbasis)
+        @test issymplectic(qpairbasis, S_array, atol = 1e-5)
     end
 
     @testset "random states" begin
@@ -62,7 +65,18 @@
         @test rc_array * rs_array isa GaussianState
         @test isgaussian(rs_array, atol = 1e-5)
 
+        rs_array = randstate(SArray, qpairbasis)
+        rc_array = randchannel(SArray, qpairbasis)
+        @test rc_array isa GaussianChannel
+        @test rc_array.ħ == 2
+        @test rc_array * rs_array isa GaussianState
+        @test isgaussian(rs_array, atol = 1e-5)
+
         rspure_array = randstate(Array, qpairbasis, pure = true)
+        @test isgaussian(rspure_array, atol = 1e-5)
+        @test isapprox(purity(rspure_array), 1.0, atol = 1e-3)
+
+        rspure_array = randstate(SArray, qpairbasis, pure = true)
         @test isgaussian(rspure_array, atol = 1e-5)
         @test isapprox(purity(rspure_array), 1.0, atol = 1e-3)
 
@@ -74,6 +88,17 @@
         @test isgaussian(rs_static, atol = 1e-5)
 
         rspure_static = randstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, pure = true)
+        @test isgaussian(rspure_static, atol = 1e-5)
+        @test isapprox(purity(rspure_static), 1.0, atol = 1e-5)
+
+        rs_static = randstate(SVector, SMatrix, qpairbasis)
+        rc_static = randchannel(SVector, SMatrix, qpairbasis)
+        @test rc_static isa GaussianChannel
+        @test rs_static isa GaussianState
+        @test rc_static * rs_static isa GaussianState
+        @test isgaussian(rs_static, atol = 1e-5)
+
+        rspure_static = randstate(SVector, SMatrix, qpairbasis, pure = true)
         @test isgaussian(rspure_static, atol = 1e-5)
         @test isapprox(purity(rspure_static), 1.0, atol = 1e-5)
     end
