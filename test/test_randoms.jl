@@ -119,6 +119,10 @@
         @test ru_array.ħ == 2
         @test isgaussian(ru_array, atol = 1e-5)
 
+        ru_array = randunitary(SArray, qpairbasis)
+        @test ru_array.ħ == 2
+        @test isgaussian(ru_array, atol = 1e-5)
+
         rupassive_array = randunitary(qpairbasis, passive = true)
         @test isapprox(rupassive_array.symplectic', inv(rupassive_array.symplectic), atol = 1e-5)
         @test isgaussian(rupassive_array, atol = 1e-5)
@@ -128,6 +132,14 @@
         @test isgaussian(ru_static, atol = 1e-5)
 
         rupassive_static = randunitary(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, passive = true)
+        @test isapprox(rupassive_static.symplectic', inv(rupassive_static.symplectic), atol = 1e-5)
+        @test isgaussian(rupassive_static, atol = 1e-5)
+
+        ru_static = randunitary(SVector, SMatrix, qpairbasis)
+        @test ru_static.ħ == 2
+        @test isgaussian(ru_static, atol = 1e-5)
+
+        rupassive_static = randunitary(SVector, SMatrix, qpairbasis, passive = true)
         @test isapprox(rupassive_static.symplectic', inv(rupassive_static.symplectic), atol = 1e-5)
         @test isgaussian(rupassive_static, atol = 1e-5)
     end
@@ -144,6 +156,14 @@
         @test isgaussian(rc_array, atol = 1e-5)
 
         rc_static = randchannel(SVector{2*nmodes}, SMatrix{2*nmodes, 2*nmodes}, qpairbasis)
+        @test rc_static.ħ == 2
+        @test isgaussian(rc_static, atol = 1e-5)
+
+        rc_array = randchannel(SArray, qpairbasis)
+        @test rc_array.ħ == 2
+        @test isgaussian(rc_array, atol = 1e-5)
+
+        rc_static = randchannel(SVector, SMatrix, qpairbasis)
         @test rc_static.ħ == 2
         @test isgaussian(rc_static, atol = 1e-5)
     end
