@@ -474,7 +474,7 @@ blochmessiah
 polar
 ```
 Let's see an example with the Williamson decomposition:
-```julia
+```@example
 julia> using LinearAlgebra
 
 julia> state = randstate(QuadBlockBasis(1))
