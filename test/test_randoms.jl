@@ -51,7 +51,7 @@
 
         S_passive_qpair = randsymplectic(SMatrix{2nmodes,2nmodes}, qpairbasis, passive=true)
         @test isapprox(S_passive_qpair', inv(S_passive_qpair), atol=1e-5)
-        @test issymplectic(qpairbasis, S_passive, atol=1e-5)
+        @test issymplectic(qpairbasis, S_passive_qpair, atol=1e-5)
 
         S_passive_qblock = randsymplectic(SMatrix{2nmodes,2nmodes}, qblockbasis, passive=true)
         @test isapprox(S_passive_qblock', inv(S_passive_qblock), atol=1e-5)
