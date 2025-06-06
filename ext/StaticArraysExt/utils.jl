@@ -18,58 +18,66 @@ end
 
 # % random.jl
 
-randunitary(::Type{SArray}, basis::SymplecticBasis{N}; passive = false, ħ = 2) where {N<:Int} = 
-    let n = basis.nmodes
-        randunitary(SVector{2n,Float64}, SMatrix{2n,2n,Float64}, basis; passive = passive, ħ = ħ)
-    end
-randunitary(::Type{SVector}, ::Type{SMatrix}, basis::SymplecticBasis{N}; passive = false, ħ = 2) where {N<:Int} = 
-    let n = basis.nmodes
-        randunitary(SVector{2n,Float64}, SMatrix{2n,2n,Float64}, basis; passive = passive, ħ = ħ)
-    end
-randunitary(::Type{SVector{M}}, ::Type{SMatrix{M,M}}, basis::SymplecticBasis{N}; passive = false, ħ = 2) where {M,N<:Int} = 
-    let n = basis.nmodes
-        M == 2n || error("Size mismatch: SVector{$M}/SMatrix{$M,$M} != 2n (n=$n)")
-        randunitary(SVector{2n,Float64}, SMatrix{2n,2n,Float64}, basis; passive = passive, ħ = ħ)
-    end
+function randunitary(::Type{SArray}, basis::SymplecticBasis{N}; passive=false, ħ=2) where {N<:Int}
+    n = basis.nmodes
+    randunitary(SVector{2n,Float64}, SMatrix{2n,2n,Float64}, basis; passive=passive, ħ=ħ)
+end
 
-randchannel(::Type{SArray}, basis::SymplecticBasis{N}) where {N<:Int} =
-    let n = basis.nmodes
-        randchannel(SVector{2n,Float64}, SMatrix{2n,2n,Float64}, basis)
-    end
-randchannel(::Type{SVector}, ::Type{SMatrix}, basis::SymplecticBasis{N}) where {N<:Int} =
-    let n = basis.nmodes
-        randchannel(SVector{2n,Float64}, SMatrix{2n,2n,Float64}, basis)
-    end
-randchannel(::Type{SVector{M}}, ::Type{SMatrix{M,M}}, basis::SymplecticBasis{N}) where {M,N<:Int} =
-    let n = basis.nmodes
-        M == 2n || error("Size mismatch: SVector{$M}/SMatrix{$M,$M} != 2n (n=$n)")
-        randchannel(SVector{2n,Float64}, SMatrix{2n,2n,Float64}, basis)
-    end
+function randunitary(::Type{SVector}, ::Type{SMatrix}, basis::SymplecticBasis{N}; passive=false, ħ=2) where {N<:Int}
+    n = basis.nmodes
+    randunitary(SVector{2n,Float64}, SMatrix{2n,2n,Float64}, basis; passive=passive, ħ=ħ)
+end
 
-randsymplectic(::Type{SArray}, basis::SymplecticBasis{N}; passive = false) where {N<:Int} = 
-    let n = basis.nmodes
-        randsymplectic(SMatrix{2n,2n,Float64}, basis; passive = passive)
-    end
-randsymplectic(::Type{SMatrix}, basis::SymplecticBasis{N}; passive = false) where {N<:Int} =
-    let n = basis.nmodes
-        randsymplectic(SMatrix{2n,2n,Float64}, basis; passive = passive)
-    end
-randsymplectic(::Type{SMatrix{M,M}}, basis::SymplecticBasis{N}; passive = false) where {M,N<:Int} =
-    let n = basis.nmodes
-        M == 2n || error("Size mismatch: SMatrix{$M,$M} != 2n×2n (n=$n)")
-        randsymplectic(SMatrix{2n,2n,Float64}, basis; passive = passive)
-    end
+function randunitary(::Type{SVector{M}}, ::Type{SMatrix{M,M}}, basis::SymplecticBasis{N}; passive=false, ħ=2) where {M,N<:Int}
+    n = basis.nmodes
+    M == 2n || error("Size mismatch: SVector{$M}/SMatrix{$M,$M} != 2n (n=$n)")
+    randunitary(SVector{2n,Float64}, SMatrix{2n,2n,Float64}, basis; passive=passive, ħ=ħ)
+end
 
-randstate(::Type{SArray}, basis::SymplecticBasis{N}; pure = false, ħ = 2) where {N<:Int} =
-    let n = basis.nmodes
-        randstate(SVector{2n,Float64}, SMatrix{2n,2n,Float64}, basis; pure = pure, ħ = ħ)
-    end
-randstate(::Type{SVector}, ::Type{SMatrix}, basis::SymplecticBasis{N}; pure = false, ħ = 2) where {N<:Int} =
-    let n = basis.nmodes
-        randstate(SVector{2n,Float64}, SMatrix{2n,2n,Float64}, basis; pure = pure, ħ = ħ)
-    end
-randstate(::Type{SVector{M}}, ::Type{SMatrix{M,M}}, basis::SymplecticBasis{N}; pure = false, ħ = 2) where {M,N<:Int} =
-    let n = basis.nmodes
-        M == 2n || error("Size mismatch: SVector{$M}/SMatrix{$M,$M} != 2n (n=$n)")
-        randstate(SVector{2n,Float64}, SMatrix{2n,2n,Float64}, basis; pure = pure, ħ = ħ)
-    end
+function randchannel(::Type{SArray}, basis::SymplecticBasis{N}) where {N<:Int}
+    n = basis.nmodes
+    randchannel(SVector{2n,Float64}, SMatrix{2n,2n,Float64}, basis)
+end
+
+function randchannel(::Type{SVector}, ::Type{SMatrix}, basis::SymplecticBasis{N}) where {N<:Int}
+    n = basis.nmodes
+    randchannel(SVector{2n,Float64}, SMatrix{2n,2n,Float64}, basis)
+end
+
+function randchannel(::Type{SVector{M}}, ::Type{SMatrix{M,M}}, basis::SymplecticBasis{N}) where {M,N<:Int}
+    n = basis.nmodes
+    M == 2n || error("Size mismatch: SVector{$M}/SMatrix{$M,$M} != 2n (n=$n)")
+    randchannel(SVector{2n,Float64}, SMatrix{2n,2n,Float64}, basis)
+end
+
+function randsymplectic(::Type{SArray}, basis::SymplecticBasis{N}; passive=false) where {N<:Int}
+    n = basis.nmodes
+    randsymplectic(SMatrix{2n,2n,Float64}, basis; passive=passive)
+end
+
+function randsymplectic(::Type{SMatrix}, basis::SymplecticBasis{N}; passive=false) where {N<:Int}
+    n = basis.nmodes
+    randsymplectic(SMatrix{2n,2n,Float64}, basis; passive=passive)
+end
+
+function randsymplectic(::Type{SMatrix{M,M}}, basis::SymplecticBasis{N}; passive=false) where {M,N<:Int}
+    n = basis.nmodes
+    M == 2n || error("Size mismatch: SMatrix{$M,$M} != 2n×2n (n=$n)")
+    randsymplectic(SMatrix{2n,2n,Float64}, basis; passive=passive)
+end
+
+function randstate(::Type{SArray}, basis::SymplecticBasis{N}; pure=false, ħ=2) where {N<:Int}
+    n = basis.nmodes
+    randstate(SVector{2n,Float64}, SMatrix{2n,2n,Float64}, basis; pure=pure, ħ=ħ)
+end
+
+function randstate(::Type{SVector}, ::Type{SMatrix}, basis::SymplecticBasis{N}; pure=false, ħ=2) where {N<:Int}
+    n = basis.nmodes
+    randstate(SVector{2n,Float64}, SMatrix{2n,2n,Float64}, basis; pure=pure, ħ=ħ)
+end
+
+function randstate(::Type{SVector{M}}, ::Type{SMatrix{M,M}}, basis::SymplecticBasis{N}; pure=false, ħ=2) where {M,N<:Int}
+    n = basis.nmodes
+    M == 2n || error("Size mismatch: SVector{$M}/SMatrix{$M,$M} != 2n (n=$n)")
+    randstate(SVector{2n,Float64}, SMatrix{2n,2n,Float64}, basis; pure=pure, ħ=ħ)
+end
