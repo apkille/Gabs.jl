@@ -34,8 +34,28 @@
         S_array = randsymplectic(Array, qpairbasis)
         @test issymplectic(qpairbasis, S_array, atol = 1e-5)
 
-        S_array = randsymplectic(SArray, qpairbasis)
-        @test issymplectic(qpairbasis, S_array, atol = 1e-5)
+        S_sarray = randsymplectic(SArray, qpairbasis)
+        @test issymplectic(qpairbasis, S_sarray, atol = 1e-5)
+
+        S_smatrix = randsymplectic(SMatrix, qpairbasis)
+        @test issymplectic(qpairbasis, S_smatrix, atol = 1e-5)
+
+        S_sized = randsymplectic(SMatrix{2nmodes,2nmodes}, qpairbasis)
+        @test issymplectic(qpairbasis, S_sized, atol = 1e-5)
+
+        S_qpair = randsymplectic(SMatrix{2nmodes,2nmodes}, qpairbasis)
+        @test issymplectic(qpairbasis, S_qpair, atol=1e-5)
+
+        S_qblock = randsymplectic(SMatrix{2nmodes,2nmodes}, qblockbasis)
+        @test issymplectic(qblockbasis, S_qblock, atol=1e-5)
+
+        S_passive_qpair = randsymplectic(SMatrix{2nmodes,2nmodes}, qpairbasis, passive=true)
+        @test isapprox(S_passive_qpair', inv(S_passive_qpair), atol=1e-5)
+        @test issymplectic(qpairbasis, S_passive, atol=1e-5)
+
+        S_passive_qblock = randsymplectic(SMatrix{2nmodes,2nmodes}, qblockbasis, passive=true)
+        @test isapprox(S_passive_qblock', inv(S_passive_qblock), atol=1e-5)
+        @test issymplectic(qblockbasis, S_passive_qblock, atol=1e-5)
     end
 
     @testset "random states" begin
@@ -101,6 +121,22 @@
         rspure_static = randstate(SVector, SMatrix, qpairbasis, pure = true)
         @test isgaussian(rspure_static, atol = 1e-5)
         @test isapprox(purity(rspure_static), 1.0, atol = 1e-5)
+
+        ρ_sarray = randstate(SArray, qpairbasis)
+        @test ρ_sarray isa GaussianState
+        @test isgaussian(ρ_sarray, atol=1e-5)
+        @test ρ_sarray.ħ == 2
+
+        ρ_svec = randstate(SVector, SMatrix, qpairbasis)
+        @test ρ_svec isa GaussianState
+        @test isgaussian(ρ_svec, atol=1e-5)
+
+        ρ_sized = randstate(SVector{2nmodes}, SMatrix{2nmodes,2nmodes}, qpairbasis)
+        @test ρ_sized isa GaussianState
+
+        @test isgaussian(ρ_sized, atol=1e-5)
+        ρ_pure = randstate(SArray, qpairbasis, pure=true)
+        @test isapprox(purity(ρ_pure), 1.0, atol=1e-5)
     end
 
     @testset "random unitaries" begin
