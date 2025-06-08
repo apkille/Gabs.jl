@@ -27,15 +27,10 @@ covariance: 2×2 Matrix{Float64}:
 ```
 """
 function vacuumstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}; ħ = 2) where {Tm,Tc,N<:Int}
-    mtype, ctype = _infer_types(Tm, Tc, basis)
-    mean, covar = _vacuumstate(basis)
-    return GaussianState(basis,  mtype(mean), ctype(covar); ħ = ħ)
+    mean, covar = _vacuumstate(basis; ħ = ħ)
+    return GaussianState(basis, Tm(mean), Tc(covar); ħ = ħ)
 end
-function vacuumstate(::Type{T}, basis::SymplecticBasis{N}; ħ = 2) where {T,N<:Int}
-    mtype, ctype = _infer_types(T, basis)
-    mean, covar = _vacuumstate(basis)
-    return GaussianState(basis,  mtype(mean), ctype(covar); ħ = ħ)
-end
+vacuumstate(::Type{T}, basis::SymplecticBasis{N}; ħ = 2) where {T,N<:Int} = vacuumstate(T, T, basis; ħ = ħ)
 function vacuumstate(basis::SymplecticBasis{N}; ħ = 2) where {N<:Int}
     mean, covar = _vacuumstate(basis; ħ = ħ)
     return GaussianState(basis, mean, covar; ħ = ħ)
@@ -74,15 +69,10 @@ covariance: 2×2 Matrix{Float64}:
 ```
 """
 function thermalstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, photons::P; ħ = 2) where {Tm,Tc,N<:Int,P}
-    mtype, ctype = _infer_types(Tm, Tc, basis)
     mean, covar = _thermalstate(basis, photons; ħ = ħ)
-    return GaussianState(basis, mtype(mean), ctype(covar); ħ = ħ)
+    return GaussianState(basis, Tm(mean), Tc(covar); ħ = ħ)
 end
-function thermalstate(::Type{T}, basis::SymplecticBasis{N}, photons::P; ħ = 2) where {T,N<:Int,P}
-    mtype, ctype = _infer_types(T, basis)
-    mean, covar = _thermalstate(basis, photons; ħ = ħ)
-    return GaussianState(basis, mtype(mean), ctype(covar); ħ = ħ)
-end
+thermalstate(::Type{T}, basis::SymplecticBasis{N}, photons::P; ħ = 2) where {T,N<:Int,P} = thermalstate(T, T, basis, photons; ħ = ħ)
 function thermalstate(basis::SymplecticBasis{N}, photons::P; ħ = 2) where {N<:Int,P}
     mean, covar = _thermalstate(basis, photons; ħ = ħ)
     return GaussianState(basis, mean, covar; ħ = ħ)
@@ -147,15 +137,10 @@ covariance: 2×2 Matrix{Float64}:
 ```
 """
 function coherentstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, alpha::A; ħ = 2) where {Tm,Tc,N<:Int,A}
-    mtype, ctype = _infer_types(Tm, Tc, basis)
-    mean, covar = _coherentstate(basis, alpha)
-    return GaussianState(basis,  mtype(mean), ctype(covar); ħ = ħ)
-end
-function coherentstate(::Type{T}, basis::SymplecticBasis{N}, alpha::A; ħ = 2) where {T,N<:Int,A}
-    mtype, ctype = _infer_types(T, basis)
     mean, covar = _coherentstate(basis, alpha; ħ = ħ)
-    return GaussianState(basis, mtype(mean), ctype(covar); ħ = ħ)
+    return GaussianState(basis, Tm(mean), Tc(covar); ħ = ħ)
 end
+coherentstate(::Type{T}, basis::SymplecticBasis{N}, alpha::A; ħ = 2) where {T,N<:Int,A} = coherentstate(T, T, basis, alpha; ħ = ħ)
 function coherentstate(basis::SymplecticBasis{N}, alpha::A; ħ = 2) where {N<:Int,A}
     mean, covar = _coherentstate(basis, alpha; ħ = ħ)
     return GaussianState(basis, mean, covar; ħ = ħ)
@@ -218,15 +203,10 @@ covariance: 2×2 Matrix{Float64}:
 ```
 """
 function squeezedstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {Tm,Tc,N<:Int,R}
-    mtype, ctype = _infer_types(Tm, Tc, basis)
-    mean, covar = _squeezedstate(basis, r, theta)
-    return GaussianState(basis,  mtype(mean), ctype(covar); ħ = ħ)
+    mean, covar = _squeezedstate(basis, r, theta; ħ = ħ)
+    return GaussianState(basis, Tm(mean), Tc(covar); ħ = ħ)
 end
-function squeezedstate(::Type{T}, basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {T,N<:Int,R}
-    mtype, ctype = _infer_types(T, basis)
-    mean, covar = _squeezedstate(basis, r, theta)
-    return GaussianState(basis,  mtype(mean), ctype(covar); ħ = ħ)
-end
+squeezedstate(::Type{T}, basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {T,N<:Int,R} = squeezedstate(T, T, basis, r, theta; ħ = ħ)
 function squeezedstate(basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {N<:Int,R}
     mean, covar = _squeezedstate(basis, r, theta; ħ = ħ)
     return GaussianState(basis, mean, covar; ħ = ħ)
@@ -323,15 +303,10 @@ covariance: 4×4 Matrix{Float64}:
 ```
 """
 function eprstate(::Type{Tm}, ::Type{Tc}, basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {Tm,Tc,N<:Int,R}
-    mtype, ctype = _infer_types(Tm, Tc, basis)
-    mean, covar = _eprstate(basis, r, theta)
-    return GaussianState(basis,  mtype(mean), ctype(covar); ħ = ħ)
+    mean, covar = _eprstate(basis, r, theta; ħ = ħ)
+    return GaussianState(basis, Tm(mean), Tc(covar); ħ = ħ)
 end
-function eprstate(::Type{T}, basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {T,N<:Int,R}
-    mtype, ctype = _infer_types(T, basis)
-    mean, covar = _eprstate(basis, r, theta)
-    return GaussianState(basis,  mtype(mean), ctype(covar); ħ = ħ)
-end
+eprstate(::Type{T}, basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {T,N<:Int,R} = eprstate(T, T, basis, r, theta; ħ = ħ)
 function eprstate(basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {N<:Int,R}
     mean, covar = _eprstate(basis, r, theta; ħ = ħ)
     return GaussianState(basis, mean, covar; ħ = ħ)
@@ -483,16 +458,13 @@ function tensor(state1::GaussianState, state2::GaussianState)
     return GaussianState(state1.basis ⊕ state2.basis, mean, covar; ħ = state1.ħ)
 end
 function _tensor(state1::GaussianState{B1,M1,V1}, state2::GaussianState{B2,M2,V2}) where {B1<:QuadPairBasis,B2<:QuadPairBasis,M1,M2,V1,V2}
-    # initialize direct sum of mean vectors
     mean1, mean2 = state1.mean, state2.mean
-    elT1 = eltype(mean1) isa Type ? eltype(mean1) : Float64
-    elT2 = eltype(mean2) isa Type ? eltype(mean2) : Float64
-    Mt = promote_type(elT1, elT2)
-    Mt = Mt == Any ? Float64 : Mt
+    Mt = promote_type(eltype(mean1), eltype(mean2))
     basis1, basis2 = state1.basis, state2.basis
     nmodes1, nmodes2 = basis1.nmodes, basis2.nmodes
     nmodes = nmodes1 + nmodes2
     block1, block2 = Base.OneTo(2*nmodes1), Base.OneTo(2*nmodes2)
+    # initialize direct sum of mean vectors
     mean′ = zeros(Mt, 2*nmodes)
     @inbounds for i in block1
         mean′[i] = mean1[i]
@@ -502,10 +474,7 @@ function _tensor(state1::GaussianState{B1,M1,V1}, state2::GaussianState{B2,M2,V2
     end
     # initialize direct sum of covariance matrices
     covar1, covar2 = state1.covar, state2.covar
-    elV1 = eltype(covar1) isa Type ? eltype(covar1) : Float64
-    elV2 = eltype(covar2) isa Type ? eltype(covar2) : Float64
-    Vt = promote_type(elV1, elV2)
-    Vt = Vt == Any ? Float64 : Vt
+    Vt = promote_type(eltype(covar1), eltype(covar2))
     covar′ = zeros(Vt, 2*nmodes, 2*nmodes)
     @inbounds for i in block1, j in block1
         covar′[i,j] = covar1[i,j]
@@ -520,14 +489,13 @@ function _tensor(state1::GaussianState{B1,M1,V1}, state2::GaussianState{B2,M2,V2
 end
 function _tensor(state1::GaussianState{B1,M1,V1}, state2::GaussianState{B2,M2,V2}) where {B1<:QuadBlockBasis,B2<:QuadBlockBasis,M1,M2,V1,V2}
     mean1, mean2 = state1.mean, state2.mean
-    elT1 = eltype(mean1) isa Type ? eltype(mean1) : Float64
-    elT2 = eltype(mean2) isa Type ? eltype(mean2) : Float64
-    Mt = promote_type(elT1, elT2)
-    Mt = Mt == Any ? Float64 : Mt
+    Mt = promote_type(eltype(mean1), eltype(mean2))
     basis1, basis2 = state1.basis, state2.basis
     nmodes1, nmodes2 = basis1.nmodes, basis2.nmodes
     nmodes = nmodes1 + nmodes2
     block1, block2 = Base.OneTo(nmodes1), Base.OneTo(nmodes2)
+    # initialize direct sum of mean vectors
+    mean1, mean2 = state1.mean, state2.mean
     mean′ = zeros(Mt, 2*nmodes)
     @inbounds for i in block1
         mean′[i] = mean1[i]
@@ -539,10 +507,7 @@ function _tensor(state1::GaussianState{B1,M1,V1}, state2::GaussianState{B2,M2,V2
     end
     # initialize direct sum of covariance matrices
     covar1, covar2 = state1.covar, state2.covar
-    elV1 = eltype(covar1) isa Type ? eltype(covar1) : Float64
-    elV2 = eltype(covar2) isa Type ? eltype(covar2) : Float64
-    Vt = promote_type(elV1, elV2)
-    Vt = Vt == Any ? Float64 : Vt
+    Vt = promote_type(eltype(covar1), eltype(covar2))
     covar′ = zeros(Vt, 2*nmodes, 2*nmodes)
     @inbounds for i in block1, j in block1
         covar′[i,j] = covar1[i,j]

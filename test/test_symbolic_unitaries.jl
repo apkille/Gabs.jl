@@ -14,8 +14,7 @@
             op_pair = op_func(factor * qpairbasis, r, theta)
             op_block = op_func(factor * qblockbasis, r, theta)
             @test op_pair isa GaussianUnitary && op_block isa GaussianUnitary
-            @test op_func(SArray, factor * qpairbasis, r, theta) isa GaussianUnitary
-            @test op_func(SVector, SMatrix, factor * qpairbasis, r, theta) isa GaussianUnitary
+            @test op_func(Array, factor * qpairbasis, r, theta) isa GaussianUnitary
             @test op_func(SVector{factor * 2 * nmodes}, SMatrix{factor * 2 * nmodes, factor * 2 * nmodes}, factor * qpairbasis, r, theta) isa GaussianUnitary
             @test isequal(op_func(factor * qblockbasis, r, theta).disp, changebasis(QuadBlockBasis, op_pair).disp)
             @test isequal(op_func(factor * qblockbasis, r, theta).symplectic, changebasis(QuadBlockBasis, op_pair).symplectic)
@@ -25,8 +24,7 @@
             op_pair_arr = op_func(factor * qpairbasis, rs_vec, thetas_vec)
             op_block_arr = op_func(factor * qblockbasis, rs_vec, thetas_vec)
             @test op_pair_arr isa GaussianUnitary && op_block_arr isa GaussianUnitary
-            @test op_func(SArray, factor * qpairbasis, rs_vec, thetas_vec) isa GaussianUnitary
-            @test op_func(SVector, SMatrix, factor * qpairbasis, rs_vec, thetas_vec) isa GaussianUnitary
+            @test op_func(Array, factor * qpairbasis, rs_vec, thetas_vec) isa GaussianUnitary
             @test op_func(SVector{factor * 2 * nmodes}, SMatrix{factor * 2 * nmodes, factor * 2 * nmodes}, factor * qpairbasis, rs_vec, thetas_vec) isa GaussianUnitary
             @test isequal(op_func(factor * qblockbasis, rs_vec, thetas_vec).disp, changebasis(QuadBlockBasis, op_pair_arr).disp)
             @test isequal(op_func(factor * qblockbasis, rs_vec, thetas_vec).symplectic, changebasis(QuadBlockBasis, op_pair_arr).symplectic)
@@ -38,8 +36,7 @@
             @variables theta
             op = op_func(factor * qpairbasis, theta)
             @test op isa GaussianUnitary
-            @test op_func(SArray, factor * qpairbasis, theta) isa GaussianUnitary
-            @test op_func(SVector, SMatrix, factor * qpairbasis, theta) isa GaussianUnitary
+            @test op_func(Array, factor * qpairbasis, theta) isa GaussianUnitary
             @test op_func(SVector{factor * 2 * nmodes}, SMatrix{factor * 2 * nmodes, factor * 2 * nmodes}, factor * qpairbasis, theta) isa GaussianUnitary
             @test isequal(op_func(factor * qblockbasis, theta).disp, changebasis(QuadBlockBasis, op).disp)
             @test isequal(op_func(factor * qblockbasis, theta).symplectic, changebasis(QuadBlockBasis, op).symplectic)
@@ -48,9 +45,8 @@
             op_arr = op_func(factor * qpairbasis, thetas_vec)
             op_block_arr = op_func(factor * qblockbasis, thetas_vec)
             @test op_arr isa GaussianUnitary && op_block_arr isa GaussianUnitary
-            @test op_func(SArray, factor * qpairbasis, thetas_vec) isa GaussianUnitary
+            @test op_func(Array, factor * qpairbasis, thetas_vec) isa GaussianUnitary
             @test op_func(SVector{factor * 2 * nmodes}, SMatrix{factor * 2 * nmodes, factor * 2 * nmodes}, factor * qpairbasis, thetas_vec) isa GaussianUnitary
-            @test op_func(SVector, SMatrix, factor * qpairbasis, thetas_vec) isa GaussianUnitary
             @test isequal(op_func(factor * qblockbasis, thetas_vec).disp, changebasis(QuadBlockBasis, op_arr).disp)
             @test isequal(op_func(factor * qblockbasis, thetas_vec).symplectic, changebasis(QuadBlockBasis, op_arr).symplectic)
         end

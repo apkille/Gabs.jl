@@ -32,15 +32,10 @@ symplectic: 2×2 Matrix{Float64}:
 ```
 """
 function displace(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}, alpha::A; ħ = 2) where {Td,Ts,N<:Int,A}
-    dtype, stype = _infer_types(Td, Ts, basis)
-    disp, symplectic = _displace(basis, alpha)
-    return GaussianUnitary(basis, dtype(disp), stype(symplectic); ħ = ħ)
+    disp, symplectic = _displace(basis, alpha; ħ = ħ)
+    return GaussianUnitary(basis, Td(disp), Ts(symplectic); ħ = ħ)
 end
-function displace(::Type{T}, basis::SymplecticBasis{N}, alpha::A; ħ = 2) where {T,N<:Int,A}
-    dtype, stype = _infer_types(T, basis)
-    disp, symplectic = _displace(basis, alpha)
-    return GaussianUnitary(basis, dtype(disp), stype(symplectic); ħ = ħ)
-end
+displace(::Type{T}, basis::SymplecticBasis{N}, alpha::A; ħ = 2) where {T,N<:Int,A} = displace(T, T, basis, alpha; ħ = ħ)
 function displace(basis::SymplecticBasis{N}, alpha::A; ħ = 2) where {N<:Int,A}
     disp, symplectic = _displace(basis, alpha; ħ = ħ)
     return GaussianUnitary(basis, disp, symplectic; ħ = ħ)
@@ -109,15 +104,10 @@ symplectic: 2×2 Matrix{Float64}:
 ```
 """
 function squeeze(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {Td,Ts,N<:Int,R}
-    dtype, stype = _infer_types(Td, Ts, basis)
     disp, symplectic = _squeeze(basis, r, theta)
-    return GaussianUnitary(basis, dtype(disp), stype(symplectic); ħ = ħ)
+    return GaussianUnitary(basis, Td(disp), Ts(symplectic); ħ = ħ)
 end
-function squeeze(::Type{T},  basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {T,N<:Int,R}
-    dtype, stype = _infer_types(T, basis)
-    disp, symplectic = _squeeze(basis, r, theta)
-    return GaussianUnitary(basis, dtype(disp), stype(symplectic); ħ = ħ)
-end
+squeeze(::Type{T}, basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {T,N<:Int,R} = squeeze(T, T, basis, r, theta; ħ = ħ)
 function squeeze(basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {N<:Int, R}
     disp, symplectic = _squeeze(basis, r, theta)
     return GaussianUnitary(basis, disp, symplectic; ħ = ħ)
@@ -219,15 +209,10 @@ symplectic: 4×4 Matrix{Float64}:
 ```
 """
 function twosqueeze(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {Td,Ts,N<:Int,R}
-    dtype, stype = _infer_types(Td, Ts, basis)
     disp, symplectic = _twosqueeze(basis, r, theta)
-    return GaussianUnitary(basis, dtype(disp), stype(symplectic); ħ = ħ)
+    return GaussianUnitary(basis, Td(disp), Ts(symplectic); ħ = ħ)
 end
-function twosqueeze(::Type{T}, basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {T,N<:Int,R}
-    dtype, stype = _infer_types(T, basis)
-    disp, symplectic = _twosqueeze(basis, r, theta)
-    return GaussianUnitary(basis, dtype(disp), stype(symplectic); ħ = ħ)
-end
+twosqueeze(::Type{T}, basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {T,N<:Int,R} = twosqueeze(T, T, basis, r, theta; ħ = ħ)
 function twosqueeze(basis::SymplecticBasis{N}, r::R, theta::R; ħ = 2) where {N<:Int,R}
     disp, symplectic = _twosqueeze(basis, r, theta)
     return GaussianUnitary(basis, disp, symplectic; ħ = ħ)
@@ -369,15 +354,10 @@ symplectic: 2×2 Matrix{Float64}:
 ```
 """
 function phaseshift(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}, theta::R; ħ = 2) where {Td,Ts,N<:Int,R}
-    dtype, stype = _infer_types(Td, Ts, basis)
     disp, symplectic = _phaseshift(basis, theta)
-    return GaussianUnitary(basis, dtype(disp), stype(symplectic); ħ = ħ)
+    return GaussianUnitary(basis, Td(disp), Ts(symplectic); ħ = ħ)
 end
-function phaseshift(::Type{T}, basis::SymplecticBasis{N}, theta::R; ħ = 2) where {T,N<:Int,R}
-    dtype, stype = _infer_types(T, basis)
-    disp, symplectic = _phaseshift(basis, theta)
-    return GaussianUnitary(basis, dtype(disp), stype(symplectic); ħ = ħ)
-end
+phaseshift(::Type{T}, basis::SymplecticBasis{N}, theta::R; ħ = 2) where {T,N<:Int,R} = phaseshift(T, T, basis, theta; ħ = ħ)
 function phaseshift(basis::SymplecticBasis{N}, theta::R; ħ = 2) where {N<:Int,R}
     disp, symplectic = _phaseshift(basis, theta)
     return GaussianUnitary(basis, disp, symplectic; ħ = ħ)
@@ -474,15 +454,10 @@ symplectic: 4×4 Matrix{Float64}:
 ```
 """
 function beamsplitter(::Type{Td}, ::Type{Ts}, basis::SymplecticBasis{N}, transmit::R; ħ = 2) where {Td,Ts,N<:Int,R}
-    dtype, stype = _infer_types(Td, Ts, basis)
     disp, symplectic = _beamsplitter(basis, transmit)
-    return GaussianUnitary(basis, dtype(disp), stype(symplectic); ħ = ħ)
+    return GaussianUnitary(basis, Td(disp), Ts(symplectic); ħ = ħ)
 end
-function beamsplitter(::Type{T}, basis::SymplecticBasis{N}, transmit::R; ħ = 2) where {T,N<:Int,R}
-    dtype, stype = _infer_types(T, basis)
-    disp, symplectic = _beamsplitter(basis, transmit)
-    return GaussianUnitary(basis, dtype(disp), stype(symplectic); ħ = ħ)
-end
+beamsplitter(::Type{T}, basis::SymplecticBasis{N}, transmit::R; ħ = 2) where {T,N<:Int,R} = beamsplitter(T, T, basis, transmit; ħ = ħ)
 function beamsplitter(basis::SymplecticBasis{N}, transmit::R; ħ = 2) where {N<:Int,R}
     disp, symplectic = _beamsplitter(basis, transmit)
     return GaussianUnitary(basis, disp, symplectic; ħ = ħ)
@@ -587,10 +562,7 @@ function _tensor(op1::GaussianUnitary{B1,D1,S1}, op2::GaussianUnitary{B2,D2,S2})
     block1, block2 = Base.OneTo(2*nmodes1), Base.OneTo(2*nmodes2)
     # initialize direct sum of displacement vectors
     disp1, disp2 = op1.disp, op2.disp
-    elD1 = eltype(disp1) isa Type ? eltype(disp1) : Float64
-    elD2 = eltype(disp2) isa Type ? eltype(disp2) : Float64
-    Dt = promote_type(elD1, elD2)
-    Dt = Dt == Any ? Float64 : Dt
+    Dt = promote_type(eltype(disp1), eltype(disp2))
     disp′ = zeros(Dt, 2*nmodes)
     @inbounds for i in block1
         disp′[i] = disp1[i]
@@ -600,15 +572,13 @@ function _tensor(op1::GaussianUnitary{B1,D1,S1}, op2::GaussianUnitary{B2,D2,S2})
     end
     # initialize direct sum of symplectic matrices
     symp1, symp2 = op1.symplectic, op2.symplectic
-    elS1 = eltype(symp1) isa Type ? eltype(symp1) : Float64
-    elS2 = eltype(symp2) isa Type ? eltype(symp2) : Float64
-    St = promote_type(elS1, elS2)
-    St = St == Any ? Float64 : St
+    St = promote_type(eltype(symp1), eltype(symp2))
     symp′ = zeros(St, 2*nmodes, 2*nmodes)
     @inbounds for i in block1, j in block1
         symp′[i,j] = symp1[i,j]
     end
     @inbounds for i in block2, j in block2
+        symp′[i+2*nmodes1,j+2*nmodes1] = symp2[i,j]
         symp′[i+2*nmodes1,j+2*nmodes1] = symp2[i,j]
     end
     # extract output array types
@@ -616,7 +586,6 @@ function _tensor(op1::GaussianUnitary{B1,D1,S1}, op2::GaussianUnitary{B2,D2,S2})
     symp′′ = _promote_output_matrix(typeof(symp1), typeof(symp2), symp′)
     return disp′′, symp′′
 end
-
 function _tensor(op1::GaussianUnitary{B1,D1,S1}, op2::GaussianUnitary{B2,D2,S2}) where {B1<:QuadBlockBasis,B2<:QuadBlockBasis,D1,D2,S1,S2}
     basis1, basis2 = op1.basis, op2.basis
     nmodes1, nmodes2 = basis1.nmodes, basis2.nmodes
@@ -624,10 +593,7 @@ function _tensor(op1::GaussianUnitary{B1,D1,S1}, op2::GaussianUnitary{B2,D2,S2})
     block1, block2 = Base.OneTo(nmodes1), Base.OneTo(nmodes2)
     # initialize direct sum of displacement vectors
     disp1, disp2 = op1.disp, op2.disp
-    elD1 = eltype(disp1) isa Type ? eltype(disp1) : Float64
-    elD2 = eltype(disp2) isa Type ? eltype(disp2) : Float64
-    Dt = promote_type(elD1, elD2)
-    Dt = Dt == Any ? Float64 : Dt
+    Dt = promote_type(eltype(disp1), eltype(disp2))
     disp′ = zeros(Dt, 2*nmodes)
     @inbounds for i in block1
         disp′[i] = disp1[i]
@@ -639,10 +605,7 @@ function _tensor(op1::GaussianUnitary{B1,D1,S1}, op2::GaussianUnitary{B2,D2,S2})
     end
     # initialize direct sum of symplectic matrices
     symp1, symp2 = op1.symplectic, op2.symplectic
-    elS1 = eltype(symp1) isa Type ? eltype(symp1) : Float64
-    elS2 = eltype(symp2) isa Type ? eltype(symp2) : Float64
-    St = promote_type(elS1, elS2)
-    St = St == Any ? Float64 : St
+    St = promote_type(eltype(symp1), eltype(symp2))
     symp′ = zeros(St, 2*nmodes, 2*nmodes)
     @inbounds for i in block1, j in block1
         symp′[i,j] = symp1[i,j]
@@ -655,7 +618,7 @@ function _tensor(op1::GaussianUnitary{B1,D1,S1}, op2::GaussianUnitary{B2,D2,S2})
         symp′[i+nmodes1,j+nmodes+nmodes1] = symp2[i,j+nmodes2]
         symp′[i+nmodes+nmodes1,j+nmodes1] = symp2[i+nmodes2,j]
         symp′[i+nmodes+nmodes1,j+nmodes+nmodes1] = symp2[i+nmodes2,j+nmodes2]
-    end
+   end
     # extract output array types
     disp′′ = _promote_output_vector(typeof(disp1), typeof(disp2), disp′)
     symp′′ = _promote_output_matrix(typeof(symp1), typeof(symp2), symp′)

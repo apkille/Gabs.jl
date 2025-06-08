@@ -17,7 +17,6 @@
         state = eprstate(2 * qpairbasis, r, θ)
         @test state isa GaussianState
         @test eprstate(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, 2*qpairbasis, r, θ) isa GaussianState
-        @test eprstate(SVector, SMatrix, 2*qpairbasis, r, θ) isa GaussianState
         @test iszero(simplify(eprstate(2*qblockbasis, r, θ).covar - changebasis(QuadBlockBasis, state).covar))
         @test iszero(simplify(eprstate(2*qblockbasis, r, θ).mean - changebasis(QuadBlockBasis, state).mean))
         state_pair = eprstate(2*qpairbasis, collect(rs), collect(thetas))
@@ -34,7 +33,6 @@
         state = squeezedstate(qpairbasis, r, theta)
         @test state isa GaussianState
         @test squeezedstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, r, theta) isa GaussianState
-        @test squeezedstate(SVector, SMatrix, qpairbasis, r, theta) isa GaussianState
         @test all(isequal.(squeezedstate(qblockbasis, r, theta).covar, changebasis(QuadBlockBasis, state).covar))
         @test all(isequal.(squeezedstate(qblockbasis, r, theta).mean, changebasis(QuadBlockBasis, state).mean))
         rs_vec = collect(rs)
@@ -51,7 +49,6 @@
         state_pair = coherentstate(qpairbasis, α)
         state_block = coherentstate(qblockbasis, α)
         @test state_pair isa GaussianState && state_block isa GaussianState
-        @test coherentstate(SVector, SMatrix, qpairbasis, α) isa GaussianState
         @test coherentstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, α) isa GaussianState
         @test coherentstate(qblockbasis, α).covar == changebasis(QuadBlockBasis, state_pair).covar
         @test isequal(coherentstate(qblockbasis, α).mean, changebasis(QuadBlockBasis, state_pair).mean)
@@ -86,7 +83,6 @@
         state_block = thermalstate(qblockbasis, n)
         @test state_pair isa GaussianState && state_block isa GaussianState
         @test thermalstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, n) isa GaussianState
-        @test thermalstate(SVector, SMatrix, qpairbasis, n) isa GaussianState
         @test isequal(thermalstate(qblockbasis, n).covar, changebasis(QuadBlockBasis, state_pair).covar)
         @test isequal(thermalstate(qblockbasis, n).mean, changebasis(QuadBlockBasis, state_pair).mean)
         @variables ns[1:nmodes]
@@ -95,7 +91,6 @@
         state_block = thermalstate(qblockbasis, n_vec)
         @test state_pair isa GaussianState && state_block isa GaussianState
         @test thermalstate(SVector{2*nmodes}, SMatrix{2*nmodes, 2*nmodes}, qpairbasis, n_vec) isa GaussianState
-        @test thermalstate(SVector, SMatrix, qpairbasis, n_vec) isa GaussianState
         @test all.(isequal(thermalstate(qblockbasis, n_vec).mean, changebasis(QuadBlockBasis, thermalstate(qpairbasis, n_vec)).mean))
         @test all.(isequal(thermalstate(qblockbasis, n_vec).covar, changebasis(QuadBlockBasis, thermalstate(qpairbasis, n_vec)).covar))
     end
