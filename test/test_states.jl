@@ -21,6 +21,8 @@
         state_block = thermalstate(qblockbasis, n)
         @test state_pair isa GaussianState && state_block isa GaussianState
         @test thermalstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, n) isa GaussianState
+        @test thermalstate(SVector, SMatrix, qpairbasis, n) isa GaussianState
+        @test thermalstate(SArray, qpairbasis, n) isa GaussianState
         @test thermalstate(qblockbasis, n) == changebasis(QuadBlockBasis, state_pair)
         @test state_pair == changebasis(QuadPairBasis, state_block) && state_block == changebasis(QuadBlockBasis, state_pair)
         @test state_pair == changebasis(QuadPairBasis, state_pair) && state_block == changebasis(QuadBlockBasis, state_block)
@@ -36,6 +38,8 @@
         state_block = coherentstate(qblockbasis, alpha)
         @test state_pair isa GaussianState && state_block isa GaussianState
         @test coherentstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, alpha) isa GaussianState
+        @test coherentstate(SVector, SMatrix, qpairbasis, alpha) isa GaussianState
+        @test coherentstate(SArray, qpairbasis, alpha) isa GaussianState
         @test coherentstate(qblockbasis, alpha) == changebasis(QuadBlockBasis, state_pair)
         @test state_pair == changebasis(QuadPairBasis, state_block) && state_block == changebasis(QuadBlockBasis, state_pair)
         @test state_pair == changebasis(QuadPairBasis, state_pair) && state_block == changebasis(QuadBlockBasis, state_block)
@@ -70,6 +74,8 @@
         vs = tensor(v, v)
         @test vs isa GaussianState
         @test tensor(SVector{4*nmodes}, SMatrix{4*nmodes,4*nmodes}, v, v) isa GaussianState
+        @test tensor(SVector, SMatrix, v, v) isa GaussianState
+        @test tensor(SArray, v, v) isa GaussianState
         @test vs == v ⊗ v
         @test isapprox(vs, v ⊗ v, atol = 1e-10)
 
@@ -83,6 +89,8 @@
         @test sq ⊗ sq == sqs
 
         vstatic = vacuumstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis)
+        vstatic = vacuumstate(SVector, SMatrix, qpairbasis)
+        vstatic = vacuumstate(SArray, qpairbasis)
         tpstatic = vstatic ⊗ vstatic ⊗ vstatic
         @test tpstatic.mean isa SVector{6*nmodes}
         @test tpstatic.covar isa SMatrix{6*nmodes,6*nmodes}
@@ -113,8 +121,30 @@
             @test ptrace(tpstatic, 1) == sstatic ⊗ sstatic
             @test ptrace(tpstatic, [1,3]) == sstatic
 
-            @test ptrace(SVector{2}, SMatrix{2,2}, state, [1, 3]) isa GaussianState
-            @test ptrace(SVector{4}, SMatrix{4,4}, state, 1) isa GaussianState
+            sstatic = coherentstate(SVector, SMatrix, basis, alpha)
+            tpstatic = sstatic ⊗ sstatic ⊗ sstatic
+            @test ptrace(tpstatic, 1) == sstatic ⊗ sstatic
+            @test ptrace(tpstatic, [1,3]) == sstatic
+
+            sstatic = coherentstate(SArray, basis, alpha)
+            tpstatic = sstatic ⊗ sstatic ⊗ sstatic
+            @test ptrace(tpstatic, 1) == sstatic ⊗ sstatic
+            @test ptrace(tpstatic, [1,3]) == sstatic
+
+            for (T1, T2, subsys) in [
+                (SVector{2}, SMatrix{2,2}, [1, 3]),
+                (SVector{4}, SMatrix{4,4}, 1),
+                (SVector,    SMatrix,      [1, 3]),
+                (SVector,    SMatrix,      1),
+                (SArray,     nothing,      [1, 3]),
+                (SArray,     nothing,      1)
+            ]
+                if T2 === nothing
+                    @test ptrace(T1, state, subsys) isa GaussianState
+                else
+                    @test ptrace(T1, T2, state, subsys) isa GaussianState
+                end
+            end
 
             eprstates = eprstate(basis ⊕ basis ⊕ basis ⊕ basis, r, theta)
 
