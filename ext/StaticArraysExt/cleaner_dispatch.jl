@@ -88,6 +88,55 @@ function squeezedstate(::Type{SVector{M,T1}}, ::Type{SMatrix{M,M,T2}}, basis::Sy
     GaussianState(basis, mean, covar; ħ=ħ)
 end
 
+function eprstate(::Type{SVector{M,T1}}, ::Type{SMatrix{M,M,T2}}, 
+                 basis::SymplecticBasis{N}, r::R, theta::R; ħ=2) where {
+                 M, N<:Int, T1, T2, R<:Number}
+    n = basis.nmodes
+    M == 2n || error("Size mismatch: SVector{$M}/SMatrix{$M,$M} != 2n (n=$n)")
+    T = promote_type(T1, T2, typeof(ħ/2), R)
+    mean = zeros(SVector{2n,T})
+    covar = _epr_covar(SMatrix{2n,2n,T}, r, theta, ħ)
+    GaussianState(basis, mean, covar; ħ=ħ)
+end
+
+# Unsized StaticArrays convenience methods
+function eprstate(::Type{SVector}, ::Type{SMatrix}, basis::SymplecticBasis{N}, r::R, theta::R; ħ=2) where {
+                 N<:Int, R<:Number}
+    n = basis.nmodes
+    T = promote_type(typeof(ħ/2), R)
+    eprstate(SVector{2n,T}, SMatrix{2n,2n,T}, basis, r, theta; ħ=ħ)
+end
+
+function eprstate(::Type{SArray}, basis::SymplecticBasis{N}, r::R, theta::R; ħ=2) where {
+                 N<:Int, R<:Number}
+    n = basis.nmodes
+    T = promote_type(typeof(ħ/2), R)
+    eprstate(SVector{2n,T}, SMatrix{2n,2n,T}, basis, r, theta; ħ=ħ)
+end
+
+function _epr_covar(::Type{SMatrix{M,M,T}}, r::R, theta::R, ħ) where {M, T, R<:Number}
+    n = M ÷ 2
+    cr, sr = (ħ/2)*cosh(2*r), (ħ/2)*sinh(2*r)
+    ct, st = cos(theta), sin(theta)
+    elements = zeros(T, M, M)
+    for i in 1:2:n
+        j = n + i
+        elements[i,i] = cr
+        elements[i+1,i+1] = cr
+        elements[j,j] = cr
+        elements[j+1,j+1] = cr
+        elements[i,j] = -sr*ct
+        elements[i,j+1] = -sr*st
+        elements[i+1,j] = -sr*st
+        elements[i+1,j+1] = sr*ct
+        elements[j,i] = -sr*ct
+        elements[j,i+1] = -sr*st
+        elements[j+1,i] = -sr*st
+        elements[j+1,i+1] = sr*ct
+    end
+    return SMatrix{M,M,T}(elements)
+end
+
 function tensor(::Type{SVector}, ::Type{SMatrix}, state1::GaussianState, state2::GaussianState)
     M1, V1 = typeof(state1.mean), typeof(state1.covar)
     M2, V2 = typeof(state2.mean), typeof(state2.covar)
