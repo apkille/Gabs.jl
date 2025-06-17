@@ -1,7 +1,7 @@
 module MakieExt
 
 using Makie
-using Gabs: GaussianState, wigner, wignerchar
+using Gabs: GaussianState,GaussianLinearCombination, wigner, wignerchar
 
 Makie.used_attributes(::Type{<:Makie.Heatmap}, ::Any, ::Any, x::GaussianState) = (:dist,)
 
@@ -15,6 +15,27 @@ function Makie.convert_arguments(P::Type{<:Makie.Heatmap}, q, p, state::Gaussian
     else
         throw(ErrorException("`distribution` should be `:wigner` or `:wignerchar`"))
     end
+    return convert_arguments(P, q, p, data)
+end
+
+
+
+# Support for GaussianLinearCombination visualization (phase 3)
+
+Makie.used_attributes(::Type{<:Makie.Heatmap}, ::Any, ::Any, x::GaussianLinearCombination) = (:dist,)
+
+# Extend convert_arguments to handle GaussianLinearCombination
+function Makie.convert_arguments(P::Type{<:Makie.Heatmap}, q, p, lcgs::GaussianLinearCombination; dist = :wigner)
+    isequal(length(lcgs.states[1].mean), 2) || throw(ArgumentError(Gabs.HEATMAP_ERROR))
+    
+    if isequal(dist, :wigner)
+        data = [wigner(lcgs, [i,j]) for i in q, j in p]
+    elseif isequal(dist, :wignerchar)
+        data = [real(wignerchar(lcgs, [i,j])) for i in q, j in p]
+    else
+        throw(ErrorException("`distribution` should be `:wigner` or `:wignerchar`"))
+    end
+    
     return convert_arguments(P, q, p, data)
 end
 

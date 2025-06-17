@@ -1,7 +1,7 @@
 module Gabs
 
 import LinearAlgebra
-using LinearAlgebra: I, det, mul!, diag, qr, eigvals, Diagonal, cholesky, Symmetric
+using LinearAlgebra: I, det, mul!, diag, qr, eigvals, Diagonal, cholesky, Symmetric, dot,Hermitian
 
 import QuantumInterface: StateVector, AbstractOperator, apply!, tensor, ⊗, directsum, ⊕, entropy_vn, fidelity, logarithmic_negativity
 
@@ -13,7 +13,7 @@ using SymplecticFactorizations: williamson, Williamson, polar, Polar, blochmessi
 
 export
     # types
-    GaussianState, GaussianUnitary, GaussianChannel,
+    GaussianState, GaussianUnitary, GaussianChannel,GaussianLinearCombination,
     # Gaussian measurements
     generaldyne, Generaldyne,
     # symplectic representations
@@ -22,6 +22,9 @@ export
     tensor, ⊗, directsum, ⊕, apply!, ptrace,
     # predefined Gaussian states
     vacuumstate, thermalstate, coherentstate, squeezedstate, eprstate,
+    # non-Gaussian states
+    catstate_even, catstate_odd, catstate, gkpstate,
+    normalization_factor, fidelity_approximation,
     # predefined Gaussian channels
     displace, squeeze, twosqueeze, phaseshift, beamsplitter,
     attenuator, amplifier,
@@ -34,7 +37,12 @@ export
     # factorizations
     williamson, Williamson, polar, Polar, blochmessiah, BlochMessiah,
     # metrics
-    purity, entropy_vn, fidelity, logarithmic_negativity
+    purity, entropy_vn, fidelity, logarithmic_negativity,
+    #newphase 3:
+    cross_wigner,cross_wignerchar, measurement_probability, coherence_measure
+    
+    # quck Note: Removed simplify! and normalize! from exports since they conflict with LinearAlgebra
+    # the're  available as Gabs.simplify! and Gabs.normalize!
 
 include("errors.jl")
 
@@ -61,5 +69,9 @@ include("generaldyne.jl")
 include("wigner.jl")
 
 include("metrics.jl")
+
+include("linearcombinations.jl")
+
+include("nongaussian_states.jl")
 
 end
