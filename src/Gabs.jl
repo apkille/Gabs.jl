@@ -13,7 +13,7 @@ using SymplecticFactorizations: williamson, Williamson, polar, Polar, blochmessi
 
 export
     # types
-    GaussianState, GaussianUnitary, GaussianChannel,GaussianLinearCombination,
+    GaussianState, GaussianUnitary, GaussianChannel, GaussianLinearCombination,
     # Gaussian measurements
     generaldyne, Generaldyne,
     # symplectic representations
