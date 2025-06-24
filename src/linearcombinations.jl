@@ -47,7 +47,7 @@ mutable struct GaussianLinearCombination{B<:SymplecticBasis,C,S}
         isempty(states) && throw(ArgumentError("Cannot create an empty linear combination"))
         
         ħ = first(states).ħ
-        for (i, state) in enumerate(states)
+        @inbounds for (i, state) in enumerate(states)
             state isa GaussianState || throw(ArgumentError("Element $i is not a GaussianState: got $(typeof(state))"))
             if !bases_compatible(state.basis, basis)
                 throw(ArgumentError("State $i has incompatible basis: expected $(typeof(basis))($(basis.nmodes)), got $(typeof(state.basis))($(state.basis.nmodes))"))
