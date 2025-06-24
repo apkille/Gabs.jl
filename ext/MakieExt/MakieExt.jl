@@ -1,7 +1,7 @@
 module MakieExt
 
 using Makie
-using Gabs: GaussianState,GaussianLinearCombination, wigner, wignerchar
+using Gabs: GaussianState, GaussianLinearCombination, wigner, wignerchar
 
 Makie.used_attributes(::Type{<:Makie.Heatmap}, ::Any, ::Any, x::GaussianState) = (:dist,)
 
