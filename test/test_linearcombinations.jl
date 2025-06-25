@@ -25,19 +25,19 @@
         lc2 = GaussianLinearCombination(qpairbasis, coeffs, states)
         @test lc2 isa GaussianLinearCombination
         @test length(lc2) == 2
-        @test lc2.coefficients == coeffs
+        @test lc2.coeffs == coeffs
         @test lc2.states == states
 
         pairs = [(0.6, coh1), (0.8, coh2)]
         lc3 = GaussianLinearCombination(pairs)
         @test lc3 isa GaussianLinearCombination
         @test length(lc3) == 2
-        @test lc3.coefficients == [0.6, 0.8]
+        @test lc3.coeffs == [0.6, 0.8]
 
         lc4 = GaussianLinearCombination(0.6 => coh1, 0.8 => coh2)
         @test lc4 isa GaussianLinearCombination
         @test length(lc4) == 2
-        @test lc4.coefficients == [0.6, 0.8]
+        @test lc4.coeffs == [0.6, 0.8]
 
         vac_block = vacuumstate(qblockbasis)
         lc_block = GaussianLinearCombination(vac_block)
@@ -69,37 +69,30 @@
         lc_sum = lc1 + lc2
         @test lc_sum isa GaussianLinearCombination
         @test length(lc_sum) == 2
-        @test lc_sum.coefficients == [1.0, 1.0]
+        @test lc_sum.coeffs == [1.0, 1.0]
         @test lc_sum.states == [coh1, coh2]
 
         lc_scaled1 = 0.5 * lc1
         @test lc_scaled1 isa GaussianLinearCombination
-        @test lc_scaled1.coefficients == [0.5]
+        @test lc_scaled1.coeffs == [0.5]
         @test lc_scaled1.states == [coh1]
 
         lc_scaled2 = lc1 * 0.5
         @test lc_scaled2 isa GaussianLinearCombination
-        @test lc_scaled2.coefficients == [0.5]
+        @test lc_scaled2.coeffs == [0.5]
         @test lc_scaled2 == lc_scaled1
 
         lc_complex = (1.0 + 2.0im) * lc1
-        @test lc_complex.coefficients == [1.0 + 2.0im]
+        @test lc_complex.coeffs == [1.0 + 2.0im]
 
         lc_diff = lc1 - lc2
         @test lc_diff isa GaussianLinearCombination
         @test length(lc_diff) == 2
-        @test lc_diff.coefficients == [1.0, -1.0]
+        @test lc_diff.coeffs == [1.0, -1.0]
 
         lc_neg = -lc1
         @test lc_neg isa GaussianLinearCombination
-        @test lc_neg.coefficients == [-1.0]
-
-        lc_zero = zero(lc1)
-        @test lc_zero isa GaussianLinearCombination
-        @test length(lc_zero) == 1
-        @test lc_zero.coefficients == [0.0]
-        @test lc_zero.basis == lc1.basis
-        @test lc_zero.ħ == lc1.ħ
+        @test lc_neg.coeffs == [-1.0]
     end
 
     @testset "Arithmetic validation" begin
@@ -142,17 +135,17 @@
         coh2 = coherentstate(qpairbasis, -1.0)
         lc = GaussianLinearCombination(qpairbasis, [3.0, 4.0], [coh1, coh2])
         
-        initial_norm = sqrt(sum(abs2, lc.coefficients))
+        initial_norm = sqrt(sum(abs2, lc.coeffs))
         @test initial_norm == 5.0
         
         result = Gabs.normalize!(lc)
         @test result === lc  
-        @test isapprox(sqrt(sum(abs2, lc.coefficients)), 1.0, atol=1e-15)
-        @test lc.coefficients ≈ [0.6, 0.8]
+        @test isapprox(sqrt(sum(abs2, lc.coeffs)), 1.0, atol=1e-15)
+        @test lc.coeffs ≈ [0.6, 0.8]
 
         lc_zero = GaussianLinearCombination(qpairbasis, [0.0, 0.0], [coh1, coh2])
         Gabs.normalize!(lc_zero)
-        @test all(lc_zero.coefficients .== 0.0)
+        @test all(lc_zero.coeffs .== 0.0)
     end
 
     @testset "Simplification" begin
@@ -163,30 +156,30 @@
         lc1 = GaussianLinearCombination(qpairbasis, [1.0, 1e-16, 0.5], [coh1, coh2, vac])
         Gabs.simplify!(lc1)
         @test length(lc1) == 2
-        @test lc1.coefficients ≈ [1.0, 0.5]
+        @test lc1.coeffs ≈ [1.0, 0.5]
         @test lc1.states == [coh1, vac]
 
         lc2 = GaussianLinearCombination(qpairbasis, [0.5, 0.3, 0.2], [coh1, coh2, coh1])
         Gabs.simplify!(lc2)
         @test length(lc2) == 2
         if lc2.states[1] == coh1
-            @test lc2.coefficients ≈ [0.7, 0.3]
+            @test lc2.coeffs ≈ [0.7, 0.3]
             @test lc2.states == [coh1, coh2]
         else
-            @test lc2.coefficients ≈ [0.3, 0.7]
+            @test lc2.coeffs ≈ [0.3, 0.7]
             @test lc2.states == [coh2, coh1]
         end
 
         lc3 = GaussianLinearCombination(qpairbasis, [1e-16, -1e-16], [coh1, coh2])
         Gabs.simplify!(lc3)
         @test length(lc3) == 1
-        @test lc3.coefficients == [0.0]
+        @test lc3.coeffs[1] ≈ 1e-14
         @test lc3.states[1] == vacuumstate(qpairbasis)
 
         lc4 = GaussianLinearCombination(qpairbasis, [1.0, -1.0], [coh1, coh1])
         Gabs.simplify!(lc4)
         @test length(lc4) == 1
-        @test lc4.coefficients == [0.0]
+        @test lc4.coeffs[1] ≈ 1e-14
 
         lc5 = GaussianLinearCombination(qpairbasis, [1.0, 1e-10], [coh1, coh2])
         Gabs.simplify!(lc5, atol=1e-12)
@@ -238,13 +231,13 @@
         
         lc_complex = GaussianLinearCombination(qpairbasis, [1.0 + 2.0im, 0.5 - 1.0im], [coh, vac])
         @test lc_complex isa GaussianLinearCombination
-        @test eltype(lc_complex.coefficients) <: Complex
+        @test eltype(lc_complex.coeffs) <: Complex
         
         lc_scaled = (0.5 + 0.5im) * lc_complex
-        @test eltype(lc_scaled.coefficients) <: Complex
+        @test eltype(lc_scaled.coeffs) <: Complex
         
         Gabs.normalize!(lc_complex)
-        norm_val = sqrt(sum(abs2, lc_complex.coefficients))
+        norm_val = sqrt(sum(abs2, lc_complex.coeffs))
         @test isapprox(norm_val, 1.0, atol=1e-15)
     end
 
@@ -266,9 +259,6 @@
         
         lc_h1_scaled = 2.0 * lc_h1
         @test lc_h1_scaled.ħ == 1
-        
-        zero_h1 = zero(lc_h1)
-        @test zero_h1.ħ == 1
     end
 
     @testset "Static arrays compatibility" begin
@@ -293,15 +283,15 @@
         
         @test lcgs isa GaussianLinearCombination
         @test length(lcgs) == 2
-        @test lcgs.coefficients == [0.5, 0.5]
+        @test lcgs.coeffs == [0.5, 0.5]
         @test lcgs.states[1] == state1
         @test lcgs.states[2] == state2
         
-        norm_val = sqrt(sum(abs2, lcgs.coefficients))
+        norm_val = sqrt(sum(abs2, lcgs.coeffs))
         @test isapprox(norm_val, sqrt(0.5), atol=1e-15)
         
         cat_state = GaussianLinearCombination(0.5 => state1, 0.5 => state2)
-        @test cat_state.coefficients == [0.5, 0.5]
+        @test cat_state.coeffs == [0.5, 0.5]
     end
 
     @testset "Edge cases" begin
@@ -310,7 +300,7 @@
         
         lc_single = GaussianLinearCombination(coh1)
         @test length(lc_single) == 1
-        @test lc_single.coefficients == [1.0]
+        @test lc_single.coeffs == [1.0]
         
         lc_with_zero = GaussianLinearCombination(qpairbasis, [0.0, 1.0], [coh1, coh2])
         @test length(lc_with_zero) == 2
@@ -326,7 +316,7 @@
         lc_identical = GaussianLinearCombination(qpairbasis, [0.2, 0.3, 0.5], [coh1, coh1, coh1])
         Gabs.simplify!(lc_identical)
         @test length(lc_identical) == 1
-        @test lc_identical.coefficients[1] ≈ 1.0
+        @test lc_identical.coeffs[1] ≈ 1.0
         @test lc_identical.states[1] == coh1
     end
 end

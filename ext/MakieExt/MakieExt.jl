@@ -18,15 +18,11 @@ function Makie.convert_arguments(P::Type{<:Makie.Heatmap}, q, p, state::Gaussian
     return convert_arguments(P, q, p, data)
 end
 
-
-
-# Support for GaussianLinearCombination visualization (phase 3)
-
 Makie.used_attributes(::Type{<:Makie.Heatmap}, ::Any, ::Any, x::GaussianLinearCombination) = (:dist,)
 
 # Extend convert_arguments to handle GaussianLinearCombination
 function Makie.convert_arguments(P::Type{<:Makie.Heatmap}, q, p, lcgs::GaussianLinearCombination; dist = :wigner)
-    isequal(length(lcgs.states[1].mean), 2) || throw(ArgumentError(Gabs.HEATMAP_ERROR))
+    isequal(lcgs.basis.nmodes, 1) || throw(ArgumentError(Gabs.HEATMAP_ERROR))
     
     if isequal(dist, :wigner)
         data = [wigner(lcgs, [i,j]) for i in q, j in p]

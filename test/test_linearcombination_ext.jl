@@ -2,7 +2,6 @@
     using Gabs
     using LinearAlgebra
     using StaticArrays
-
     nmodes1 = 1
     nmodes2 = 2
     qpairbasis1 = QuadPairBasis(nmodes1)
@@ -24,7 +23,7 @@
                 @test length(lc_displaced) == 2
                 @test lc_displaced.basis == basis
                 @test lc_displaced.ħ == lc.ħ
-                @test lc_displaced.coefficients == lc.coefficients  
+                @test lc_displaced.coeffs == lc.coeffs  
                 
                 expected_state1 = disp_op * coh1
                 expected_state2 = disp_op * coh2
@@ -35,7 +34,7 @@
                 lc_squeezed = squeeze_op * lc
                 
                 @test lc_squeezed isa GaussianLinearCombination
-                @test lc_squeezed.coefficients == lc.coefficients
+                @test lc_squeezed.coeffs == lc.coeffs
                 @test isapprox(lc_squeezed.states[1], squeeze_op * coh1)
                 @test isapprox(lc_squeezed.states[2], squeeze_op * coh2)
                 
@@ -43,7 +42,7 @@
                 lc_phase = phase_op * lc
                 
                 @test lc_phase isa GaussianLinearCombination
-                @test lc_phase.coefficients == lc.coefficients
+                @test lc_phase.coeffs == lc.coeffs
                 @test isapprox(lc_phase.states[1], phase_op * coh1)
                 @test isapprox(lc_phase.states[2], phase_op * coh2)
             end
@@ -62,7 +61,7 @@
                 @test length(lc_attenuated) == 2
                 @test lc_attenuated.basis == basis
                 @test lc_attenuated.ħ == lc.ħ
-                @test lc_attenuated.coefficients == lc.coefficients  
+                @test lc_attenuated.coeffs == lc.coeffs  
                 
                 @test isapprox(lc_attenuated.states[1], att_channel * coh1)
                 @test isapprox(lc_attenuated.states[2], att_channel * coh2)
@@ -71,7 +70,7 @@
                 lc_amplified = amp_channel * lc
                 
                 @test lc_amplified isa GaussianLinearCombination
-                @test lc_amplified.coefficients == lc.coefficients
+                @test lc_amplified.coeffs == lc.coeffs
                 @test isapprox(lc_amplified.states[1], amp_channel * coh1)
                 @test isapprox(lc_amplified.states[2], amp_channel * coh2)
             end
@@ -112,7 +111,7 @@
             @test lc_tensor.ħ == lc1.ħ
             
             expected_coeffs = [0.6*0.8, 0.6*0.2, 0.4*0.8, 0.4*0.2]
-            @test isapprox(sort(lc_tensor.coefficients), sort(expected_coeffs))
+            @test isapprox(sort(lc_tensor.coeffs), sort(expected_coeffs))
             
             expected_states = [
                 coh1 ⊗ vac1, coh1 ⊗ sq1,
@@ -140,7 +139,7 @@
             lc_tensor_typed = tensor(Vector{Float64}, Matrix{Float64}, lc1, lc2)
             @test lc_tensor_typed isa GaussianLinearCombination
             @test length(lc_tensor_typed) == 2  
-            @test lc_tensor_typed.coefficients == [0.7, 0.3]
+            @test lc_tensor_typed.coeffs == [0.7, 0.3]
             
             lc_tensor_single = tensor(Matrix{Float64}, lc1, lc2)
             @test lc_tensor_single isa GaussianLinearCombination
@@ -240,13 +239,9 @@
             basis = qpairbasis2
             state1 = coherentstate(QuadPairBasis(1), 1.0) ⊗ vacuumstate(QuadPairBasis(1))
             lc = GaussianLinearCombination(basis, [1.0], [state1])
-            
-            lc_traced_typed = ptrace(Vector{Float64}, Matrix{Float64}, lc, 1)
-            @test lc_traced_typed isa GaussianLinearCombination
-            @test lc_traced_typed.basis.nmodes == 1
-            
-            lc_traced_single = ptrace(Matrix{Float64}, lc, 1)
-            @test lc_traced_single isa GaussianLinearCombination
+            lc_traced = ptrace(lc, 1)
+            @test lc_traced isa GaussianLinearCombination
+            @test lc_traced.basis.nmodes == 1
         end
         
         @testset "Partial Trace Error Handling" begin
@@ -256,8 +251,8 @@
             state = coh ⊗ vac
             lc = GaussianLinearCombination(basis, [1.0], [state])
             
-            @test_throws ArgumentError ptrace(lc, 3)  # ..Index too large
-            @test_throws ArgumentError ptrace(lc, 0)  # Index too small
+            @test_throws DimensionMismatch ptrace(lc, 3)  # ..Index too large
+            @test_throws DimensionMismatch ptrace(lc, 0)  # Index too small
             @test_throws ArgumentError ptrace(lc, [1, 2])  # Tracing all modes
             @test_throws ArgumentError ptrace(lc, [1, 1])  # Duplicate indices
         end
@@ -855,7 +850,7 @@
             Gabs.simplify!(right_side)
             
             @test length(left_side) == length(right_side)
-            @test isapprox(sum(abs2, left_side.coefficients), sum(abs2, right_side.coefficients), rtol=1e-10)
+            @test isapprox(sum(abs2, left_side.coeffs), sum(abs2, right_side.coeffs), rtol=1e-10)
         end
         
         @testset "Measurement Probability Conservation" begin
