@@ -1,5 +1,4 @@
 # Linear combinations of Gaussian states
-using LinearAlgebra
 
 """
     GaussianLinearCombination{B<:SymplecticBasis,C,S}
