@@ -1,7 +1,8 @@
-@testitem "Phase 3: Integration and Advanced Features" begin
+@testitem "LinearCombinations_ext Integration and Advanced Features" begin
     using Gabs
     using LinearAlgebra
     using StaticArrays
+
     nmodes1 = 1
     nmodes2 = 2
     qpairbasis1 = QuadPairBasis(nmodes1)
@@ -949,6 +950,251 @@
             @test lc_trace_12.basis.nmodes == 1
             
             @test isapprox(lc_trace_12.states[1], sq, rtol=1e-10)
+        end
+    end
+    @testset "Additional Tests" begin
+    
+        nmodes = 1
+        qpairbasis = QuadPairBasis(nmodes)
+        qblockbasis = QuadBlockBasis(nmodes)
+    
+        @testset "1. Empty states constructor coverage" begin
+
+            coeffs = [1.0, 0.5]
+            empty_states = GaussianState[]
+            
+            @test_throws ArgumentError GaussianLinearCombination(coeffs, empty_states)
+            
+            try
+                GaussianLinearCombination(coeffs, empty_states)
+                @test false 
+            catch e
+                @test e isa ArgumentError
+                @test contains(string(e), "Cannot create an empty linear combination")
+            end
+            
+            state1 = coherentstate(qpairbasis, 1.0)
+            state2 = coherentstate(qpairbasis, -1.0)
+            states = [state1, state2]
+            
+            lc = GaussianLinearCombination(coeffs, states)
+            @test lc isa GaussianLinearCombination
+            @test length(lc) == 2
+            @test lc.coeffs == coeffs
+            @test lc.states == states
+            @test lc.basis == qpairbasis
+        end
+    
+        @testset "2. Empty coeffs in simplify! coverage" begin
+            state = coherentstate(qpairbasis, 1.0)
+            lc = GaussianLinearCombination(state)
+            lc.coeffs = Float64[]
+            lc.states = GaussianState[]
+            result = Gabs.simplify!(lc)
+            @test result === lc 
+            @test isempty(lc.coeffs)
+            @test isempty(lc.states)
+        end
+    
+        @testset "3. Show function 'more terms' coverage" begin
+            basis = qpairbasis
+            states = [coherentstate(basis, Float64(i)) for i in 1:7]  
+            coeffs = [1.0/7 for _ in 1:7]
+            lc = GaussianLinearCombination(basis, coeffs, states)
+            io = IOBuffer()
+            show(io, MIME("text/plain"), lc)
+            output = String(take!(io))
+            
+            @test contains(output, "⋮")
+            @test contains(output, "more terms")
+            @test contains(output, "GaussianLinearCombination with 7 terms")
+            
+            @test contains(output, "[5]")
+            @test contains(output, "(2 more terms)")
+        end
+    
+        @testset "4. Typed ptrace functions coverage" begin
+            basis = QuadPairBasis(2)
+            coh = coherentstate(QuadPairBasis(1), 1.0)
+            vac = vacuumstate(QuadPairBasis(1))
+            
+            state = coh ⊗ vac
+            lc = GaussianLinearCombination(basis, [1.0], [state])
+            
+            lc_traced_single = ptrace(Vector{Float64}, Matrix{Float64}, lc, 1)
+            @test lc_traced_single isa GaussianLinearCombination
+            @test lc_traced_single.basis.nmodes == 1
+            @test lc_traced_single.states[1].mean isa Vector{Float64}
+            @test lc_traced_single.states[1].covar isa Matrix{Float64}
+            
+            lc_traced_vector = ptrace(Vector{Float64}, Matrix{Float64}, lc, [1])
+            @test lc_traced_vector isa GaussianLinearCombination
+            @test lc_traced_vector.basis.nmodes == 1
+            @test lc_traced_vector.states[1].mean isa Vector{Float64}
+            @test lc_traced_vector.states[1].covar isa Matrix{Float64}
+            
+            lc_traced_static = ptrace(SVector{2,Float64}, SMatrix{2,2,Float64}, lc, 1)
+            @test lc_traced_static isa GaussianLinearCombination
+            @test lc_traced_static.states[1].mean isa SVector{2,Float64}
+            @test lc_traced_static.states[1].covar isa SMatrix{2,2,Float64}
+        end
+    
+        @testset "5. Small norm in measurement_probability coverage" begin
+            basis = qpairbasis
+            
+            state1 = coherentstate(basis, 1.0)
+            state2 = coherentstate(basis, -1.0)
+            
+            tiny_coeffs = [1e-20, 1e-20]
+            lc = GaussianLinearCombination(basis, tiny_coeffs, [state1, state2])
+            
+            measurement = vacuumstate(basis)
+            
+            prob = measurement_probability(lc, measurement, 1)
+            @test prob == 0.0
+            
+            normal_lc = GaussianLinearCombination(basis, [0.6, 0.8], [state1, state2])
+            normal_prob = measurement_probability(normal_lc, measurement, 1)
+            @test normal_prob > 0.0
+            @test normal_prob != prob
+        end
+    
+        @testset "6. Tensor function else branch coverage" begin
+            basis = qpairbasis
+            state1 = coherentstate(basis, 1.0)
+            state2 = vacuumstate(basis)
+            
+            lc1 = GaussianLinearCombination(basis, [1.0], [state1])
+            lc2 = GaussianLinearCombination(basis, [1.0], [state2])
+            
+            lc_tensor = tensor(Array{Float64}, lc1, lc2)
+            @test lc_tensor isa GaussianLinearCombination
+            @test lc_tensor.basis.nmodes == 2
+            @test length(lc_tensor) == 1
+            @test lc_tensor.states[1].mean isa Array{Float64}
+            @test lc_tensor.states[1].covar isa Array{Float64}
+
+            struct TestArrayType{T} <: AbstractArray{T, 2}
+                data::Matrix{T}
+            end
+            TestArrayType(data::Matrix{T}) where T = TestArrayType{T}(data)
+            Base.size(a::TestArrayType) = size(a.data)
+            Base.getindex(a::TestArrayType, i...) = getindex(a.data, i...)
+            Base.setindex!(a::TestArrayType, v, i...) = setindex!(a.data, v, i...)
+            TestArrayType{T}(::UndefInitializer, dims...) where T = TestArrayType(Matrix{T}(undef, dims...))
+            Base.similar(a::TestArrayType{T}, ::Type{S}, dims::Dims) where {T,S} = TestArrayType(Matrix{S}(undef, dims))
+        end
+        @testset "7. Ptrace function else branch coverage" begin
+            basis = QuadPairBasis(2)
+            coh = coherentstate(QuadPairBasis(1), 1.0)
+            vac = vacuumstate(QuadPairBasis(1))
+            
+            state = coh ⊗ vac
+            lc = GaussianLinearCombination(basis, [1.0], [state])
+            
+            lc_traced = ptrace(Array{Float64}, lc, 1)
+            @test lc_traced isa GaussianLinearCombination
+            @test lc_traced.basis.nmodes == 1
+            @test lc_traced.states[1].mean isa Array{Float64}
+            @test lc_traced.states[1].covar isa Array{Float64}
+            
+            lc_traced_vector = ptrace(Array{Float64}, lc, [1])
+            @test lc_traced_vector isa GaussianLinearCombination
+            @test lc_traced_vector.basis.nmodes == 1
+            @test lc_traced_vector.states[1].mean isa Array{Float64}
+            @test lc_traced_vector.states[1].covar isa Array{Float64}
+        end
+    
+        @testset "8. Empty eigenvals in coherence_measure coverage" begin
+            basis = qpairbasis
+
+            state1 = coherentstate(basis, 1.0)
+            state2 = coherentstate(basis, 1.0 + 1e-20)  
+            tiny_coeffs = [1e-10, -1e-10]  
+            lc = GaussianLinearCombination(basis, tiny_coeffs, [state1, state2])
+            
+            coherence = coherence_measure(lc)
+            @test coherence isa Float64
+            @test coherence >= 0.0
+            @test coherence <= 1.0
+            
+            zero_lc = GaussianLinearCombination(basis, [0.0, 0.0], [state1, state2])
+            zero_coherence = coherence_measure(zero_lc)
+            @test zero_coherence >= 0.0
+            @test zero_coherence <= 1.0
+        end
+    
+        @testset "9. Representation functions coverage (non-exported)" begin
+            basis = qpairbasis
+            
+            state1 = coherentstate(basis, 1.0)
+            state2 = coherentstate(basis, -1.0)
+            lc = GaussianLinearCombination(basis, [0.6, 0.8], [state1, state2])
+            
+            rep_purity = Gabs.representation_purity(lc)
+            @test rep_purity isa Float64
+            @test 0.0 <= rep_purity <= 1.0
+            
+            single_lc = GaussianLinearCombination(state1)
+            single_purity = Gabs.representation_purity(single_lc)
+            @test single_purity == 1.0
+            
+            zero_lc = GaussianLinearCombination(basis, [0.0, 0.0], [state1, state2])
+            zero_purity = Gabs.representation_purity(zero_lc)
+            @test zero_purity == 0.0
+            
+            rep_entropy = Gabs.representation_entropy(lc)
+            @test rep_entropy isa Float64
+            @test rep_entropy >= 0.0
+            
+            single_entropy = Gabs.representation_entropy(single_lc)
+            @test single_entropy == 0.0
+            
+            zero_entropy = Gabs.representation_entropy(zero_lc)
+            @test zero_entropy == 0.0
+            
+            @test rep_entropy >= 0.0
+            
+            orthogonal_states = [coherentstate(basis, 5.0), coherentstate(basis, -5.0)]  
+            orthogonal_lc = GaussianLinearCombination(basis, [0.6, 0.8], orthogonal_states)
+            orthogonal_entropy = Gabs.representation_entropy(orthogonal_lc)
+            
+            @test orthogonal_entropy >= 0.0
+            @test isfinite(orthogonal_entropy)
+            
+            many_states = [coherentstate(basis, Float64(i)) for i in 1:5]
+            many_coeffs = [1.0/5 for _ in 1:5]
+            many_lc = GaussianLinearCombination(basis, many_coeffs, many_states)
+            many_entropy = Gabs.representation_entropy(many_lc)
+            @test many_entropy >= 0.0
+            @test isfinite(many_entropy)
+        end
+    
+        @testset "Additional edge cases for completeness" begin            
+            basis = qpairbasis
+            state = coherentstate(basis, 1.0)
+            
+            state1 = coherentstate(basis, 1.0)
+            state2 = coherentstate(basis, 1.0) 
+            lc = GaussianLinearCombination(basis, [0.5, 0.3], [state1, state2])
+            
+            original_length = length(lc)
+            Gabs.simplify!(lc)
+            @test length(lc) <= original_length
+            
+            vac = vacuumstate(basis)
+            vac_lc = GaussianLinearCombination(vac)
+            prob = measurement_probability(vac_lc, vac, 1)
+            @test prob ≈ 1.0 atol=1e-10
+            
+            single_coherence = coherence_measure(GaussianLinearCombination(state))
+            @test single_coherence == 1.0
+            
+            many_states = [coherentstate(basis, 0.1 * i) for i in 1:10]
+            tiny_coeffs = [1e-8 for _ in 1:10]
+            many_lc = GaussianLinearCombination(basis, tiny_coeffs, many_states)
+            many_coherence = coherence_measure(many_lc)
+            @test 0.0 <= many_coherence <= 1.0
         end
     end
 end
