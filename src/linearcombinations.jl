@@ -336,7 +336,6 @@ function tensor(::Type{Tm}, ::Type{Tc}, lc1::GaussianLinearCombination, lc2::Gau
     return GaussianLinearCombination(new_basis, new_coeffs, new_states)
 end
 
-tensor(::Type{T}, lc1::GaussianLinearCombination, lc2::GaussianLinearCombination) where {T} = tensor(T, T, lc1, lc2)
 """
     tensor(lc1::GaussianLinearCombination, lc2::GaussianLinearCombination)
 
@@ -375,9 +374,6 @@ function ptrace(::Type{Tm}, ::Type{Tc}, lc::GaussianLinearCombination, indices::
     simplify!(result)
     return result
 end
-
-ptrace(::Type{T}, lc::GaussianLinearCombination, index::Int) where {T} = ptrace(T, T, lc, index)
-ptrace(::Type{T}, lc::GaussianLinearCombination, indices::AbstractVector{<:Int}) where {T} = ptrace(T, T, lc, indices)
 
 """
     ptrace(lc::GaussianLinearCombination, index::Int)
