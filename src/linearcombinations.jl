@@ -326,7 +326,7 @@ function tensor(::Type{Tm}, ::Type{Tc}, lc1::GaussianLinearCombination, lc2::Gau
     new_coeffs = Vector{CoeffType}(undef, n1 * n2)
     new_states = Vector{GaussianState}(undef, n1 * n2)
     @inbounds for i in 1:n1
-        for j in 1:n2
+        @inbounds for j in 1:n2
             idx = (i-1) * n2 + j
             new_coeffs[idx] = lc1.coeffs[i] * lc2.coeffs[j]
             new_states[idx] = tensor(Tm, Tc, lc1.states[i], lc2.states[j])
