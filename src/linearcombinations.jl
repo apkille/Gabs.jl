@@ -3,7 +3,7 @@
 """
     GaussianLinearCombination{B<:SymplecticBasis,C,S}
 
-Represents a linear combination of Gaussian states of the form Σᵢ cᵢ|ψᵢ⟩ where cᵢ are coefficients 
+Represents a linear combination of Gaussian states of the form `Σᵢ cᵢ|ψᵢ⟩` where `cᵢ` are coefficients 
 and |ψᵢ⟩ are Gaussian states, all sharing the same symplectic basis and ħ value.
 
 ## Fields
