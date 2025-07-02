@@ -161,7 +161,6 @@ Base.:*(lc::GaussianLinearCombination, α::Number) = α * lc
     Gabs.normalize!(lc::GaussianLinearCombination)
 
 Normalize the coefficients of a linear combination in-place using L2 norm.
-Note: Use Gabs.normalize! to avoid conflicts with LinearAlgebra.normalize!
 """
 function normalize!(lc::GaussianLinearCombination)
     norm_val = sqrt(sum(abs2, lc.coeffs))
