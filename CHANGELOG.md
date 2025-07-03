@@ -1,5 +1,9 @@
 # News
 
+## v1.3.1 - 2025-07-02
+
+- Bump QuantumInterface compatibility.
+
 ## v1.3.0 - 2025-04-15
 
 - Add seminal papers section to documentation.
