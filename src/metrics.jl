@@ -139,3 +139,4 @@ function _tilde(state::GaussianState{B,M,V}, indices::Union{Integer, AbstractVec
     end
     return T
 end
+
