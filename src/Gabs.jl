@@ -24,7 +24,7 @@ export
     vacuumstate, thermalstate, coherentstate, squeezedstate, eprstate,
     # non-Gaussian states
     catstate_even, catstate_odd, catstate, gkpstate,
-    normalization_factor, fidelity_approximation,
+    norm_factor, fidelity_approximation,
     # predefined Gaussian channels
     displace, squeeze, twosqueeze, phaseshift, beamsplitter,
     attenuator, amplifier,

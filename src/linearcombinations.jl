@@ -27,12 +27,6 @@ covariance: 2×2 Matrix{Float64}:
  1.0  0.0
  0.0  1.0
 
-julia> lcgs1 = GaussianLinearCombination(state1)
-GaussianLinearCombination with 1 terms for 1 mode.
-  symplectic basis: QuadPairBasis
-  ħ = 2
-  [1] 1.0 * GaussianState
-
 julia> state2 = coherentstate(basis, -1.0)
 GaussianState for 1 mode.
   symplectic basis: QuadPairBasis
@@ -43,14 +37,16 @@ covariance: 2×2 Matrix{Float64}:
  1.0  0.0
  0.0  1.0
 
-julia> cat_state = 0.5 * GaussianLinearCombination(state1) + 0.5 * GaussianLinearCombination(state2)
+julia> # Direct arithmetic with GaussianStates
+julia> cat_state = 0.5 * state1 + 0.5 * state2
 GaussianLinearCombination with 2 terms for 1 mode.
   symplectic basis: QuadPairBasis
   ħ = 2
   [1] 0.5 * GaussianState
   [2] 0.5 * GaussianState
 
-julia> lcgs2 = GaussianLinearCombination([0.6, 0.8], [state1, state2])
+julia> # Alternative explicit construction
+julia> lcgs = GaussianLinearCombination([0.6, 0.8], [state1, state2])
 GaussianLinearCombination with 2 terms for 1 mode.
   symplectic basis: QuadPairBasis
   ħ = 2
@@ -156,6 +152,105 @@ end
 Multiply a linear combination by a scalar from the right.
 """
 Base.:*(lc::GaussianLinearCombination, α::Number) = α * lc
+
+"""
+    *(α::Number, state::GaussianState)
+
+Multiply a Gaussian state by a scalar to create a linear combination.
+"""
+function Base.:*(α::Number, state::GaussianState)
+    coeff_type = promote_type(typeof(α), Float64)
+    return GaussianLinearCombination(state.basis, [convert(coeff_type, α)], [state])
+end
+
+"""
+    *(state::GaussianState, α::Number)
+
+Multiply a Gaussian state by a scalar to create a linear combination.
+"""
+Base.:*(state::GaussianState, α::Number) = α * state
+
+"""
+    +(state1::GaussianState, state2::GaussianState)
+
+Add two Gaussian states to create a linear combination.
+"""
+function Base.:+(state1::GaussianState, state2::GaussianState)
+    state1.basis == state2.basis || throw(ArgumentError(SYMPLECTIC_ERROR))
+    state1.ħ == state2.ħ || throw(ArgumentError(HBAR_ERROR))
+    coeff_type = promote_type(Float64, Float64)
+    return GaussianLinearCombination(state1.basis, [one(coeff_type), one(coeff_type)], [state1, state2])
+end
+
+"""
+    +(state::GaussianState, lc::GaussianLinearCombination)
+
+Add a Gaussian state to a linear combination.
+"""
+function Base.:+(state::GaussianState, lc::GaussianLinearCombination)
+    state.basis == lc.basis || throw(ArgumentError(SYMPLECTIC_ERROR))
+    state.ħ == lc.ħ || throw(ArgumentError(HBAR_ERROR))
+    coeff_type = promote_type(Float64, eltype(lc.coeffs))
+    new_coeffs = vcat([one(coeff_type)], convert(Vector{coeff_type}, lc.coeffs))
+    new_states = vcat([state], lc.states)
+    return GaussianLinearCombination(lc.basis, new_coeffs, new_states)
+end
+
+"""
+    +(lc::GaussianLinearCombination, state::GaussianState)
+
+Add a linear combination to a Gaussian state.
+"""
+function Base.:+(lc::GaussianLinearCombination, state::GaussianState)
+    lc.basis == state.basis || throw(ArgumentError(SYMPLECTIC_ERROR))
+    lc.ħ == state.ħ || throw(ArgumentError(HBAR_ERROR))
+    new_coeffs = vcat(lc.coeffs, [1.0])  
+    new_states = vcat(lc.states, [state])
+    return GaussianLinearCombination(lc.basis, new_coeffs, new_states)
+end
+
+"""
+    -(state1::GaussianState, state2::GaussianState)
+
+Subtract two Gaussian states to create a linear combination.
+"""
+function Base.:-(state1::GaussianState, state2::GaussianState)
+    state1.basis == state2.basis || throw(ArgumentError(SYMPLECTIC_ERROR))
+    state1.ħ == state2.ħ || throw(ArgumentError(HBAR_ERROR))
+    coeff_type = promote_type(Float64, Float64)
+    return GaussianLinearCombination(state1.basis, [one(coeff_type), -one(coeff_type)], [state1, state2])
+end
+
+"""
+    -(state::GaussianState, lc::GaussianLinearCombination)
+
+Subtract a linear combination from a Gaussian state.
+"""
+function Base.:-(state::GaussianState, lc::GaussianLinearCombination)
+    state.basis == lc.basis || throw(ArgumentError(SYMPLECTIC_ERROR))
+    state.ħ == lc.ħ || throw(ArgumentError(HBAR_ERROR))
+    return state + (-1) * lc
+end
+
+"""
+    -(lc::GaussianLinearCombination, state::GaussianState)
+
+Subtract a Gaussian state from a linear combination.
+"""
+function Base.:-(lc::GaussianLinearCombination, state::GaussianState)
+    lc.basis == state.basis || throw(ArgumentError(SYMPLECTIC_ERROR))
+    lc.ħ == state.ħ || throw(ArgumentError(HBAR_ERROR))
+    new_coeffs = vcat(lc.coeffs, [-1.0])  
+    new_states = vcat(lc.states, [state])
+    return GaussianLinearCombination(lc.basis, new_coeffs, new_states)
+end
+
+"""
+    -(state::GaussianState)
+
+Negate a Gaussian state to create a linear combination with coefficient -1.
+"""
+Base.:-(state::GaussianState) = (-1) * state
 
 """
     Gabs.normalize!(lc::GaussianLinearCombination)
@@ -408,26 +503,24 @@ Compute the off-diagonal Wigner kernel (cross-Wigner function) between two Gauss
 
 The cross-Wigner function is given by:
 
-    W₁₂(x) = (1/(2π)ⁿ√det((V₁+V₂)/2)) × 
-             exp[-½(x-μ̄)ᵀ((V₁+V₂)/2)⁻¹(x-μ̄)] × 
-             exp[i(μ₁-μ₂)ᵀΩ(x-μ̄)/ħ]
+    `W₁₂(x) = (1/(2π)ⁿ√det((V₁+V₂)/2)) × exp[-½(x-μ̄)ᵀ((V₁+V₂)/2)⁻¹(x-μ̄)] × exp[i(μ₁-μ₂)ᵀΩ(x-μ̄)/ħ]`
 
 where:
-- μ̄ = (μ₁ + μ₂)/2 is the average of the two mean vectors
-- μ₁, μ₂ are the mean vectors of the two states  
-- V₁, V₂ are the covariance matrices of the two states
-- Ω is the symplectic form matrix
-- n is the number of modes
-- ħ is the reduced Planck constant
+- `μ̄ = (μ₁ + μ₂)/2` is the average of the two mean vectors
+- `μ₁`, `μ₂` are the mean vectors of the two states  
+- `V₁`, `V₂` are the covariance matrices of the two states
+- `Ω` is the symplectic form matrix
+- `n` is the number of modes
+- `ħ` is the reduced Planck constant
 
 This function captures the quantum interference between two Gaussian states and is 
 essential for computing Wigner functions of superposition states. The cross-Wigner 
 function appears in the interference terms when computing the Wigner function of 
-a linear combination |ψ⟩ = c₁|ψ₁⟩ + c₂|ψ₂⟩:
+a linear combination `|ψ⟩ = c₁|ψ₁⟩ + c₂|ψ₂⟩`:
 
-    W(x) = |c₁|²W₁(x) + |c₂|²W₂(x) + 2Re(c₁*c₂*W₁₂(x))
+    `W(x) = |c₁|²W₁(x) + |c₂|²W₂(x) + 2Re(c₁*c₂*W₁₂(x))`
 
-The normalization is chosen to ensure the identity property W₁₁(x) = W₁(x).
+The normalization is chosen to ensure the identity property `W₁₁(x) = W₁(x)`.
 
 # Arguments
 - `state1::GaussianState`: First Gaussian state
@@ -435,11 +528,11 @@ The normalization is chosen to ensure the identity property W₁₁(x) = W₁(x)
 - `x::AbstractVector`: Phase space point where to evaluate the function
 
 # Returns
-- `ComplexF64`: Complex value of the cross-Wigner function at point x
+- `ComplexF64`: Complex value of the cross-Wigner function at point `x`
 
 # Notes
-- The function is Hermitian: W₁₂(x) = W₂₁*(x)
-- For identical states: W₁₁(x) = W₁(x) (reduces to regular Wigner function)
+- The function is Hermitian: `W₁₂(x) = W₂₁*(x)`
+- For identical states: `W₁₁(x) = W₁(x)` (reduces to regular Wigner function)
 - The implementation uses log-space arithmetic for numerical stability
 """
 function cross_wigner(state1::GaussianState,
@@ -465,17 +558,15 @@ end
     wigner(lc::GaussianLinearCombination, x::AbstractVector)
 
 Compute Wigner function of a linear combination including quantum interference.
-W(x) = Σᵢ |cᵢ|² Wᵢ(x) + 2 Σᵢ<ⱼ Re(cᵢ*cⱼ W_cross(ψᵢ,ψⱼ,x))
+`W(x) = Σᵢ |cᵢ|² Wᵢ(x) + 2 Σᵢ<ⱼ Re(cᵢ*cⱼ W_cross(ψᵢ,ψⱼ,x))`
 """
 function wigner(lc::GaussianLinearCombination, x::AbstractVector)
     length(x) == length(lc.states[1].mean) || throw(ArgumentError(WIGNER_ERROR))
     result = 0.0
-    for (c, state) in lc
-        result += abs2(c) * wigner(state, x)
-    end
-    for i in 1:length(lc)
+    @inbounds for i in 1:length(lc)
         ci, si = lc[i]
-        for j in (i+1):length(lc)
+        result += abs2(ci) * wigner(si, x)
+        @inbounds for j in (i+1):length(lc)
             cj, sj = lc[j]
             cross_term = 2 * real(conj(ci) * cj * cross_wigner(si, sj, x))
             result += cross_term
@@ -511,12 +602,10 @@ Compute Wigner characteristic function of a linear combination including interfe
 function wignerchar(lc::GaussianLinearCombination, xi::AbstractVector)
     length(xi) == length(lc.states[1].mean) || throw(ArgumentError(WIGNER_ERROR))
     result = 0.0 + 0.0im
-    for (c, state) in lc
-        result += abs2(c) * wignerchar(state, xi)
-    end
-    for i in 1:length(lc)
+    @inbounds for i in 1:length(lc)
         ci, si = lc[i]
-        for j in (i+1):length(lc)
+        result += abs2(ci) * wignerchar(si, xi)        
+        @inbounds for j in (i+1):length(lc)
             cj, sj = lc[j]
             cross_term = 2 * real(conj(ci) * cj * cross_wignerchar(si, sj, xi))
             result += cross_term
@@ -540,7 +629,7 @@ end
 """
     measurement_probability(lc::GaussianLinearCombination, measurement::GaussianState, indices)
 
-Calculate measurement probability using Born rule: P = |⟨measurement|Tr_complement(lc)⟩|².
+Calculate measurement probability using Born rule: `P = |⟨measurement|Tr_complement(lc)⟩|²`.
 """
 function measurement_probability(lc::GaussianLinearCombination, measurement::GaussianState, indices::Union{Int, AbstractVector{<:Int}})
     indices_vec = indices isa Int ? [indices] : collect(indices)
@@ -554,7 +643,7 @@ function measurement_probability(lc::GaussianLinearCombination, measurement::Gau
         for j in 1:length(lc)
             cj = lc.coeffs[j]
             sj = lc.states[j]
-            overlap = _gaussian_overlap(si, sj)
+            overlap = _overlap(si, sj)
             norm_squared += real(conj(ci) * cj * overlap)
         end
     end
@@ -574,7 +663,7 @@ function measurement_probability(lc::GaussianLinearCombination, measurement::Gau
     for i in 1:length(lc_measured_states)
         c = lc_measured_coeffs[i]
         state = lc_measured_states[i]
-        state_overlap = _gaussian_overlap(measurement, state)
+        state_overlap = _overlap(measurement, state)
         overlap += c * state_overlap
     end
     prob = abs2(overlap)
@@ -613,7 +702,7 @@ function coherence_measure(lc::GaussianLinearCombination)
     overlap_matrix = Matrix{ComplexF64}(undef, n, n)
     for i in 1:n
         for j in 1:n
-            overlap_matrix[i, j] = _gaussian_overlap(lc.states[i], lc.states[j])
+            overlap_matrix[i, j] = _overlap(lc.states[i], lc.states[j])
         end
     end
     eigenvals = real(eigvals(Hermitian(overlap_matrix)))
@@ -638,7 +727,7 @@ overlaps between component Gaussian states. Unlike quantum purity (which is alwa
 for pure superposition states), this measures the representational efficiency.
 
 The formula used is:
-    P_rep = |Σᵢⱼ cᵢ* cⱼ ⟨ψᵢ|ψⱼ⟩|² / |Σᵢⱼ cᵢ* cⱼ ⟨ψᵢ|ψⱼ⟩|²
+    `P_rep = |Σᵢⱼ cᵢ* cⱼ ⟨ψᵢ|ψⱼ⟩|² / |Σᵢⱼ cᵢ* cⱼ ⟨ψᵢ|ψⱼ⟩|²`
 
 Returns values between 0 and 1, where:
 - 1.0: All component states are orthogonal (most efficient representation)
@@ -663,7 +752,7 @@ function representation_purity(lc::GaussianLinearCombination)
         for j in 1:n
             cj = lc.coeffs[j] 
             state_j = lc.states[j]
-            overlap_ij = _gaussian_overlap(state_i, state_j)
+            overlap_ij = _overlap(state_i, state_j)
             norm_squared += conj(ci) * cj * overlap_ij
         end
     end
@@ -684,8 +773,8 @@ function representation_purity(lc::GaussianLinearCombination)
                 for l in 1:n
                     cl = lc.coeffs[l]
                     state_l = lc.states[l]
-                    overlap_ik = _gaussian_overlap(state_i, state_k)
-                    overlap_lj = _gaussian_overlap(state_l, state_j)
+                    overlap_ik = _overlap(state_i, state_k)
+                    overlap_lj = _overlap(state_l, state_j)
                     tr_rho_squared += conj(ci) * cj * conj(ck) * cl * overlap_ik * overlap_lj
                 end
             end
@@ -706,8 +795,8 @@ state as a linear combination of Gaussian states. It accounts for redundancy
 introduced by overlapping component states.
 
 The calculation constructs an effective density matrix from state overlaps:
-    ρᵢⱼ = cᵢ* cⱼ ⟨ψᵢ|ψⱼ⟩
-and computes S = -Tr(ρ log ρ) from its eigenvalues.
+    `ρᵢⱼ = cᵢ* cⱼ ⟨ψᵢ|ψⱼ⟩`
+and computes `S = -Tr(ρ log ρ)` from its eigenvalues.
 
 Returns values ≥ 0, where:
 - 0.0: All component states are orthogonal (minimal redundancy)
@@ -742,7 +831,7 @@ function representation_entropy(lc::GaussianLinearCombination)
         for j in 1:n
             cj = normalized_coeffs[j]
             sj = lc.states[j]
-            overlap = _gaussian_overlap(si, sj)
+            overlap = _overlap(si, sj)
             ρ[i, j] = conj(ci) * cj * overlap
         end
     end

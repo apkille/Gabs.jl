@@ -1,4 +1,3 @@
-
 ##
 # Predefined Gaussian states
 ##

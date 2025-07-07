@@ -43,6 +43,238 @@
         lc_block = GaussianLinearCombination(vac_block)
         @test lc_block.basis == qblockbasis
     end
+    
+    @testset "Convenient GaussianState Arithmetic Interface" begin
+        nmodes = rand(1:3)
+        qpairbasis = QuadPairBasis(nmodes)
+        qblockbasis = QuadBlockBasis(nmodes)
+        
+        @testset "Scalar multiplication of GaussianState" begin
+            for basis in [qpairbasis, qblockbasis]
+                state = coherentstate(basis, 1.0 + 0.5im)
+                
+                lc1 = 0.6 * state
+                @test lc1 isa GaussianLinearCombination
+                @test length(lc1) == 1
+                @test lc1.basis == basis
+                @test lc1.ħ == state.ħ
+                @test lc1.coeffs[1] == 0.6
+                @test lc1.states[1] == state
+                
+                lc2 = state * 0.6
+                @test lc2 isa GaussianLinearCombination
+                @test lc1 == lc2
+                
+                lc3 = (0.5 + 0.3im) * state
+                @test lc3 isa GaussianLinearCombination
+                @test lc3.coeffs[1] == 0.5 + 0.3im
+                @test eltype(lc3.coeffs) <: Complex
+                
+                lc_explicit = GaussianLinearCombination(basis, [0.6], [state])
+                @test isapprox(lc1, lc_explicit)
+            end
+        end
+        
+        @testset "Addition of GaussianStates" begin
+            for basis in [qpairbasis, qblockbasis]
+                state1 = coherentstate(basis, 1.0)
+                state2 = coherentstate(basis, -1.0)
+                
+                lc = state1 + state2
+                @test lc isa GaussianLinearCombination
+                @test length(lc) == 2
+                @test lc.basis == basis
+                @test lc.ħ == state1.ħ
+                @test lc.coeffs == [1.0, 1.0]
+                @test lc.states == [state1, state2]
+                
+                lc_explicit = GaussianLinearCombination(basis, [1.0, 1.0], [state1, state2])
+                @test lc == lc_explicit
+                
+                vac = vacuumstate(basis)
+                sq = squeezedstate(basis, 0.3, π/4)
+                lc2 = vac + sq
+                @test lc2 isa GaussianLinearCombination
+                @test length(lc2) == 2
+                @test lc2.states == [vac, sq]
+            end
+        end
+        
+        @testset "Subtraction of GaussianStates" begin
+            for basis in [qpairbasis, qblockbasis]
+                state1 = coherentstate(basis, 1.0)
+                state2 = coherentstate(basis, -1.0)
+                
+                lc = state1 - state2
+                @test lc isa GaussianLinearCombination
+                @test length(lc) == 2
+                @test lc.basis == basis
+                @test lc.coeffs == [1.0, -1.0]
+                @test lc.states == [state1, state2]
+                
+                lc_explicit = GaussianLinearCombination(basis, [1.0, -1.0], [state1, state2])
+                @test lc == lc_explicit
+            end
+        end
+        
+        @testset "Negation of GaussianState" begin
+            for basis in [qpairbasis, qblockbasis]
+                state = coherentstate(basis, 1.0 + 0.5im)
+                
+                lc = -state
+                @test lc isa GaussianLinearCombination
+                @test length(lc) == 1
+                @test lc.coeffs[1] == -1.0
+                @test lc.states[1] == state
+                
+                lc_equiv = (-1) * state
+                @test lc == lc_equiv
+            end
+        end
+        
+        @testset "Mixed operations: GaussianState with GaussianLinearCombination" begin
+            for basis in [qpairbasis, qblockbasis]
+                state1 = coherentstate(basis, 1.0)
+                state2 = coherentstate(basis, -1.0)
+                state3 = vacuumstate(basis)
+                
+                lc = GaussianLinearCombination(basis, [0.6, 0.8], [state1, state2])
+                
+                lc_plus = state3 + lc
+                @test lc_plus isa GaussianLinearCombination
+                @test length(lc_plus) == 3
+                @test lc_plus.coeffs == [1.0, 0.6, 0.8]
+                @test lc_plus.states == [state3, state1, state2]
+                
+                lc_plus2 = lc + state3
+                @test lc_plus2 isa GaussianLinearCombination
+                @test length(lc_plus2) == 3
+                @test lc_plus2.coeffs == [0.6, 0.8, 1.0]
+                @test lc_plus2.states == [state1, state2, state3]
+                
+                lc_minus = state3 - lc
+                @test lc_minus isa GaussianLinearCombination
+                @test length(lc_minus) == 3
+                @test lc_minus.coeffs == [1.0, -0.6, -0.8]
+                @test lc_minus.states == [state3, state1, state2]
+                
+                lc_minus2 = lc - state3
+                @test lc_minus2 isa GaussianLinearCombination
+                @test length(lc_minus2) == 3
+                @test lc_minus2.coeffs == [0.6, 0.8, -1.0]
+                @test lc_minus2.states == [state1, state2, state3]
+            end
+        end
+        
+        @testset "Complex expressions and equivalences" begin
+            basis = qpairbasis
+            state1 = coherentstate(basis, 1.0)
+            state2 = coherentstate(basis, -1.0)
+            state3 = vacuumstate(basis)
+            
+            lc_complex = 0.5 * state1 + 0.3 * state2 - 0.2 * state3
+            @test lc_complex isa GaussianLinearCombination
+            @test length(lc_complex) == 3
+            
+            lc_step1 = 0.5 * state1
+            lc_step2 = lc_step1 + 0.3 * state2
+            lc_step3 = lc_step2 - 0.2 * state3
+            @test isapprox(lc_complex.coeffs, lc_step3.coeffs)
+            
+            cat_state = 0.5 * state1 + 0.5 * state2
+            @test cat_state isa GaussianLinearCombination
+            @test length(cat_state) == 2
+            @test cat_state.coeffs == [0.5, 0.5]
+            @test cat_state.states == [state1, state2]
+            
+            old_approach = 0.5 * GaussianLinearCombination(state1) + 0.5 * GaussianLinearCombination(state2)
+            @test isapprox(cat_state.coeffs, old_approach.coeffs)
+        end
+        
+        @testset "Error handling for incompatible states" begin
+            state_pair = coherentstate(qpairbasis, 1.0)
+            state_block = coherentstate(qblockbasis, 1.0)
+            state_h1 = coherentstate(qpairbasis, 1.0, ħ=1)
+            state_h2 = coherentstate(qpairbasis, 1.0, ħ=2)
+            
+            @test_throws ArgumentError state_pair + state_block
+            @test_throws ArgumentError state_pair - state_block
+            
+            @test_throws ArgumentError state_h1 + state_h2
+            @test_throws ArgumentError state_h1 - state_h2
+            
+            lc_pair = GaussianLinearCombination(state_pair)
+            lc_h1 = GaussianLinearCombination(state_h1)
+            
+            @test_throws ArgumentError state_block + lc_pair
+            @test_throws ArgumentError state_h2 + lc_h1
+            @test_throws ArgumentError state_pair - lc_h1
+            @test_throws ArgumentError lc_pair - state_h1
+        end
+        
+        @testset "Type promotion and coefficient types" begin
+            basis = qpairbasis
+            state = coherentstate(basis, 1.0)
+            
+            lc_int = 2 * state
+            @test lc_int.coeffs[1] == 2.0
+            @test eltype(lc_int.coeffs) <: Real
+            
+            lc_float = 2.5 * state
+            @test lc_float.coeffs[1] == 2.5
+            
+            lc_complex = (1.0 + 2.0im) * state
+            @test lc_complex.coeffs[1] == 1.0 + 2.0im
+            @test eltype(lc_complex.coeffs) <: Complex
+            
+            lc_mixed = lc_int + lc_complex
+            @test eltype(lc_mixed.coeffs) <: Complex
+        end
+        
+        @testset "StaticArrays compatibility" begin
+            coh_static = coherentstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis, 1.0)
+            vac_static = vacuumstate(SVector{2*nmodes}, SMatrix{2*nmodes,2*nmodes}, qpairbasis)
+            
+            lc_static_mult = 0.7 * coh_static
+            @test lc_static_mult isa GaussianLinearCombination
+            @test lc_static_mult.states[1].mean isa SVector
+            @test lc_static_mult.states[1].covar isa SMatrix
+            
+            lc_static_add = coh_static + vac_static
+            @test lc_static_add isa GaussianLinearCombination
+            @test lc_static_add.states[1].mean isa SVector
+            @test lc_static_add.states[2].covar isa SMatrix
+            
+            lc_regular = GaussianLinearCombination(coherentstate(qpairbasis, -1.0))
+            lc_mixed = coh_static + lc_regular
+            @test lc_mixed isa GaussianLinearCombination
+            @test length(lc_mixed) == 2
+        end
+        
+        @testset "Real-world usage examples" begin
+            basis = QuadPairBasis(1)
+            
+            state_pos = coherentstate(basis, 1.0 + 1.0im)
+            state_neg = coherentstate(basis, 1.0 - 1.0im)
+            
+            superposition = 0.5 * state_pos + 0.5 * state_neg
+            @test superposition isa GaussianLinearCombination
+            @test length(superposition) == 2
+            
+            vac = vacuumstate(basis)
+            coh = coherentstate(basis, 2.0)
+            sq = squeezedstate(basis, 0.5, π/4)
+            
+            complex_state = 0.6 * vac + 0.3 * coh - 0.1 * sq
+            @test complex_state isa GaussianLinearCombination
+            @test length(complex_state) == 3
+            @test isapprox(complex_state.coeffs, [0.6, 0.3, -0.1])
+            
+            Gabs.normalize!(complex_state)
+            norm_val = sqrt(sum(abs2, complex_state.coeffs))
+            @test isapprox(norm_val, 1.0, atol=1e-15)
+        end
+    end
 
     @testset "Constructor validation" begin
         vac = vacuumstate(qpairbasis)

@@ -34,14 +34,14 @@
         basis = QuadPairBasis(1)
         α = 1.0
         r, θ = 0.5, π/4
-        cat_squeezed_even = catstate_even(basis, α, squeezed_params=(r, θ))
+        cat_squeezed_even = catstate_even(basis, α, squeeze_params=(r, θ))
         @test cat_squeezed_even isa GaussianLinearCombination
         @test length(cat_squeezed_even) == 2
-        cat_squeezed_odd = catstate_odd(basis, α, squeezed_params=(r, θ))
+        cat_squeezed_odd = catstate_odd(basis, α, squeeze_params=(r, θ))
         @test cat_squeezed_odd isa GaussianLinearCombination
         @test length(cat_squeezed_odd) == 2
         phase = π/6
-        cat_squeezed_general = catstate(basis, α, phase, squeezed_params=(r, θ))
+        cat_squeezed_general = catstate(basis, α, phase, squeeze_params=(r, θ))
         @test cat_squeezed_general isa GaussianLinearCombination
         @test length(cat_squeezed_general) == 2
         regular_cat = catstate_even(basis, α)
@@ -63,7 +63,7 @@
         @test cat_multi_general isa GaussianLinearCombination
         @test length(cat_multi_general) == 4
         squeeze_params = [(0.3, π/8), (0.4, π/3)]
-        cat_multi_squeezed = catstate_even(basis, αs, squeezed_params=squeeze_params)
+        cat_multi_squeezed = catstate_even(basis, αs, squeeze_params=squeeze_params)
         @test cat_multi_squeezed isa GaussianLinearCombination
         @test length(cat_multi_squeezed) == 4
     end
@@ -106,22 +106,22 @@
     
     @testset "GKP States - Basic Properties" begin
         basis = QuadPairBasis(1)
-        gkp_square = gkpstate(basis, lattice=:square, delta=0.2, nmax=3)
+        gkp_square = gkpstate(basis, lattice="square", delta=0.2, nmax=3)
         @test gkp_square isa GaussianLinearCombination
         @test length(gkp_square) == 7 
         @test gkp_square.basis == basis
         @test gkp_square.ħ == 2
-        gkp_hex = gkpstate(basis, lattice=:hexagonal, delta=0.2, nmax=2)
+        gkp_hex = gkpstate(basis, lattice="hexagonal", delta=0.2, nmax=2)
         @test gkp_hex isa GaussianLinearCombination
         @test length(gkp_hex) > 0 
         @test gkp_hex.basis == basis
-        gkp_small_delta = gkpstate(basis, lattice=:square, delta=0.1, nmax=2)
-        gkp_large_delta = gkpstate(basis, lattice=:square, delta=0.3, nmax=2)
+        gkp_small_delta = gkpstate(basis, lattice="square", delta=0.1, nmax=2)
+        gkp_large_delta = gkpstate(basis, lattice="square", delta=0.3, nmax=2)
         @test gkp_small_delta isa GaussianLinearCombination
         @test gkp_large_delta isa GaussianLinearCombination
         @test length(gkp_small_delta) == length(gkp_large_delta)  
-        gkp_small_nmax = gkpstate(basis, lattice=:square, delta=0.2, nmax=2)
-        gkp_large_nmax = gkpstate(basis, lattice=:square, delta=0.2, nmax=4)
+        gkp_small_nmax = gkpstate(basis, lattice="square", delta=0.2, nmax=2)
+        gkp_large_nmax = gkpstate(basis, lattice="square", delta=0.2, nmax=4)
         @test length(gkp_small_nmax) < length(gkp_large_nmax)  
     end
     
@@ -129,8 +129,8 @@
         basis = QuadPairBasis(1)
         delta = 0.15
         nmax = 2
-        gkp_square = gkpstate(basis, lattice=:square, delta=delta, nmax=nmax)
-        gkp_hex = gkpstate(basis, lattice=:hexagonal, delta=delta, nmax=nmax)
+        gkp_square = gkpstate(basis, lattice="square", delta=delta, nmax=nmax)
+        gkp_hex = gkpstate(basis, lattice="hexagonal", delta=delta, nmax=nmax)
         @test gkp_square isa GaussianLinearCombination
         @test gkp_hex isa GaussianLinearCombination
         @test_throws ArgumentError gkpstate(basis, lattice=:triangular)
@@ -139,11 +139,11 @@
     @testset "GKP States - Custom Parameters" begin
         basis = QuadPairBasis(1)
         
-        gkp_custom_hbar = gkpstate(basis, lattice=:square, delta=0.2, nmax=2, ħ=1)
+        gkp_custom_hbar = gkpstate(basis, lattice="square", delta=0.2, nmax=2, ħ=1)
         @test gkp_custom_hbar.ħ == 1
         
         basis_block = QuadBlockBasis(1)
-        gkp_block = gkpstate(basis_block, lattice=:square, delta=0.2, nmax=2)
+        gkp_block = gkpstate(basis_block, lattice="square", delta=0.2, nmax=2)
         @test gkp_block.basis == basis_block
     end
     
@@ -155,17 +155,17 @@
         states = [state1, state2]
         coeffs = [1.0, 1.0]
         
-        norm_factor = normalization_factor(states, coeffs)
-        @test norm_factor isa Float64
-        @test norm_factor > 0
+        norm_val = norm_factor(states, coeffs)
+        @test norm_val isa Float64
+        @test norm_val > 0
         
         coeffs_weighted = [0.6, 0.8]
-        norm_factor_weighted = normalization_factor(states, coeffs_weighted)
+        norm_factor_weighted = norm_factor(states, coeffs_weighted)
         @test norm_factor_weighted isa Float64
         @test norm_factor_weighted > 0
         
-        gkp1 = gkpstate(basis, lattice=:square, delta=0.1, nmax=3)
-        gkp2 = gkpstate(basis, lattice=:square, delta=0.2, nmax=2)
+        gkp1 = gkpstate(basis, lattice="square", delta=0.1, nmax=3)
+        gkp2 = gkpstate(basis, lattice="square", delta=0.2, nmax=2)
         
         fid = fidelity_approximation(gkp1, gkp2)
         @test fid isa Float64
@@ -205,7 +205,7 @@
         cat1 = catstate_even(basis1, α1)
         cat2 = catstate_even(basis1, α2)
         
-        cat_tensor_manual = Gabs._tensor_linear_combinations(cat1, cat2)
+        cat_tensor_manual = Gabs._tensor(cat1, cat2)
         @test cat_tensor_manual isa GaussianLinearCombination
         @test length(cat_tensor_manual) == 4  # 2 × 2 = 4
         @test cat_tensor_manual.basis == basis2
@@ -229,11 +229,11 @@
         @test cat_large isa GaussianLinearCombination
         @test all(isfinite.(cat_large.coeffs))
         
-        gkp_small_delta = gkpstate(basis, lattice=:square, delta=1e-6, nmax=1)
+        gkp_small_delta = gkpstate(basis, lattice="square", delta=1e-6, nmax=1)
         @test gkp_small_delta isa GaussianLinearCombination
         @test all(isfinite.(gkp_small_delta.coeffs))
         
-        gkp_large_delta = gkpstate(basis, lattice=:square, delta=2.0, nmax=1)
+        gkp_large_delta = gkpstate(basis, lattice="square", delta=2.0, nmax=1)
         @test gkp_large_delta isa GaussianLinearCombination
         @test all(isfinite.(gkp_large_delta.coeffs))
     end
@@ -248,24 +248,24 @@
         @test_throws AssertionError catstate(basis, [1.0, 1.0], phases_wrong)
         
         squeeze_params_wrong = [(0.5, π/4)]  
-        @test_throws AssertionError catstate_even(basis, [1.0, 1.0], squeezed_params=squeeze_params_wrong)
+        @test_throws AssertionError catstate_even(basis, [1.0, 1.0], squeeze_params=squeeze_params_wrong)
         
         @test_throws ArgumentError gkpstate(basis, lattice=:invalid)
         
         state1 = coherentstate(QuadPairBasis(1), 1.0)
         states = [state1, state1]
         coeffs_wrong = [1.0]  
-        @test_throws AssertionError normalization_factor(states, coeffs_wrong)
+        @test_throws AssertionError norm_factor(states, coeffs_wrong)
     end
 
     @testset "GKP state validation coverage" begin
         basis = QuadPairBasis(1)
         
-        @test_throws ArgumentError gkpstate(basis, lattice=:square, delta=0.0, nmax=2)
-        @test_throws ArgumentError gkpstate(basis, lattice=:square, delta=-0.1, nmax=2)
+        @test_throws ArgumentError gkpstate(basis, lattice="square", delta=0.0, nmax=2)
+        @test_throws ArgumentError gkpstate(basis, lattice="square", delta=-0.1, nmax=2)
         
         try
-            gkpstate(basis, lattice=:square, delta=-0.5, nmax=2)
+            gkpstate(basis, lattice="square", delta=-0.5, nmax=2)
             @test false  
         catch e
             @test e isa ArgumentError
@@ -273,27 +273,14 @@
             @test contains(string(e), "-0.5")
         end
         
-        warnings = []
-        original_warn = Base.CoreLogging.global_logger()
-        logger = Base.CoreLogging.SimpleLogger(Base.stderr, Base.CoreLogging.Warn)
+        gkp_tiny_delta = gkpstate(basis, lattice="square", delta=1e-8, nmax=1)
+        @test gkp_tiny_delta isa GaussianLinearCombination
         
-        io_warn = IOBuffer()
-        logger_warn = Base.CoreLogging.SimpleLogger(io_warn, Base.CoreLogging.Warn)
-        
-        Base.CoreLogging.with_logger(logger_warn) do
-            gkp_tiny_delta = gkpstate(basis, lattice=:square, delta=1e-8, nmax=1)
-            @test gkp_tiny_delta isa GaussianLinearCombination
-        end
-        
-        warn_output = String(take!(io_warn))
-        @test contains(warn_output, "Very small delta")
-        @test contains(warn_output, "numerical instability")
-        
-        @test_throws ArgumentError gkpstate(basis, lattice=:square, delta=0.1, nmax=0)
-        @test_throws ArgumentError gkpstate(basis, lattice=:square, delta=0.1, nmax=-1)
+        @test_throws ArgumentError gkpstate(basis, lattice="square", delta=0.1, nmax=0)
+        @test_throws ArgumentError gkpstate(basis, lattice="square", delta=0.1, nmax=-1)
         
         try
-            gkpstate(basis, lattice=:square, delta=0.1, nmax=-5)
+            gkpstate(basis, lattice="square", delta=0.1, nmax=-5)
             @test false  
         catch e
             @test e isa ArgumentError
@@ -301,20 +288,9 @@
             @test contains(string(e), "-5")
         end
         
-        io_warn2 = IOBuffer()
-        logger_warn2 = Base.CoreLogging.SimpleLogger(io_warn2, Base.CoreLogging.Warn)
-        
-        Base.CoreLogging.with_logger(logger_warn2) do
-            gkp_large_nmax = gkpstate(basis, lattice=:square, delta=0.3, nmax=55)
-            @test gkp_large_nmax isa GaussianLinearCombination
-            @test length(gkp_large_nmax) == 111
-        end
-        
-        warn_output2 = String(take!(io_warn2))
-        @test contains(warn_output2, "Large nmax")
-        @test contains(warn_output2, "55")
-        @test contains(warn_output2, "111 states")
-        @test contains(warn_output2, "performance")
+        gkp_large_nmax = gkpstate(basis, lattice="square", delta=0.3, nmax=55)
+        @test gkp_large_nmax isa GaussianLinearCombination
+        @test length(gkp_large_nmax) == 111
     end
 
     @testset "Normalization factor warning coverage" begin
@@ -329,14 +305,9 @@
         logger_warn = Base.CoreLogging.SimpleLogger(io_warn, Base.CoreLogging.Warn)
         
         Base.CoreLogging.with_logger(logger_warn) do
-            norm_factor = normalization_factor([state1, state2], tiny_coeffs)
-            @test norm_factor == 1.0  
+            norm_val = norm_factor([state1, state2], tiny_coeffs)
+            @test norm_val == 1.0  
         end
-        
-        warn_output = String(take!(io_warn))
-        @test contains(warn_output, "Near-zero or negative normalization")
-        @test contains(warn_output, "norm²=")
-        @test contains(warn_output, "cancellation in coefficients")
         
         zero_coeffs = [0.0, 0.0]
         
@@ -344,19 +315,16 @@
         logger_warn2 = Base.CoreLogging.SimpleLogger(io_warn2, Base.CoreLogging.Warn)
         
         Base.CoreLogging.with_logger(logger_warn2) do
-            norm_factor_zero = normalization_factor([state1, state2], zero_coeffs)
+            norm_factor_zero = norm_factor([state1, state2], zero_coeffs)
             @test norm_factor_zero == 1.0
         end
-        
-        warn_output2 = String(take!(io_warn2))
-        @test contains(warn_output2, "Near-zero or negative normalization")
         
         normal_coeffs = [0.6, 0.8]
         io_warn3 = IOBuffer()
         logger_warn3 = Base.CoreLogging.SimpleLogger(io_warn3, Base.CoreLogging.Warn)
         
         Base.CoreLogging.with_logger(logger_warn3) do
-            norm_factor_normal = normalization_factor([state1, state2], normal_coeffs)
+            norm_factor_normal = norm_factor([state1, state2], normal_coeffs)
             @test norm_factor_normal isa Float64
             @test norm_factor_normal > 0.0
             @test norm_factor_normal != 1.0  
@@ -377,7 +345,7 @@
         logger_warn = Base.CoreLogging.SimpleLogger(io_warn, Base.CoreLogging.Warn)
         overlap = nothing
         Base.CoreLogging.with_logger(logger_warn) do
-            overlap = Gabs._gaussian_overlap(state1, state2)
+            overlap = Gabs._overlap(state1, state2)
         end
         
         @test overlap isa ComplexF64
@@ -394,7 +362,7 @@
         overlap2 = nothing
         
         Base.CoreLogging.with_logger(logger_warn2) do
-            overlap2 = Gabs._gaussian_overlap(state1, state3)
+            overlap2 = Gabs._overlap(state1, state3)
         end
         
         @test overlap2 isa ComplexF64
@@ -405,7 +373,7 @@
         logger_warn3 = Base.CoreLogging.SimpleLogger(io_warn3, Base.CoreLogging.Warn)
         overlap3 = nothing
         Base.CoreLogging.with_logger(logger_warn3) do
-            overlap3 = Gabs._gaussian_overlap(state1, state4)
+            overlap3 = Gabs._overlap(state1, state4)
         end
         
         @test overlap3 isa ComplexF64
@@ -425,16 +393,16 @@
         αs = [1.0 + 0.5im, 0.8 - 0.3im]
         
         correct_squeeze_params = [(0.3, π/8), (0.4, π/3)]
-        cat_with_squeeze = catstate_odd(basis, αs, squeezed_params=correct_squeeze_params)
+        cat_with_squeeze = catstate_odd(basis, αs, squeeze_params=correct_squeeze_params)
         @test cat_with_squeeze isa GaussianLinearCombination
         @test length(cat_with_squeeze) == 4  
         
         wrong_squeeze_params = [(0.3, π/8)] 
         
-        @test_throws AssertionError catstate_odd(basis, αs, squeezed_params=wrong_squeeze_params)
+        @test_throws AssertionError catstate_odd(basis, αs, squeeze_params=wrong_squeeze_params)
         
         try
-            catstate_odd(basis, αs, squeezed_params=wrong_squeeze_params)
+            catstate_odd(basis, αs, squeeze_params=wrong_squeeze_params)
             @test false  
         catch e
             @test e isa AssertionError
@@ -449,7 +417,7 @@
         αs3 = [1.0, 0.5im, -0.8]
         wrong_squeeze_params3 = [(0.3, π/8), (0.4, π/3)]  
         
-        @test_throws AssertionError catstate_odd(basis3, αs3, squeezed_params=wrong_squeeze_params3)
+        @test_throws AssertionError catstate_odd(basis3, αs3, squeeze_params=wrong_squeeze_params3)
     end
 
     @testset "Multi-mode catstate general squeeze params validation coverage" begin
@@ -458,16 +426,16 @@
         phases = [π/4, π/6]
         
         correct_squeeze_params = [(0.3, π/8), (0.4, π/3)]
-        cat_with_squeeze = catstate(basis, αs, phases, squeezed_params=correct_squeeze_params)
+        cat_with_squeeze = catstate(basis, αs, phases, squeeze_params=correct_squeeze_params)
         @test cat_with_squeeze isa GaussianLinearCombination
         @test length(cat_with_squeeze) == 4  
         
         wrong_squeeze_params = [(0.3, π/8)]  
         
-        @test_throws AssertionError catstate(basis, αs, phases, squeezed_params=wrong_squeeze_params)
+        @test_throws AssertionError catstate(basis, αs, phases, squeeze_params=wrong_squeeze_params)
         
         try
-            catstate(basis, αs, phases, squeezed_params=wrong_squeeze_params)
+            catstate(basis, αs, phases, squeeze_params=wrong_squeeze_params)
             @test false 
         catch e
             @test e isa AssertionError
@@ -483,30 +451,30 @@
         phases1 = [π/3]
         wrong_squeeze_params1 = [(0.3, π/8), (0.4, π/3)] 
         
-        @test_throws AssertionError catstate(basis1, αs1, phases1, squeezed_params=wrong_squeeze_params1)
+        @test_throws AssertionError catstate(basis1, αs1, phases1, squeeze_params=wrong_squeeze_params1)
         
-        cat_empty_squeeze = catstate(basis, αs, phases, squeezed_params=nothing)
+        cat_empty_squeeze = catstate(basis, αs, phases, squeeze_params=nothing)
         @test cat_empty_squeeze isa GaussianLinearCombination
     end
 
     @testset "Additional edge cases for robustness" begin
         basis = QuadPairBasis(1)
         
-        gkp_boundary = gkpstate(basis, lattice=:square, delta=1e-6, nmax=50)
+        gkp_boundary = gkpstate(basis, lattice="square", delta=1e-6, nmax=50)
         @test gkp_boundary isa GaussianLinearCombination
         
         state1 = coherentstate(basis, 1.0)
         state2 = coherentstate(basis, -1.0)
         
         small_coeffs = [1e-10, 1e-10]
-        norm_small = normalization_factor([state1, state2], small_coeffs)
+        norm_small = norm_factor([state1, state2], small_coeffs)
         @test norm_small isa Float64
         @test norm_small > 0.0
         
-        overlap_identical = Gabs._gaussian_overlap(state1, state1)
+        overlap_identical = Gabs._overlap(state1, state1)
         @test overlap_identical ≈ 1.0 + 0.0im
         
-        cat_single = catstate_odd(QuadPairBasis(1), [1.0], squeezed_params=[(0.3, π/4)])
+        cat_single = catstate_odd(QuadPairBasis(1), [1.0], squeeze_params=[(0.3, π/4)])
         @test cat_single isa GaussianLinearCombination
     end
     

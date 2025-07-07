@@ -1,8 +1,8 @@
 # src/nongaussian_states.jl
 """
-    catstate_even(basis::SymplecticBasis, α::Number; squeezed_params=nothing, ħ=2)
+    catstate_even(basis::SymplecticBasis, α::Number; squeeze_params=nothing, ħ=2)
 
-Create an even Schrödinger cat state |cat+⟩ = (|α⟩ + |-α⟩)/√N where N is the normalization constant.
+Create an even Schrödinger cat state `|cat+⟩ = (|α⟩ + |-α⟩)/√N` where `N` is the normalization constant.
 
 The even cat state is a quantum superposition of two coherent states (or squeezed states) with 
 opposite phases. The normalization accounts for the overlap between the two component states.
@@ -10,27 +10,24 @@ opposite phases. The normalization accounts for the overlap between the two comp
 # Arguments
 - `basis::SymplecticBasis`: The symplectic basis for the state
 - `α::Number`: Complex amplitude of the coherent states
-- `squeezed_params=nothing`: Optional tuple (r, θ) for squeezed cat states where r is the squeeze parameter and θ is the squeeze angle
+- `squeeze_params=nothing`: Optional tuple `(r, θ)` for squeezed cat states where `r` is the squeeze parameter and `θ` is the squeeze angle
 - `ħ=2`: Reduced Planck constant
 
 # Mathematical Description:
-For coherent states: |cat+⟩ = (|α⟩ + |-α⟩)/√(2(1 + exp(-2|α|²)))
-For squeezed states: The squeezed vacuum is first created, then displaced to ±α.
+For coherent states: `|cat+⟩ = (|α⟩ + |-α⟩)/√(2(1 + exp(-2|α|²)))`
+For squeezed states: The squeezed vacuum is first created, then displaced to `±α`.
 """
-function catstate_even(basis::SymplecticBasis, α::Number; squeezed_params=nothing, ħ=2)
-    if squeezed_params === nothing
+function catstate_even(basis::SymplecticBasis, α::Number; squeeze_params=nothing, ħ=2)
+    if squeeze_params === nothing
         state_plus = coherentstate(basis, α, ħ=ħ)
         state_minus = coherentstate(basis, -α, ħ=ħ)
     else
-        r, θ = squeezed_params
+        r, θ = squeeze_params
         vac = vacuumstate(basis, ħ=ħ)
-        
         squeeze_op = squeeze(basis, r, θ, ħ=ħ)
         squeezed_vac = squeeze_op * vac
-        
         displace_plus = displace(basis, α, ħ=ħ)
         displace_minus = displace(basis, -α, ħ=ħ)
-        
         state_plus = displace_plus * squeezed_vac
         state_minus = displace_minus * squeezed_vac
     end
@@ -42,9 +39,9 @@ function catstate_even(basis::SymplecticBasis, α::Number; squeezed_params=nothi
 end
 
 """
-    catstate_odd(basis::SymplecticBasis, α::Number; squeezed_params=nothing, ħ=2)
+    catstate_odd(basis::SymplecticBasis, α::Number; squeeze_params=nothing, ħ=2)
 
-Create an odd Schrödinger cat state |cat-⟩ = (|α⟩ - |-α⟩)/√N where N is the normalization constant.
+Create an odd Schrödinger cat state `|cat-⟩ = (|α⟩ - |-α⟩)/√N` where `N` is the normalization constant.
 
 The odd cat state is a quantum superposition of two coherent states (or squeezed states) with 
 opposite phases and a relative minus sign.
@@ -52,19 +49,19 @@ opposite phases and a relative minus sign.
 # Arguments
 - `basis::SymplecticBasis`: The symplectic basis for the state
 - `α::Number`: Complex amplitude of the coherent states
-- `squeezed_params=nothing`: Optional tuple (r, θ) for squeezed cat states
+- `squeeze_params=nothing`: Optional tuple `(r, θ)` for squeezed cat states
 - `ħ=2`: Reduced Planck constant
 
 # Mathematical Description
-For coherent states: |cat-⟩ = (|α⟩ - |-α⟩)/√(2(1 - exp(-2|α|²)))
+For coherent states: `|cat-⟩ = (|α⟩ - |-α⟩)/√(2(1 - exp(-2|α|²)))`
 
 """
-function catstate_odd(basis::SymplecticBasis, α::Number; squeezed_params=nothing, ħ=2)
-    if squeezed_params === nothing
+function catstate_odd(basis::SymplecticBasis, α::Number; squeeze_params=nothing, ħ=2)
+    if squeeze_params === nothing
         state_plus = coherentstate(basis, α, ħ=ħ)
         state_minus = coherentstate(basis, -α, ħ=ħ)
     else
-        r, θ = squeezed_params
+        r, θ = squeeze_params
         vac = vacuumstate(basis, ħ=ħ)
         squeeze_op = squeeze(basis, r, θ, ħ=ħ)
         squeezed_vac = squeeze_op * vac
@@ -81,29 +78,29 @@ function catstate_odd(basis::SymplecticBasis, α::Number; squeezed_params=nothin
 end
 
 """
-    catstate(basis::SymplecticBasis, α::Number, phase::Real=0; squeezed_params=nothing, ħ=2)
+    catstate(basis::SymplecticBasis, α::Number, phase::Real=0; squeeze_params=nothing, ħ=2)
 
-Create a general Schrödinger cat state |cat⟩ = (|α⟩ + e^(iφ)|-α⟩)/√N where φ is the relative phase.
+Create a general Schrödinger cat state `|cat⟩ = (|α⟩ + e^(iφ)|-α⟩)/√N` where `φ` is the relative phase.
 
-This is the most general form of cat state, which reduces to even (φ=0) or odd (φ=π) cat states
+This is the most general form of cat state, which reduces to even `(φ=0)` or odd `(φ=π)` cat states
 for specific phase values.
 
 # Arguments
 - `basis::SymplecticBasis`: The symplectic basis for the state
 - `α::Number`: Complex amplitude of the coherent states
 - `phase::Real=0`: Relative phase between the two coherent state components
-- `squeezed_params=nothing`: Optional tuple (r, θ) for squeezed cat states
+- `squeeze_params=nothing`: Optional tuple `(r, θ)` for squeezed cat states
 - `ħ=2`: Reduced Planck constant
 
 # Mathematical Description
-|cat⟩ = (|α⟩ + e^(iφ)|-α⟩)/√(2(1 + Re(e^(iφ)exp(-2|α|²))))
+`|cat⟩ = (|α⟩ + e^(iφ)|-α⟩)/√(2(1 + Re(e^(iφ)exp(-2|α|²))))`
 """
-function catstate(basis::SymplecticBasis, α::Number, phase::Real=0; squeezed_params=nothing, ħ=2)
-    if squeezed_params === nothing
+function catstate(basis::SymplecticBasis, α::Number, phase::Real=0; squeeze_params=nothing, ħ=2)
+    if squeeze_params === nothing
         state_plus = coherentstate(basis, α, ħ=ħ)
         state_minus = coherentstate(basis, -α, ħ=ħ)
     else
-        r, θ = squeezed_params
+        r, θ = squeeze_params
         vac = vacuumstate(basis, ħ=ħ)
         squeeze_op = squeeze(basis, r, θ, ħ=ħ)
         squeezed_vac = squeeze_op * vac
@@ -138,37 +135,36 @@ They are constructed as superpositions of squeezed states positioned at lattice 
 - `nmax=5`: Maximum lattice index for truncation (controls number of peaks)
 - `ħ=2`: Reduced Planck constant
 
+# Notes
+- Very small `delta` values (< 1e-6) may cause numerical instability
+- Large `nmax` values (> 50) create many states and may impact performance
+- For square lattice: creates `2*nmax + 1` total states
+
 # Mathematical Description
-For square lattice: |GKP⟩ = Σₖ |xₖ⟩ where xₖ = √(2πħ) × k for integer k ∈ [-nmax, nmax]
-Each |xₖ⟩ is approximated by a squeezed state with squeezing delta in the conjugate direction.
+For square lattice: `|GKP⟩ = Σₖ |xₖ⟩` where `xₖ = √(2πħ) × k` for integer `k ∈ [-nmax, nmax]`
+Each `|xₖ⟩` is approximated by a squeezed state with squeezing delta in the conjugate direction.
 """
-function gkpstate(basis::SymplecticBasis; lattice=:square, delta=0.1, nmax=5, ħ=2)
-    if lattice == :square
-        return _gkpstate_square(basis, delta, nmax, ħ)
-    elseif lattice == :hexagonal
-        return _gkpstate_hexagonal(basis, delta, nmax, ħ)
+function gkpstate(basis::SymplecticBasis; lattice="square", delta=0.1, nmax=5, ħ=2)
+    if lattice == "square"
+        return _square(basis, delta, nmax, ħ)
+    elseif lattice == "hexagonal"
+        return _hexagonal(basis, delta, nmax, ħ)
     else
-        throw(ArgumentError("lattice must be :square or :hexagonal"))
+        throw(ArgumentError("lattice must be \"square\" or \"hexagonal\", got \"$lattice\""))
     end
 end
 
 """
-    _gkpstate_square(basis::SymplecticBasis, delta, nmax, ħ)
+    _square(basis::SymplecticBasis, delta, nmax, ħ)
 
 Internal function to create square lattice GKP state.
 """
-function _gkpstate_square(basis::SymplecticBasis, delta, nmax, ħ)
+function _square(basis::SymplecticBasis, delta, nmax, ħ)
     if delta <= 0
         throw(ArgumentError("delta must be positive, got $delta"))
     end
-    if delta < 1e-6
-        @warn "Very small delta=$delta may cause numerical instability"
-    end
     if nmax <= 0
         throw(ArgumentError("nmax must be positive, got $nmax"))
-    end
-    if nmax > 50
-        @warn "Large nmax=$nmax will create $(2*nmax+1) states, consider smaller value for performance"
     end
     lattice_spacing = sqrt(2 * π * ħ)
     lattice_points = [k * lattice_spacing for k in -nmax:nmax]
@@ -184,17 +180,17 @@ function _gkpstate_square(basis::SymplecticBasis, delta, nmax, ħ)
         states[i] = final_state
     end
     lc = GaussianLinearCombination(basis, coeffs, states)
-    norm_factor = normalization_factor(lc.states, lc.coeffs)
-    lc.coeffs .= lc.coeffs .* norm_factor
+    norm_val = norm_factor(lc.states, lc.coeffs)
+    lc.coeffs .= lc.coeffs .* norm_val
     return lc
 end
 
 """
-    _gkpstate_hexagonal(basis::SymplecticBasis, delta, nmax, ħ)
+    _hexagonal(basis::SymplecticBasis, delta, nmax, ħ)
 
 Internal function to create hexagonal lattice GKP state.
 """
-function _gkpstate_hexagonal(basis::SymplecticBasis, delta, nmax, ħ)
+function _hexagonal(basis::SymplecticBasis, delta, nmax, ħ)
     lattice_spacing = sqrt(2 * π * ħ / sqrt(3))  
     states = GaussianState[]
     coeffs = Float64[]
@@ -216,54 +212,59 @@ function _gkpstate_hexagonal(basis::SymplecticBasis, delta, nmax, ħ)
         end
     end
     lc = GaussianLinearCombination(basis, coeffs, states)
-    norm_factor = normalization_factor(lc.states, lc.coeffs)
-    lc.coeffs .= lc.coeffs .* norm_factor
+    norm_val = norm_factor(lc.states, lc.coeffs)
+    lc.coeffs .= lc.coeffs .* norm_val
     return lc
 end
 
 """
-    normalization_factor(states::Vector{GaussianState}, coeffs::Vector{<:Number})
+    norm_factor(states::Vector{GaussianState}, coeffs::Vector{<:Number})
 
 Calculate the normalization factor for a linear combination of Gaussian states.
 
-This function computes the normalization constant needed to ensure ⟨ψ|ψ⟩ = 1 for a state
-|ψ⟩ = Σᵢ cᵢ|ψᵢ⟩ by calculating all overlap integrals between component states.
+This function computes the normalization constant needed to ensure `⟨ψ|ψ⟩ = 1` for a state
+`|ψ⟩ = Σᵢ cᵢ|ψᵢ⟩` by calculating all overlap integrals between component states.
 
 # Arguments
 - `states::Vector{GaussianState}`: Vector of Gaussian states
 - `coeffs::Vector{<:Number}`: Vector of coefficients
 
 # Returns
-- `Float64`: Normalization factor N such that the state Σᵢ (cᵢ/N)|ψᵢ⟩ is normalized
+- `Float64`: Normalization factor `N` such that the state `Σᵢ (cᵢ/N)|ψᵢ⟩` is normalized
+
+# Notes
+- Returns 1.0 if near-zero or negative normalization is detected (may indicate coefficient cancellation)
+- Numerical instabilities can occur with very small coefficients or nearly orthogonal states
 
 # Mathematical Description
-N² = Σᵢⱼ cᵢ* cⱼ ⟨ψᵢ|ψⱼ⟩
-
-
+`N² = Σᵢⱼ cᵢ* cⱼ ⟨ψᵢ|ψⱼ⟩`
 """
-function normalization_factor(states::Vector{<:GaussianState}, coeffs::Vector{<:Number})
+function norm_factor(states::Vector{<:GaussianState}, coeffs::Vector{<:Number})
     n = length(states)
     @assert length(coeffs) == n "Number of coefficients must match number of states"
     norm_squared = 0.0
     for i in 1:n
         for j in 1:n
-            overlap = _gaussian_overlap(states[i], states[j])
+            overlap = _overlap(states[i], states[j])
             norm_squared += real(conj(coeffs[i]) * coeffs[j] * overlap)
         end
     end
     if norm_squared <= 1e-15
-        @warn "Near-zero or negative normalization detected (norm²=$norm_squared). Check for cancellation in coefficients."
         return 1.0
     end
     return 1.0 / sqrt(norm_squared)
 end
 
 """
-    _gaussian_overlap(state1::GaussianState, state2::GaussianState)
+    _overlap(state1::GaussianState, state2::GaussianState)
 
-Calculate the overlap ⟨ψ₁|ψ₂⟩ between two Gaussian states.
+Calculate the overlap `⟨ψ₁|ψ₂⟩` between two Gaussian states.
+
+# Notes
+- Returns 0.0 if numerical instabilities are encountered during calculation
+- Handles edge cases like singular covariance matrices gracefully
 """
-function _gaussian_overlap(state1::GaussianState, state2::GaussianState)
+function _overlap(state1::GaussianState, state2::GaussianState)
     @assert state1.basis == state2.basis "States must have the same basis"
     @assert state1.ħ == state2.ħ "States must have the same ħ"
     if state1 === state2
@@ -283,7 +284,6 @@ function _gaussian_overlap(state1::GaussianState, state2::GaussianState)
         overlap = exp_factor * det_factor
         return ComplexF64(overlap)
     catch e
-        @warn "Numerical instability in overlap calculation, returning 0"
         return ComplexF64(0.0)
     end
 end
@@ -301,7 +301,7 @@ infinite-energy GKP state.
 - `finite_gkp::GaussianLinearCombination`: Finite approximation
 
 # Returns
-- `Float64`: Fidelity estimate F = |⟨ideal|finite⟩|²
+- `Float64`: Fidelity estimate `F = |⟨ideal|finite⟩|²`
 
 """
 function fidelity_approximation(ideal_gkp::GaussianLinearCombination, finite_gkp::GaussianLinearCombination)
@@ -310,104 +310,104 @@ function fidelity_approximation(ideal_gkp::GaussianLinearCombination, finite_gkp
     overlap = 0.0 + 0.0im
     for (c1, s1) in ideal_gkp
         for (c2, s2) in finite_gkp
-            overlap += conj(c1) * c2 * _gaussian_overlap(s1, s2)
+            overlap += conj(c1) * c2 * _overlap(s1, s2)
         end
     end
     return abs2(overlap)
 end
 
 """
-    catstate_even(basis::SymplecticBasis, αs::AbstractVector; squeezed_params=nothing, ħ=2)
+    catstate_even(basis::SymplecticBasis, αs::AbstractVector; squeeze_params=nothing, ħ=2)
 
 Create multi-mode even cat states as tensor products of single-mode cat states.
 
 # Arguments
 - `basis::SymplecticBasis`: The symplectic basis for the multi-mode system
 - `αs::AbstractVector`: Vector of complex amplitudes for each mode
-- `squeezed_params=nothing`: Optional vector of tuples (r, θ) for each mode
+- `squeeze_params=nothing`: Optional vector of tuples `(r, θ)` for each mode
 - `ħ=2`: Reduced Planck constant
 """
-function catstate_even(basis::SymplecticBasis, αs::AbstractVector; squeezed_params=nothing, ħ=2)
+function catstate_even(basis::SymplecticBasis, αs::AbstractVector; squeeze_params=nothing, ħ=2)
     nmodes = basis.nmodes
     @assert length(αs) == nmodes "Number of amplitudes must match number of modes"
-    if squeezed_params !== nothing
-        @assert length(squeezed_params) == nmodes "Number of squeeze parameters must match number of modes"
+    if squeeze_params !== nothing
+        @assert length(squeeze_params) == nmodes "Number of squeeze parameters must match number of modes"
     end
     single_mode_basis = typeof(basis)(1)
     cat_states = []
     for i in 1:nmodes
         α = αs[i]
-        squeeze_param = squeezed_params === nothing ? nothing : squeezed_params[i]
-        cat = catstate_even(single_mode_basis, α, squeezed_params=squeeze_param, ħ=ħ)
+        squeeze_param = squeeze_params === nothing ? nothing : squeeze_params[i]
+        cat = catstate_even(single_mode_basis, α, squeeze_params=squeeze_param, ħ=ħ)
         push!(cat_states, cat)
     end
     result = cat_states[1]
     for i in 2:nmodes
-        result = _tensor_linear_combinations(result, cat_states[i])
+        result = _tensor(result, cat_states[i])
     end
     return result
 end
 
 """
-    catstate_odd(basis::SymplecticBasis, αs::AbstractVector; squeezed_params=nothing, ħ=2)
+    catstate_odd(basis::SymplecticBasis, αs::AbstractVector; squeeze_params=nothing, ħ=2)
 
 Create multi-mode odd cat states as tensor products of single-mode cat states.
 """
-function catstate_odd(basis::SymplecticBasis, αs::AbstractVector; squeezed_params=nothing, ħ=2)
+function catstate_odd(basis::SymplecticBasis, αs::AbstractVector; squeeze_params=nothing, ħ=2)
     nmodes = basis.nmodes
     @assert length(αs) == nmodes "Number of amplitudes must match number of modes"
-    if squeezed_params !== nothing
-        @assert length(squeezed_params) == nmodes "Number of squeeze parameters must match number of modes"
+    if squeeze_params !== nothing
+        @assert length(squeeze_params) == nmodes "Number of squeeze parameters must match number of modes"
     end
     single_mode_basis = typeof(basis)(1)
     cat_states = []
     for i in 1:nmodes
         α = αs[i]
-        squeeze_param = squeezed_params === nothing ? nothing : squeezed_params[i]
-        cat = catstate_odd(single_mode_basis, α, squeezed_params=squeeze_param, ħ=ħ)
+        squeeze_param = squeeze_params === nothing ? nothing : squeeze_params[i]
+        cat = catstate_odd(single_mode_basis, α, squeeze_params=squeeze_param, ħ=ħ)
         push!(cat_states, cat)
     end
     result = cat_states[1]
     for i in 2:nmodes
-        result = _tensor_linear_combinations(result, cat_states[i])
+        result = _tensor(result, cat_states[i])
     end
     return result
 end
 
 """
-    catstate(basis::SymplecticBasis, αs::AbstractVector, phases::AbstractVector=zeros(length(αs)); squeezed_params=nothing, ħ=2)
+    catstate(basis::SymplecticBasis, αs::AbstractVector, phases::AbstractVector=zeros(length(αs)); squeeze_params=nothing, ħ=2)
 
 Create multi-mode general cat states as tensor products of single-mode cat states.
 """
-function catstate(basis::SymplecticBasis, αs::AbstractVector, phases::AbstractVector=zeros(length(αs)); squeezed_params=nothing, ħ=2)
+function catstate(basis::SymplecticBasis, αs::AbstractVector, phases::AbstractVector=zeros(length(αs)); squeeze_params=nothing, ħ=2)
     nmodes = basis.nmodes
     @assert length(αs) == nmodes "Number of amplitudes must match number of modes"
     @assert length(phases) == nmodes "Number of phases must match number of modes"
-    if squeezed_params !== nothing
-        @assert length(squeezed_params) == nmodes "Number of squeeze parameters must match number of modes"
+    if squeeze_params !== nothing
+        @assert length(squeeze_params) == nmodes "Number of squeeze parameters must match number of modes"
     end
     single_mode_basis = typeof(basis)(1)
     cat_states = []
     for i in 1:nmodes
         α = αs[i]
         phase = phases[i]
-        squeeze_param = squeezed_params === nothing ? nothing : squeezed_params[i]
-        cat = catstate(single_mode_basis, α, phase, squeezed_params=squeeze_param, ħ=ħ)
+        squeeze_param = squeeze_params === nothing ? nothing : squeeze_params[i]
+        cat = catstate(single_mode_basis, α, phase, squeeze_params=squeeze_param, ħ=ħ)
         push!(cat_states, cat)
     end
     result = cat_states[1]
     for i in 2:nmodes
-        result = _tensor_linear_combinations(result, cat_states[i])
+        result = _tensor(result, cat_states[i])
     end
     return result
 end
 
 """
-    _tensor_linear_combinations(lc1::GaussianLinearCombination, lc2::GaussianLinearCombination)
+    _tensor(lc1::GaussianLinearCombination, lc2::GaussianLinearCombination)
 
 Internal function to compute tensor product of two GaussianLinearCombination objects.
 """
-function _tensor_linear_combinations(lc1::GaussianLinearCombination, lc2::GaussianLinearCombination)
+function _tensor(lc1::GaussianLinearCombination, lc2::GaussianLinearCombination)
     @assert typeof(lc1.basis) == typeof(lc2.basis) "Linear combinations must have compatible bases"
     @assert lc1.ħ == lc2.ħ "Linear combinations must have the same ħ"
     new_basis = lc1.basis ⊕ lc2.basis
