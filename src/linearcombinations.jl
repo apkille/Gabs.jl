@@ -1,5 +1,4 @@
 # Linear combinations of Gaussian states
-
 """
     GaussianLinearCombination{B<:SymplecticBasis,C,S}
 
@@ -41,7 +40,7 @@ julia> # Direct arithmetic with GaussianStates
 julia> cat_state = 0.5 * state1 + 0.5 * state2
 GaussianLinearCombination with 2 terms for 1 mode.
   symplectic basis: QuadPairBasis
-  ħ = 2
+  `ħ = 2`
   [1] 0.5 * GaussianState
   [2] 0.5 * GaussianState
 
@@ -49,7 +48,7 @@ julia> # Alternative explicit construction
 julia> lcgs = GaussianLinearCombination([0.6, 0.8], [state1, state2])
 GaussianLinearCombination with 2 terms for 1 mode.
   symplectic basis: QuadPairBasis
-  ħ = 2
+  `ħ = 2`
   [1] 0.6 * GaussianState
   [2] 0.8 * GaussianState
 """
@@ -410,7 +409,7 @@ end
     tensor(::Type{Tc}, ::Type{Ts}, lc1::GaussianLinearCombination, lc2::GaussianLinearCombination)
 
 Compute tensor product of two linear combinations with specified output types.
-Creates all pairwise tensor products: Σᵢⱼ cᵢcⱼ |ψᵢ⟩ ⊗ |ϕⱼ⟩.
+Creates all pairwise tensor products: `Σᵢⱼ cᵢcⱼ |ψᵢ⟩ ⊗ |ϕⱼ⟩`.
 """
 function tensor(::Type{Tm}, ::Type{Tc}, lc1::GaussianLinearCombination, lc2::GaussianLinearCombination) where {Tm,Tc}
     typeof(lc1.basis) == typeof(lc2.basis) || throw(ArgumentError(SYMPLECTIC_ERROR))
@@ -542,15 +541,28 @@ function cross_wigner(state1::GaussianState,
     V1, V2 = state1.covar, state2.covar
     n = length(μ1) ÷ 2
     ħ = state1.ħ
+    μ̄ = similar(μ1)     
+    Δμ = similar(μ1)     
+    dx = similar(x)      
+    Vavg = similar(V1)   
+    temp = similar(dx)   
+    for i in eachindex(μ1)
+        μ̄[i] = 0.5 * (μ1[i] + μ2[i])
+        Δμ[i] = μ1[i] - μ2[i]
+    end
+    for i in eachindex(V1)
+        Vavg[i] = 0.5 * (V1[i] + V2[i])
+    end
+    for i in eachindex(x)
+        dx[i] = x[i] - μ̄[i]
+    end
     Ω = symplecticform(state1.basis)
-    μ̄ = 0.5*(μ1 .+ μ2)
-    Δμ = μ1 .- μ2
-    Vavg = 0.5 * (V1 .+ V2)
     lognorm = -n*log(2π) - 0.5*logdet(Vavg)
     norm = exp(lognorm)
-    dx = x .- μ̄
-    gauss = exp(-0.5 * dot(dx, Vavg \ dx))
-    phase = cis(dot(Δμ, Ω*dx) / ħ)
+    mul!(temp, Ω, dx)  
+    phase = cis(dot(Δμ, temp) / ħ)
+    temp .= Vavg \ dx  
+    gauss = exp(-0.5 * dot(dx, temp))
     return norm * gauss * phase
 end
 
@@ -584,13 +596,29 @@ function cross_wignerchar(state1::GaussianState, state2::GaussianState, xi::Abst
     state1.basis == state2.basis || throw(ArgumentError(SYMPLECTIC_ERROR))
     state1.ħ == state2.ħ || throw(ArgumentError(HBAR_ERROR))
     length(xi) == length(state1.mean) || throw(ArgumentError(WIGNER_ERROR))
+    if state1 === state2
+        return wignerchar(state1, xi)
+    end
     μ1, μ2 = state1.mean, state2.mean
     V1, V2 = state1.covar, state2.covar
-    μ12 = (μ1 + μ2) / 2
-    V12 = (V1 + V2) / 2
+    μ12 = similar(μ1)
+    V12 = similar(V1)
+    temp_vec = similar(μ1)
+    temp_mat = similar(V1)
+    @inbounds @simd for i in eachindex(μ1)
+        μ12[i] = (μ1[i] + μ2[i]) * 0.5  
+    end
+    @inbounds @simd for i in eachindex(V1)
+        V12[i] = (V1[i] + V2[i]) * 0.5
+    end
     Omega = symplecticform(state1.basis)
-    arg1 = -0.5 * dot(xi, (Omega * V12 * transpose(Omega)) * xi)
-    arg2 = 1im * dot(Omega * μ12, xi)
+    mul!(temp_mat, Omega, V12)              
+    mul!(V12, temp_mat, Omega)              
+    V12 .*= -1                              
+    mul!(temp_vec, V12, xi)                
+    arg1 = -0.5 * dot(xi, temp_vec)
+    mul!(temp_vec, Omega, μ12)              
+    arg2 = 1im * dot(temp_vec, xi)
     return exp(arg1 - arg2)
 end
 
@@ -626,50 +654,6 @@ function entropy_vn(lc::GaussianLinearCombination)
     return 0.0
 end
 
-"""
-    measurement_probability(lc::GaussianLinearCombination, measurement::GaussianState, indices)
-
-Calculate measurement probability using Born rule: `P = |⟨measurement|Tr_complement(lc)⟩|²`.
-"""
-function measurement_probability(lc::GaussianLinearCombination, measurement::GaussianState, indices::Union{Int, AbstractVector{<:Int}})
-    indices_vec = indices isa Int ? [indices] : collect(indices)
-    expected_modes = length(indices_vec)
-    measurement.basis.nmodes == expected_modes || throw(ArgumentError(GENERALDYNE_ERROR))
-    lc.ħ == measurement.ħ || throw(ArgumentError(HBAR_ERROR))
-    norm_squared = 0.0
-    for i in 1:length(lc)
-        ci = lc.coeffs[i]
-        si = lc.states[i]
-        for j in 1:length(lc)
-            cj = lc.coeffs[j]
-            sj = lc.states[j]
-            overlap = _overlap(si, sj)
-            norm_squared += real(conj(ci) * cj * overlap)
-        end
-    end
-    if norm_squared < 1e-15
-        return 0.0
-    end
-    normalized_coeffs = lc.coeffs ./ sqrt(norm_squared)
-    complement_indices = setdiff(1:lc.basis.nmodes, indices_vec)
-    if isempty(complement_indices)
-        lc_measured_states = lc.states
-        lc_measured_coeffs = normalized_coeffs
-    else
-        lc_measured_states = [ptrace(state, complement_indices) for state in lc.states]
-        lc_measured_coeffs = normalized_coeffs
-    end
-    overlap = 0.0 + 0.0im
-    for i in 1:length(lc_measured_states)
-        c = lc_measured_coeffs[i]
-        state = lc_measured_states[i]
-        state_overlap = _overlap(measurement, state)
-        overlap += c * state_overlap
-    end
-    prob = abs2(overlap)
-    return clamp(prob, 0.0, 1.0)
-end
-
 function tensor(::Type{T}, lc1::GaussianLinearCombination, lc2::GaussianLinearCombination) where {T}
     if T <: AbstractMatrix
         return tensor(Vector{eltype(T)}, T, lc1, lc2)
@@ -685,173 +669,3 @@ function ptrace(::Type{T}, lc::GaussianLinearCombination, indices::Union{Int, Ab
         return ptrace(T, T, lc, indices)
     end
 end
-
-"""
-    coherence_measure(lc::GaussianLinearCombination)
-
-Calculate how much the overlaps between component states affect the 
-coherence of the quantum superposition. Returns value between 0 and 1,
-where 1 means perfectly orthogonal states (maximum coherence) and
-values < 1 indicate overlapping states that reduce effective coherence.
-"""
-function coherence_measure(lc::GaussianLinearCombination)
-    if length(lc) == 1
-        return 1.0
-    end
-    n = length(lc)
-    overlap_matrix = Matrix{ComplexF64}(undef, n, n)
-    for i in 1:n
-        for j in 1:n
-            overlap_matrix[i, j] = _overlap(lc.states[i], lc.states[j])
-        end
-    end
-    eigenvals = real(eigvals(Hermitian(overlap_matrix)))
-    eigenvals = eigenvals[eigenvals .> 1e-15]
-    if isempty(eigenvals)
-        return 0.0
-    end
-    participation_ratio = (sum(eigenvals))^2 / sum(eigenvals.^2)
-    effective_coherence = participation_ratio / n
-    return min(effective_coherence, 1.0)
-end
-
-#additional functions - not a part of project i coded them because of a misunderstadning, but could be useful ?:
-"""
-    representation_purity(lc::GaussianLinearCombination)
-
-Calculate the effective purity of the linear combination representation, accounting 
-for overlaps between component states.
-
-This function computes how "pure" the representation appears when considering the 
-overlaps between component Gaussian states. Unlike quantum purity (which is always 1 
-for pure superposition states), this measures the representational efficiency.
-
-The formula used is:
-    `P_rep = |Σᵢⱼ cᵢ* cⱼ ⟨ψᵢ|ψⱼ⟩|² / |Σᵢⱼ cᵢ* cⱼ ⟨ψᵢ|ψⱼ⟩|²`
-
-Returns values between 0 and 1, where:
-- 1.0: All component states are orthogonal (most efficient representation)
-- < 1.0: States have overlaps (redundant representation)
-
-# Note
-This is NOT the quantum mechanical purity of the state (which is always 1 for 
-pure superpositions), but rather a measure of the representation's efficiency.
-
-# Returns
-- `Float64`: Representation purity between 0 and 1
-"""
-function representation_purity(lc::GaussianLinearCombination)
-    n = length(lc)
-    if n == 1
-        return 1.0
-    end
-    norm_squared = complex(0.0)
-    for i in 1:n
-        ci = lc.coeffs[i]
-        state_i = lc.states[i]
-        for j in 1:n
-            cj = lc.coeffs[j] 
-            state_j = lc.states[j]
-            overlap_ij = _overlap(state_i, state_j)
-            norm_squared += conj(ci) * cj * overlap_ij
-        end
-    end
-    norm_real = real(norm_squared)
-    if norm_real < 1e-15
-        return 0.0
-    end
-    tr_rho_squared = complex(0.0)
-    for i in 1:n
-        ci = lc.coeffs[i]
-        state_i = lc.states[i]
-        for j in 1:n
-            cj = lc.coeffs[j]
-            state_j = lc.states[j]
-            for k in 1:n
-                ck = lc.coeffs[k]
-                state_k = lc.states[k]
-                for l in 1:n
-                    cl = lc.coeffs[l]
-                    state_l = lc.states[l]
-                    overlap_ik = _overlap(state_i, state_k)
-                    overlap_lj = _overlap(state_l, state_j)
-                    tr_rho_squared += conj(ci) * cj * conj(ck) * cl * overlap_ik * overlap_lj
-                end
-            end
-        end
-    end
-    purity_value = real(tr_rho_squared) / abs2(norm_squared)
-    return clamp(purity_value, 0.0, 1.0)
-end
-
-"""
-    representation_entropy(lc::GaussianLinearCombination)
-
-Calculate the informational entropy of the linear combination representation,
-considering overlaps between component states.
-
-This function measures the "informational complexity" of representing the quantum 
-state as a linear combination of Gaussian states. It accounts for redundancy 
-introduced by overlapping component states.
-
-The calculation constructs an effective density matrix from state overlaps:
-    `ρᵢⱼ = cᵢ* cⱼ ⟨ψᵢ|ψⱼ⟩`
-and computes `S = -Tr(ρ log ρ)` from its eigenvalues.
-
-Returns values ≥ 0, where:
-- 0.0: All component states are orthogonal (minimal redundancy)
-- > 0.0: States overlap (representational redundancy)
-
-# Note  
-This is NOT the von Neumann entropy of the quantum state (which is always 0 for
-pure superpositions), but rather a measure of the representation's complexity.
-
-# Applications
-- Analyzing numerical stability of linear combinations
-- Studying representational efficiency  
-- Understanding classical simulation complexity
-
-# Returns
-- `Float64`: Representation entropy ≥ 0
-"""
-function representation_entropy(lc::GaussianLinearCombination)
-    n = length(lc)
-    if n == 1
-        return 0.0  
-    end
-    total_norm = sqrt(sum(abs2, lc.coeffs))
-    if total_norm < 1e-15
-        return 0.0
-    end
-    normalized_coeffs = lc.coeffs ./ total_norm
-    ρ = Matrix{ComplexF64}(undef, n, n)
-    for i in 1:n
-        ci = normalized_coeffs[i]
-        si = lc.states[i]
-        for j in 1:n
-            cj = normalized_coeffs[j]
-            sj = lc.states[j]
-            overlap = _overlap(si, sj)
-            ρ[i, j] = conj(ci) * cj * overlap
-        end
-    end
-    if n > 100
-        @warn "Computing Von Neumann entropy for large system (n=$n). " *
-            "This may be computationally expensive."
-    end
-    eigenvals = real(eigvals(Hermitian(ρ)))
-    eigenvals = eigenvals[eigenvals .> 1e-15] 
-    total = sum(eigenvals)
-    if total > 1e-15
-        eigenvals ./= total
-    end
-    entropy = 0.0
-    for λ in eigenvals
-        if λ > 1e-15
-            entropy -= λ * log(λ)
-        end
-    end
-    return max(entropy, 0.0)
-end
-
-

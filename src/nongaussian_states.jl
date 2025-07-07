@@ -54,7 +54,6 @@ opposite phases and a relative minus sign.
 
 # Mathematical Description
 For coherent states: `|cat-⟩ = (|α⟩ - |-α⟩)/√(2(1 - exp(-2|α|²)))`
-
 """
 function catstate_odd(basis::SymplecticBasis, α::Number; squeeze_params=nothing, ħ=2)
     if squeeze_params === nothing
@@ -167,17 +166,15 @@ function _square(basis::SymplecticBasis, delta, nmax, ħ)
         throw(ArgumentError("nmax must be positive, got $nmax"))
     end
     lattice_spacing = sqrt(2 * π * ħ)
-    lattice_points = [k * lattice_spacing for k in -nmax:nmax]
-    n_points = length(lattice_points)
+    n_points = 2 * nmax + 1  
     states = Vector{GaussianState}(undef, n_points)
     coeffs = ones(Float64, n_points)
-    for (i, x_pos) in enumerate(lattice_points)
-        squeeze_op = squeeze(basis, delta, π/2, ħ=ħ)
-        displace_op = displace(basis, x_pos, ħ=ħ)
-        vac = vacuumstate(basis, ħ=ħ)
-        squeezed_state = squeeze_op * vac
-        final_state = displace_op * squeezed_state
-        states[i] = final_state
+    squeeze_op = squeeze(basis, delta, π/2, ħ=ħ)
+    vac = vacuumstate(basis, ħ=ħ)
+    squeezed_vac = squeeze_op * vac
+    for (i, k) in enumerate(-nmax:nmax)
+        x_pos = k * lattice_spacing
+        states[i] = _displaced_state(squeezed_vac, x_pos, ħ)
     end
     lc = GaussianLinearCombination(basis, coeffs, states)
     norm_val = norm_factor(lc.states, lc.coeffs)
@@ -191,9 +188,14 @@ end
 Internal function to create hexagonal lattice GKP state.
 """
 function _hexagonal(basis::SymplecticBasis, delta, nmax, ħ)
-    lattice_spacing = sqrt(2 * π * ħ / sqrt(3))  
-    states = GaussianState[]
-    coeffs = Float64[]
+    lattice_spacing = sqrt(2 * π * ħ / sqrt(3))
+    total_points = 1 + 2 * nmax * (nmax + 1)
+    states = Vector{GaussianState}(undef, total_points)
+    coeffs = ones(Float64, total_points)  
+    squeeze_op = squeeze(basis, delta, 0.0, ħ=ħ)
+    vac = vacuumstate(basis, ħ=ħ)
+    squeezed_vac = squeeze_op * vac
+    idx = 1
     for m in -nmax:nmax
         for n in -nmax:nmax
             if abs(m) + abs(n) > nmax
@@ -201,20 +203,26 @@ function _hexagonal(basis::SymplecticBasis, delta, nmax, ħ)
             end
             x_pos = lattice_spacing * (m + 0.5 * n)
             p_pos = lattice_spacing * (sqrt(3) / 2 * n)
-            squeeze_op = squeeze(basis, delta, 0.0, ħ=ħ)  
             displacement = x_pos + 1im * p_pos
-            displace_op = displace(basis, displacement, ħ=ħ)
-            vac = vacuumstate(basis, ħ=ħ)
-            squeezed_state = squeeze_op * vac
-            final_state = displace_op * squeezed_state
-            push!(states, final_state)
-            push!(coeffs, 1.0)
+            states[idx] = _displaced_state(squeezed_vac, displacement, ħ)
+            idx += 1
         end
     end
     lc = GaussianLinearCombination(basis, coeffs, states)
     norm_val = norm_factor(lc.states, lc.coeffs)
     lc.coeffs .= lc.coeffs .* norm_val
     return lc
+end
+function _displaced_state(state::GaussianState, α::Number, ħ)
+    new_mean = copy(state.mean)
+    if state.basis isa QuadPairBasis
+        new_mean[1] += sqrt(2 * ħ) * real(α)
+        new_mean[2] += sqrt(2 * ħ) * imag(α)
+    else 
+        new_mean[1] += sqrt(2 * ħ) * real(α)
+        new_mean[state.basis.nmodes + 1] += sqrt(2 * ħ) * imag(α)
+    end
+    return GaussianState(state.basis, new_mean, state.covar, ħ=state.ħ)
 end
 
 """

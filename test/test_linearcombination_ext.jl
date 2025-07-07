@@ -455,7 +455,7 @@
             cat_state = catstate_even(basis, 1.0)
             @test purity(cat_state) == 1.0
             
-            gkp_state = gkpstate(basis, lattice=:square, delta=0.2, nmax=2)
+            gkp_state = gkpstate(basis, lattice="square", delta=0.2, nmax=2)
             @test purity(gkp_state) == 1.0
             
             lc_complex = GaussianLinearCombination(basis, [0.6 + 0.8im, 0.2 - 0.1im], [coh, vac])
@@ -484,201 +484,6 @@
             
             lc_complex = GaussianLinearCombination(basis, [0.6im, 0.8], [coh1, coh2])
             @test entropy_vn(lc_complex) == 0.0
-        end
-    end
-
-    @testset "Measurement Theory" begin
-        @testset "Basic Measurement Probability" begin
-            basis = qpairbasis1
-            
-            coh1 = coherentstate(basis, 1.0)
-            coh2 = coherentstate(basis, -1.0)
-            lc = GaussianLinearCombination(basis, [0.6, 0.8], [coh1, coh2])
-            
-            measurement_state = coherentstate(basis, 0.5)
-            
-            prob = measurement_probability(lc, measurement_state, 1)
-            
-            @test prob isa Real
-            @test 0 <= prob <= 1 
-            @test isfinite(prob)
-            
- 
-            norm_squared = abs2(0.6) + abs2(0.8) 
-            normalized_lc = GaussianLinearCombination(basis, [0.6, 0.8] ./ sqrt(norm_squared), [coh1, coh2])
-            
-            prob_self = measurement_probability(normalized_lc, coh1, 1)
-            @test prob_self >= 0.0  
-        end
-        
-        @testset "Multi-mode Measurement" begin
-            basis = qpairbasis2
-            
-            coh = coherentstate(QuadPairBasis(1), 1.0)
-            vac = vacuumstate(QuadPairBasis(1))
-            
-            state1 = coh ⊗ vac
-            state2 = vac ⊗ coh
-            
-            lc = GaussianLinearCombination(basis, [0.7, 0.3], [state1, state2])
-            
-            measurement_1mode = coherentstate(QuadPairBasis(1), 0.5)
-            prob1 = measurement_probability(lc, measurement_1mode, 1)
-            
-            @test prob1 isa Real
-            @test 0 <= prob1 <= 1
-            @test isfinite(prob1)
-            
-            prob2 = measurement_probability(lc, measurement_1mode, 2)
-            
-            @test prob2 isa Real
-            @test 0 <= prob2 <= 1
-            @test isfinite(prob2)
-            
-
-        end
-        
-        @testset "Measurement with Partial Trace" begin
-            basis = qpairbasis2
-            
-            coh = coherentstate(QuadPairBasis(1), 1.0)
-            vac = vacuumstate(QuadPairBasis(1))
-            sq = squeezedstate(QuadPairBasis(1), 0.2, π/4)
-            
-            state1 = coh ⊗ vac
-            state2 = vac ⊗ sq
-            
-            lc = GaussianLinearCombination(basis, [0.6, 0.8], [state1, state2])
-            
-            measurement = vacuumstate(QuadPairBasis(1))
-            prob = measurement_probability(lc, measurement, [1])
-            
-            @test prob isa Real
-            @test 0 <= prob <= 1
-            @test isfinite(prob)
-        end
-        
-        @testset "Measurement Error Handling" begin
-            basis = qpairbasis2
-            coh = coherentstate(QuadPairBasis(1), 1.0)
-            vac = vacuumstate(QuadPairBasis(1))
-            state = coh ⊗ vac
-            lc = GaussianLinearCombination(basis, [1.0], [state])
-            
-            measurement_wrong = coherentstate(qpairbasis2, 1.0)  
-            @test_throws ArgumentError measurement_probability(lc, measurement_wrong, 1)
-            
-            measurement_h1 = coherentstate(QuadPairBasis(1), 1.0, ħ=1)
-            @test_throws ArgumentError measurement_probability(lc, measurement_h1, 1)
-            
-            measurement_1mode = coherentstate(QuadPairBasis(1), 1.0)
-            @test_throws ArgumentError measurement_probability(lc, measurement_1mode, 3)  
-        end
-        
-        @testset "Born Rule Verification" begin
-            basis = qpairbasis1
-            
-            coh1 = coherentstate(basis, 2.0)  
-            coh2 = coherentstate(basis, -2.0)
-            
-            lc = GaussianLinearCombination(basis, [1.0, 1.0], [coh1, coh2])
-            
-            prob1 = measurement_probability(lc, coh1, 1)
-            
-            prob2 = measurement_probability(lc, coh2, 1)
-            
-            @test prob1 >= 0
-            @test prob2 >= 0
-            @test isfinite(prob1)
-            @test isfinite(prob2)
-            
-   
-        end
-    end
-
-    @testset "Coherence Measure" begin
-        @testset "Basic Coherence Properties" begin
-            basis = qpairbasis1
-            
-            coh = coherentstate(basis, 1.0)
-            lc_single = GaussianLinearCombination(coh)
-            coherence_single = coherence_measure(lc_single)
-            
-            @test coherence_single == 1.0
-            
-            vac = vacuumstate(basis)
-            coh2 = coherentstate(basis, 0.1) 
-            lc_overlap = GaussianLinearCombination(basis, [0.7, 0.3], [vac, coh2])
-            coherence_overlap = coherence_measure(lc_overlap)
-            
-            @test 0 <= coherence_overlap <= 1
-            @test isfinite(coherence_overlap)
-        end
-        
-        @testset "Coherence with Different Overlaps" begin
-            basis = qpairbasis1
-            
-            coh1 = coherentstate(basis, 3.0)
-            coh2 = coherentstate(basis, -3.0)
-            lc_separated = GaussianLinearCombination(basis, [0.7, 0.3], [coh1, coh2])
-            coherence_separated = coherence_measure(lc_separated)
-            
-            coh3 = coherentstate(basis, 0.1)
-            coh4 = coherentstate(basis, 0.2)
-            lc_close = GaussianLinearCombination(basis, [0.7, 0.3], [coh3, coh4])
-            coherence_close = coherence_measure(lc_close)
-            
-            @test 0 <= coherence_separated <= 1
-            @test 0 <= coherence_close <= 1
-            
-            @test coherence_separated >= coherence_close - 0.1  
-        end
-        
-        @testset "Coherence with Identical States" begin
-            basis = qpairbasis1
-            
-            coh = coherentstate(basis, 1.0)
-            lc_identical = GaussianLinearCombination(basis, [0.5, 0.3, 0.2], [coh, coh, coh])
-            coherence_identical = coherence_measure(lc_identical)
-            
-            @test 0 <= coherence_identical <= 1
-            @test isfinite(coherence_identical)
-            
-            @test coherence_identical < 1.0
-        end
-        
-        @testset "Coherence with Many States" begin
-            basis = qpairbasis1
-            
-            states = [coherentstate(basis, Float64(i)) for i in 1:5]
-            coeffs = [1.0/5 for _ in 1:5] 
-            lc_many = GaussianLinearCombination(basis, coeffs, states)
-            coherence_many = coherence_measure(lc_many)
-            
-            @test 0 <= coherence_many <= 1
-            @test isfinite(coherence_many)
-            
-            @test coherence_many > 0.5 
-        end
-        
-        @testset "Coherence Edge Cases" begin
-            basis = qpairbasis1
-            
-            coh1 = coherentstate(basis, 1.0)
-            coh2 = coherentstate(basis, -1.0)
-            lc_small = GaussianLinearCombination(basis, [1e-10, 1.0], [coh1, coh2])
-            coherence_small = coherence_measure(lc_small)
-            
-            @test 0 <= coherence_small <= 1
-            @test isfinite(coherence_small)
-            
-            many_states = [coherentstate(basis, 0.5 * i) for i in 1:10]
-            many_coeffs = [1.0/10 for _ in 1:10]
-            lc_many_small = GaussianLinearCombination(basis, many_coeffs, many_states)
-            coherence_many_small = coherence_measure(lc_many_small)
-            
-            @test 0 <= coherence_many_small <= 1
-            @test isfinite(coherence_many_small)
         end
     end
 
@@ -711,8 +516,8 @@
         @testset "GKP State Integration" begin
             basis = qpairbasis1
             
-            gkp_square = gkpstate(basis, lattice=:square, delta=0.2, nmax=2)
-            gkp_hex = gkpstate(basis, lattice=:hexagonal, delta=0.2, nmax=1)
+            gkp_square = gkpstate(basis, lattice="square", delta=0.2, nmax=2)
+            gkp_hex = gkpstate(basis, lattice="hexagonal", delta=0.2, nmax=1)
             
             
             squeeze_op = squeeze(basis, 0.1, π/6)
@@ -729,19 +534,13 @@
             
             gkp_traced = ptrace(gkp_2mode, 2)
             @test gkp_traced.basis.nmodes == 1
-            
-            measurement = vacuumstate(basis)
-            prob = measurement_probability(gkp_square, measurement, 1)
-            
-            @test 0 <= prob <= 1
-            @test isfinite(prob)
         end
         
         @testset "Mixed Cat and GKP Operations" begin
             basis = qpairbasis1
             
             cat = catstate_even(basis, 1.0)
-            gkp = gkpstate(basis, lattice=:square, delta=0.3, nmax=1)
+            gkp = gkpstate(basis, lattice="square", delta=0.3, nmax=1)
             
             mixed = 0.6 * cat + 0.4 * gkp
             @test mixed isa GaussianLinearCombination
@@ -756,9 +555,6 @@
             w_mixed = wigner(cat_gkp_tensor, x)
             @test w_mixed isa Real
             @test isfinite(w_mixed)
-            
-            coherence_mixed = coherence_measure(mixed)
-            @test 0 <= coherence_mixed <= 1
         end
     end
 
@@ -777,11 +573,6 @@
             x = [0.5, 0.3]
             w_large = wigner(lc_large, x)
             @test isfinite(w_large)
-            
-            coherence_large = coherence_measure(lc_large)
-            @test 0 <= coherence_large <= 1
-            @test isfinite(coherence_large)
-            
             @test purity(lc_large) == 1.0
             @test entropy_vn(lc_large) == 0.0
         end
@@ -823,10 +614,6 @@
             
             w_close = wigner(lc_close, x)
             @test isfinite(w_close)
-            
-            coherence_close = coherence_measure(lc_close)
-            @test 0 <= coherence_close <= 1
-            @test isfinite(coherence_close)
         end
     end
 
@@ -852,33 +639,6 @@
             
             @test length(left_side) == length(right_side)
             @test isapprox(sum(abs2, left_side.coeffs), sum(abs2, right_side.coeffs), rtol=1e-10)
-        end
-        
-        @testset "Measurement Probability Conservation" begin
-            basis = qpairbasis1
-            
-            coh1 = coherentstate(basis, 3.0)  
-            coh2 = coherentstate(basis, -3.0)
-            
-            lc = GaussianLinearCombination(basis, [1.0, 1.0], [coh1, coh2])
-            Gabs.normalize!(lc)
-            
-            prob1 = measurement_probability(lc, coh1, 1)
-            prob2 = measurement_probability(lc, coh2, 1)
-            
-            @test prob1 >= 0
-            @test prob2 >= 0
-            @test isfinite(prob1)
-            @test isfinite(prob2)
-            
-
-            @test prob1 > 0.1  
-            @test prob2 > 0.1  
-            
-            coh_ortho = coherentstate(basis, 3.0im) 
-            prob_ortho = measurement_probability(lc, coh_ortho, 1)
-            @test prob_ortho >= 0
-            @test prob_ortho < 0.5 
         end
         
         @testset "Wigner Function Integration Properties" begin
@@ -914,7 +674,6 @@
             for i in 1:length(states)
                 for j in i:length(states)
                     s1, s2 = states[i], states[j]
-                    
                     w12 = cross_wigner(s1, s2, x)
                     w21 = cross_wigner(s2, s1, x)
                     
@@ -1039,26 +798,6 @@
             @test lc_traced_static.states[1].covar isa SMatrix{2,2,Float64}
         end
     
-        @testset "5. Small norm in measurement_probability coverage" begin
-            basis = qpairbasis
-            
-            state1 = coherentstate(basis, 1.0)
-            state2 = coherentstate(basis, -1.0)
-            
-            tiny_coeffs = [1e-20, 1e-20]
-            lc = GaussianLinearCombination(basis, tiny_coeffs, [state1, state2])
-            
-            measurement = vacuumstate(basis)
-            
-            prob = measurement_probability(lc, measurement, 1)
-            @test prob == 0.0
-            
-            normal_lc = GaussianLinearCombination(basis, [0.6, 0.8], [state1, state2])
-            normal_prob = measurement_probability(normal_lc, measurement, 1)
-            @test normal_prob > 0.0
-            @test normal_prob != prob
-        end
-    
         @testset "6. Tensor function else branch coverage" begin
             basis = qpairbasis
             state1 = coherentstate(basis, 1.0)
@@ -1103,98 +842,6 @@
             @test lc_traced_vector.basis.nmodes == 1
             @test lc_traced_vector.states[1].mean isa Array{Float64}
             @test lc_traced_vector.states[1].covar isa Array{Float64}
-        end
-    
-        @testset "8. Empty eigenvals in coherence_measure coverage" begin
-            basis = qpairbasis
-
-            state1 = coherentstate(basis, 1.0)
-            state2 = coherentstate(basis, 1.0 + 1e-20)  
-            tiny_coeffs = [1e-10, -1e-10]  
-            lc = GaussianLinearCombination(basis, tiny_coeffs, [state1, state2])
-            
-            coherence = coherence_measure(lc)
-            @test coherence isa Float64
-            @test coherence >= 0.0
-            @test coherence <= 1.0
-            
-            zero_lc = GaussianLinearCombination(basis, [0.0, 0.0], [state1, state2])
-            zero_coherence = coherence_measure(zero_lc)
-            @test zero_coherence >= 0.0
-            @test zero_coherence <= 1.0
-        end
-    
-        @testset "9. Representation functions coverage (non-exported)" begin
-            basis = qpairbasis
-            
-            state1 = coherentstate(basis, 1.0)
-            state2 = coherentstate(basis, -1.0)
-            lc = GaussianLinearCombination(basis, [0.6, 0.8], [state1, state2])
-            
-            rep_purity = Gabs.representation_purity(lc)
-            @test rep_purity isa Float64
-            @test 0.0 <= rep_purity <= 1.0
-            
-            single_lc = GaussianLinearCombination(state1)
-            single_purity = Gabs.representation_purity(single_lc)
-            @test single_purity == 1.0
-            
-            zero_lc = GaussianLinearCombination(basis, [0.0, 0.0], [state1, state2])
-            zero_purity = Gabs.representation_purity(zero_lc)
-            @test zero_purity == 0.0
-            
-            rep_entropy = Gabs.representation_entropy(lc)
-            @test rep_entropy isa Float64
-            @test rep_entropy >= 0.0
-            
-            single_entropy = Gabs.representation_entropy(single_lc)
-            @test single_entropy == 0.0
-            
-            zero_entropy = Gabs.representation_entropy(zero_lc)
-            @test zero_entropy == 0.0
-            
-            @test rep_entropy >= 0.0
-            
-            orthogonal_states = [coherentstate(basis, 5.0), coherentstate(basis, -5.0)]  
-            orthogonal_lc = GaussianLinearCombination(basis, [0.6, 0.8], orthogonal_states)
-            orthogonal_entropy = Gabs.representation_entropy(orthogonal_lc)
-            
-            @test orthogonal_entropy >= 0.0
-            @test isfinite(orthogonal_entropy)
-            
-            many_states = [coherentstate(basis, Float64(i)) for i in 1:5]
-            many_coeffs = [1.0/5 for _ in 1:5]
-            many_lc = GaussianLinearCombination(basis, many_coeffs, many_states)
-            many_entropy = Gabs.representation_entropy(many_lc)
-            @test many_entropy >= 0.0
-            @test isfinite(many_entropy)
-        end
-    
-        @testset "Additional edge cases for completeness" begin            
-            basis = qpairbasis
-            state = coherentstate(basis, 1.0)
-            
-            state1 = coherentstate(basis, 1.0)
-            state2 = coherentstate(basis, 1.0) 
-            lc = GaussianLinearCombination(basis, [0.5, 0.3], [state1, state2])
-            
-            original_length = length(lc)
-            Gabs.simplify!(lc)
-            @test length(lc) <= original_length
-            
-            vac = vacuumstate(basis)
-            vac_lc = GaussianLinearCombination(vac)
-            prob = measurement_probability(vac_lc, vac, 1)
-            @test prob ≈ 1.0 atol=1e-10
-            
-            single_coherence = coherence_measure(GaussianLinearCombination(state))
-            @test single_coherence == 1.0
-            
-            many_states = [coherentstate(basis, 0.1 * i) for i in 1:10]
-            tiny_coeffs = [1e-8 for _ in 1:10]
-            many_lc = GaussianLinearCombination(basis, tiny_coeffs, many_states)
-            many_coherence = coherence_measure(many_lc)
-            @test 0.0 <= many_coherence <= 1.0
         end
     end
 end
