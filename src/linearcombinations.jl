@@ -252,7 +252,7 @@ Negate a Gaussian state to create a linear combination with coefficient -1.
 Base.:-(state::GaussianState) = (-1) * state
 
 """
-    Gabs.normalize!(lc::GaussianLinearCombination)
+    normalize!(lc::GaussianLinearCombination)
 
 Normalize the coefficients of a linear combination in-place using L2 norm.
 """
