@@ -292,7 +292,8 @@ function Base.iterate(lc::GaussianLinearCombination, state::Int=1)
 end
 
 """
-    Gabs.simplify!(lc::GaussianLinearCombination; atol::Real=1e-14)
+    simplify!(lc::GaussianLinearCombination; atol::Real=1e-14)
+    
 Simplify a linear combination by:
 1. Removing coefficients smaller than `atol`
 2. Combining terms with identical states
