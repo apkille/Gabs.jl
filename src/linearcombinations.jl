@@ -239,7 +239,7 @@ Subtract a Gaussian state from a linear combination.
 function Base.:-(lc::GaussianLinearCombination, state::GaussianState)
     lc.basis == state.basis || throw(ArgumentError(SYMPLECTIC_ERROR))
     lc.ħ == state.ħ || throw(ArgumentError(HBAR_ERROR))
-    new_coeffs = vcat(lc.coeffs, [-1.0])  
+    new_coeffs = vcat(lc.coeffs, -1.0)  
     new_states = vcat(lc.states, [state])
     return GaussianLinearCombination(lc.basis, new_coeffs, new_states)
 end
