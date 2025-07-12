@@ -252,7 +252,7 @@ function norm_factor(states::Vector{<:GaussianState}, coeffs::Vector{<:Number})
     @assert length(coeffs) == n "Number of coefficients must match number of states"
     norm_squared = 0.0
     for i in 1:n
-        for j in 1:n
+        @inbounds for j in 1:n
             overlap = _overlap(states[i], states[j])
             norm_squared += real(conj(coeffs[i]) * coeffs[j] * overlap)
         end
