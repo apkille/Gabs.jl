@@ -158,7 +158,7 @@ Base.:*(lc::GaussianLinearCombination, α::Number) = α * lc
 Multiply a Gaussian state by a scalar to create a linear combination.
 """
 function Base.:*(α::Number, state::GaussianState)
-    coeff_type = promote_type(typeof(α), Float64)
+    coeff_type = promote_type(typeof(α), eltype(state.mean), eltype(state.covar))
     return GaussianLinearCombination(state.basis, [convert(coeff_type, α)], [state])
 end
 
