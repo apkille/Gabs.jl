@@ -191,7 +191,7 @@ function Base.:+(state::GaussianState, lc::GaussianLinearCombination)
     state.ħ == lc.ħ || throw(ArgumentError(HBAR_ERROR))
     coeff_type = promote_type(Float64, eltype(lc.coeffs))
     new_coeffs = vcat([one(coeff_type)], convert(Vector{coeff_type}, lc.coeffs))
-    new_states = vcat([state], lc.states)
+    new_states = vcat(state, lc.states)
     return GaussianLinearCombination(lc.basis, new_coeffs, new_states)
 end
 
