@@ -23,9 +23,7 @@ function catstate_even(basis::SymplecticBasis, α::Number; squeeze_params=nothin
         state_minus = coherentstate(basis, -α, ħ=ħ)
     else
         r, θ = squeeze_params
-        vac = vacuumstate(basis, ħ=ħ)
-        squeeze_op = squeeze(basis, r, θ, ħ=ħ)
-        squeezed_vac = squeeze_op * vac
+        squeezed_vac = squeezedstate(basis, r, θ, ħ=ħ) 
         displace_plus = displace(basis, α, ħ=ħ)
         displace_minus = displace(basis, -α, ħ=ħ)
         state_plus = displace_plus * squeezed_vac
@@ -61,9 +59,7 @@ function catstate_odd(basis::SymplecticBasis, α::Number; squeeze_params=nothing
         state_minus = coherentstate(basis, -α, ħ=ħ)
     else
         r, θ = squeeze_params
-        vac = vacuumstate(basis, ħ=ħ)
-        squeeze_op = squeeze(basis, r, θ, ħ=ħ)
-        squeezed_vac = squeeze_op * vac
+        squeezed_vac = squeezedstate(basis, r, θ, ħ=ħ)  
         displace_plus = displace(basis, α, ħ=ħ)
         displace_minus = displace(basis, -α, ħ=ħ)
         state_plus = displace_plus * squeezed_vac
@@ -100,9 +96,7 @@ function catstate(basis::SymplecticBasis, α::Number, phase::Real=0; squeeze_par
         state_minus = coherentstate(basis, -α, ħ=ħ)
     else
         r, θ = squeeze_params
-        vac = vacuumstate(basis, ħ=ħ)
-        squeeze_op = squeeze(basis, r, θ, ħ=ħ)
-        squeezed_vac = squeeze_op * vac
+        squeezed_vac = squeezedstate(basis, r, θ, ħ=ħ)  
         displace_plus = displace(basis, α, ħ=ħ)
         displace_minus = displace(basis, -α, ħ=ħ)
         state_plus = displace_plus * squeezed_vac
@@ -169,12 +163,10 @@ function _square(basis::SymplecticBasis, delta, nmax, ħ)
     n_points = 2 * nmax + 1  
     states = Vector{GaussianState}(undef, n_points)
     coeffs = ones(Float64, n_points)
-    squeeze_op = squeeze(basis, delta, π/2, ħ=ħ)
-    vac = vacuumstate(basis, ħ=ħ)
-    squeezed_vac = squeeze_op * vac
+    squeezed_vac = squeezedstate(basis, delta, π/2, ħ=ħ)  
     for (i, k) in enumerate(-nmax:nmax)
         x_pos = k * lattice_spacing
-        states[i] = _displaced_state(squeezed_vac, x_pos, ħ)
+        states[i] = displace(basis, x_pos, ħ=ħ) * squeezed_vac
     end
     lc = GaussianLinearCombination(basis, coeffs, states)
     norm_val = norm_factor(lc.states, lc.coeffs)
@@ -192,9 +184,7 @@ function _hexagonal(basis::SymplecticBasis, delta, nmax, ħ)
     total_points = 1 + 2 * nmax * (nmax + 1)
     states = Vector{GaussianState}(undef, total_points)
     coeffs = ones(Float64, total_points)  
-    squeeze_op = squeeze(basis, delta, 0.0, ħ=ħ)
-    vac = vacuumstate(basis, ħ=ħ)
-    squeezed_vac = squeeze_op * vac
+    squeezed_vac = squeezedstate(basis, delta, 0.0, ħ=ħ)
     idx = 1
     for m in -nmax:nmax
         for n in -nmax:nmax
@@ -204,7 +194,7 @@ function _hexagonal(basis::SymplecticBasis, delta, nmax, ħ)
             x_pos = lattice_spacing * (m + 0.5 * n)
             p_pos = lattice_spacing * (sqrt(3) / 2 * n)
             displacement = x_pos + 1im * p_pos
-            states[idx] = _displaced_state(squeezed_vac, displacement, ħ)
+            states[idx] = displace(basis, displacement, ħ=ħ) * squeezed_vac
             idx += 1
         end
     end
@@ -212,17 +202,6 @@ function _hexagonal(basis::SymplecticBasis, delta, nmax, ħ)
     norm_val = norm_factor(lc.states, lc.coeffs)
     lc.coeffs .= lc.coeffs .* norm_val
     return lc
-end
-function _displaced_state(state::GaussianState, α::Number, ħ)
-    new_mean = copy(state.mean)
-    if state.basis isa QuadPairBasis
-        new_mean[1] += sqrt(2 * ħ) * real(α)
-        new_mean[2] += sqrt(2 * ħ) * imag(α)
-    else 
-        new_mean[1] += sqrt(2 * ħ) * real(α)
-        new_mean[state.basis.nmodes + 1] += sqrt(2 * ħ) * imag(α)
-    end
-    return GaussianState(state.basis, new_mean, state.covar, ħ=state.ħ)
 end
 
 """
@@ -297,34 +276,6 @@ function _overlap(state1::GaussianState, state2::GaussianState)
 end
 
 """
-    fidelity_approximation(ideal_gkp::GaussianLinearCombination, finite_gkp::GaussianLinearCombination)
-
-Estimate the fidelity between an ideal GKP state and its finite-energy approximation.
-
-The fidelity gives a measure of how well the finite approximation represents the ideal
-infinite-energy GKP state.
-
-# Arguments
-- `ideal_gkp::GaussianLinearCombination`: Ideal GKP state (high nmax, small delta)
-- `finite_gkp::GaussianLinearCombination`: Finite approximation
-
-# Returns
-- `Float64`: Fidelity estimate `F = |⟨ideal|finite⟩|²`
-
-"""
-function fidelity_approximation(ideal_gkp::GaussianLinearCombination, finite_gkp::GaussianLinearCombination)
-    @assert ideal_gkp.basis == finite_gkp.basis "States must have the same basis"
-    @assert ideal_gkp.ħ == finite_gkp.ħ "States must have the same ħ"
-    overlap = 0.0 + 0.0im
-    for (c1, s1) in ideal_gkp
-        for (c2, s2) in finite_gkp
-            overlap += conj(c1) * c2 * _overlap(s1, s2)
-        end
-    end
-    return abs2(overlap)
-end
-
-"""
     catstate_even(basis::SymplecticBasis, αs::AbstractVector; squeeze_params=nothing, ħ=2)
 
 Create multi-mode even cat states as tensor products of single-mode cat states.
@@ -342,15 +293,15 @@ function catstate_even(basis::SymplecticBasis, αs::AbstractVector; squeeze_para
         @assert length(squeeze_params) == nmodes "Number of squeeze parameters must match number of modes"
     end
     single_mode_basis = typeof(basis)(1)
-    cat_states = []
-    for i in 1:nmodes
+    cat_states = Vector{GaussianLinearCombination}(undef, nmodes)  
+    @inbounds for i in 1:nmodes  
         α = αs[i]
         squeeze_param = squeeze_params === nothing ? nothing : squeeze_params[i]
         cat = catstate_even(single_mode_basis, α, squeeze_params=squeeze_param, ħ=ħ)
-        push!(cat_states, cat)
+        cat_states[i] = cat  
     end
     result = cat_states[1]
-    for i in 2:nmodes
+    @inbounds for i in 2:nmodes  
         result = _tensor(result, cat_states[i])
     end
     return result
@@ -368,15 +319,15 @@ function catstate_odd(basis::SymplecticBasis, αs::AbstractVector; squeeze_param
         @assert length(squeeze_params) == nmodes "Number of squeeze parameters must match number of modes"
     end
     single_mode_basis = typeof(basis)(1)
-    cat_states = []
-    for i in 1:nmodes
+    cat_states = Vector{GaussianLinearCombination}(undef, nmodes)  
+    @inbounds for i in 1:nmodes  
         α = αs[i]
         squeeze_param = squeeze_params === nothing ? nothing : squeeze_params[i]
-        cat = catstate_odd(single_mode_basis, α, squeeze_params=squeeze_param, ħ=ħ)
-        push!(cat_states, cat)
+        cat = catstate_even(single_mode_basis, α, squeeze_params=squeeze_param, ħ=ħ)
+        cat_states[i] = cat  
     end
     result = cat_states[1]
-    for i in 2:nmodes
+    @inbounds for i in 2:nmodes  
         result = _tensor(result, cat_states[i])
     end
     return result
@@ -395,16 +346,15 @@ function catstate(basis::SymplecticBasis, αs::AbstractVector, phases::AbstractV
         @assert length(squeeze_params) == nmodes "Number of squeeze parameters must match number of modes"
     end
     single_mode_basis = typeof(basis)(1)
-    cat_states = []
-    for i in 1:nmodes
+    cat_states = Vector{GaussianLinearCombination}(undef, nmodes)  
+    @inbounds for i in 1:nmodes  
         α = αs[i]
-        phase = phases[i]
         squeeze_param = squeeze_params === nothing ? nothing : squeeze_params[i]
-        cat = catstate(single_mode_basis, α, phase, squeeze_params=squeeze_param, ħ=ħ)
-        push!(cat_states, cat)
+        cat = catstate_even(single_mode_basis, α, squeeze_params=squeeze_param, ħ=ħ)
+        cat_states[i] = cat  
     end
     result = cat_states[1]
-    for i in 2:nmodes
+    @inbounds for i in 2:nmodes  
         result = _tensor(result, cat_states[i])
     end
     return result

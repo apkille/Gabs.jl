@@ -24,7 +24,7 @@ export
     vacuumstate, thermalstate, coherentstate, squeezedstate, eprstate,
     # non-Gaussian states
     catstate_even, catstate_odd, catstate, gkpstate,
-    norm_factor, fidelity_approximation,
+    norm_factor,
     # predefined Gaussian channels
     displace, squeeze, twosqueeze, phaseshift, beamsplitter,
     attenuator, amplifier,
@@ -38,7 +38,7 @@ export
     williamson, Williamson, polar, Polar, blochmessiah, BlochMessiah,
     # metrics
     purity, entropy_vn, fidelity, logarithmic_negativity,
-    cross_wigner,cross_wignerchar, measurement_probability, coherence_measure
+    cross_wigner, cross_wignerchar
 
 include("errors.jl")
 

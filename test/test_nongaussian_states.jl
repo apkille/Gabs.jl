@@ -166,13 +166,6 @@
         
         gkp1 = gkpstate(basis, lattice="square", delta=0.1, nmax=3)
         gkp2 = gkpstate(basis, lattice="square", delta=0.2, nmax=2)
-        
-        fid = fidelity_approximation(gkp1, gkp2)
-        @test fid isa Float64
-        @test 0 <= fid <= 1  
-        
-        fid_self = fidelity_approximation(gkp1, gkp1)
-        @test abs(fid_self - 1.0) < 1e-10
     end
     
     @testset "Integration with Existing Framework" begin

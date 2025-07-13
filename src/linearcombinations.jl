@@ -36,7 +36,6 @@ covariance: 2×2 Matrix{Float64}:
  1.0  0.0
  0.0  1.0
 
-julia> # Direct arithmetic with GaussianStates
 julia> cat_state = 0.5 * state1 + 0.5 * state2
 GaussianLinearCombination with 2 terms for 1 mode.
   symplectic basis: QuadPairBasis
@@ -44,7 +43,6 @@ GaussianLinearCombination with 2 terms for 1 mode.
   [1] 0.5 * GaussianState
   [2] 0.5 * GaussianState
 
-julia> # Alternative explicit construction
 julia> lcgs = GaussianLinearCombination([0.6, 0.8], [state1, state2])
 GaussianLinearCombination with 2 terms for 1 mode.
   symplectic basis: QuadPairBasis
@@ -73,10 +71,20 @@ mutable struct GaussianLinearCombination{B<:SymplecticBasis,C,S}
         return new{B,C,S}(basis, coeffs, states, ħ)
     end
 end
+"""
+    GaussianLinearCombination(state::GaussianState)
+
+Create a linear combination containing a single Gaussian state with coefficient 1.0.
+"""
 function GaussianLinearCombination(state::GaussianState{B,M,V}) where {B,M,V}
     coeff_type = float(real(promote_type(eltype(M), eltype(V))))
     return GaussianLinearCombination(state.basis, [one(coeff_type)], [state])
 end
+"""
+    GaussianLinearCombination(pairs::Vector{<:Tuple})
+
+Create a linear combination from a vector of (coefficient, state) tuples.
+"""
 function GaussianLinearCombination(pairs::Vector{<:Tuple})
     isempty(pairs) && throw(ArgumentError("Cannot create an empty linear combination"))
     coeffs = [convert(Number, p[1]) for p in pairs]
@@ -87,11 +95,21 @@ function GaussianLinearCombination(pairs::Vector{<:Tuple})
     basis = first(states).basis
     return GaussianLinearCombination(basis, coeffs, states)
 end
+"""
+    GaussianLinearCombination(coeffs::Vector{<:Number}, states::Vector{<:GaussianState})
+
+Create a linear combination from separate vectors of coefficients and states.
+"""
 function GaussianLinearCombination(coeffs::Vector{<:Number}, states::Vector{<:GaussianState})
     isempty(states) && throw(ArgumentError("Cannot create an empty linear combination"))
     basis = first(states).basis
     return GaussianLinearCombination(basis, coeffs, states)
 end
+"""
+    GaussianLinearCombination(pairs::Pair{<:Number,<:GaussianState}...)
+
+Create a linear combination from coefficient => state pairs.
+"""
 function GaussianLinearCombination(pairs::Pair{<:Number,<:GaussianState}...)
     isempty(pairs) && throw(ArgumentError("Cannot create an empty linear combination"))
     coeffs = [p.first for p in pairs]
@@ -177,7 +195,8 @@ Add two Gaussian states to create a linear combination.
 function Base.:+(state1::GaussianState, state2::GaussianState)
     state1.basis == state2.basis || throw(ArgumentError(SYMPLECTIC_ERROR))
     state1.ħ == state2.ħ || throw(ArgumentError(HBAR_ERROR))
-    coeff_type = promote_type(Float64, Float64)
+    coeff_type = promote_type(eltype(state1.mean), eltype(state1.covar), 
+                              eltype(state2.mean), eltype(state2.covar))
     return GaussianLinearCombination(state1.basis, [one(coeff_type), one(coeff_type)], [state1, state2])
 end
 
@@ -189,7 +208,7 @@ Add a Gaussian state to a linear combination.
 function Base.:+(state::GaussianState, lc::GaussianLinearCombination)
     state.basis == lc.basis || throw(ArgumentError(SYMPLECTIC_ERROR))
     state.ħ == lc.ħ || throw(ArgumentError(HBAR_ERROR))
-    coeff_type = promote_type(Float64, eltype(lc.coeffs))
+    coeff_type = promote_type(eltype(state.mean), eltype(state.covar), eltype(lc.coeffs))
     new_coeffs = vcat(one(coeff_type), convert(Vector{coeff_type}, lc.coeffs))
     new_states = vcat(state, lc.states)
     return GaussianLinearCombination(lc.basis, new_coeffs, new_states)
@@ -203,8 +222,9 @@ Add a linear combination to a Gaussian state.
 function Base.:+(lc::GaussianLinearCombination, state::GaussianState)
     lc.basis == state.basis || throw(ArgumentError(SYMPLECTIC_ERROR))
     lc.ħ == state.ħ || throw(ArgumentError(HBAR_ERROR))
-    new_coeffs = vcat(lc.coeffs, [1.0])  
-    new_states = vcat(lc.states, [state])
+    coeff_type = promote_type(eltype(state.mean), eltype(state.covar), eltype(lc.coeffs))
+    new_coeffs = vcat(convert(Vector{coeff_type}, lc.coeffs), one(coeff_type))
+    new_states = vcat(lc.states, state)
     return GaussianLinearCombination(lc.basis, new_coeffs, new_states)
 end
 
@@ -216,7 +236,8 @@ Subtract two Gaussian states to create a linear combination.
 function Base.:-(state1::GaussianState, state2::GaussianState)
     state1.basis == state2.basis || throw(ArgumentError(SYMPLECTIC_ERROR))
     state1.ħ == state2.ħ || throw(ArgumentError(HBAR_ERROR))
-    coeff_type = promote_type(Float64, Float64)
+    coeff_type = promote_type(eltype(state1.mean), eltype(state1.covar), 
+                              eltype(state2.mean), eltype(state2.covar))
     return GaussianLinearCombination(state1.basis, [one(coeff_type), -one(coeff_type)], [state1, state2])
 end
 
@@ -239,7 +260,8 @@ Subtract a Gaussian state from a linear combination.
 function Base.:-(lc::GaussianLinearCombination, state::GaussianState)
     lc.basis == state.basis || throw(ArgumentError(SYMPLECTIC_ERROR))
     lc.ħ == state.ħ || throw(ArgumentError(HBAR_ERROR))
-    new_coeffs = vcat(lc.coeffs, -1.0)  
+    coeff_type = promote_type(eltype(state.mean), eltype(state.covar), eltype(lc.coeffs))
+    new_coeffs = vcat(convert(Vector{coeff_type}, lc.coeffs), -one(coeff_type))
     new_states = vcat(lc.states, state)
     return GaussianLinearCombination(lc.basis, new_coeffs, new_states)
 end
@@ -314,19 +336,21 @@ function simplify!(lc::GaussianLinearCombination; atol::Real=1e-14)
     end
     coeffs = lc.coeffs[keep_mask]
     states = lc.states[keep_mask]
-    unique_states = typeof(states[1])[]
-    combined_coeffs = eltype(coeffs)[]
-    sizehint!(unique_states, length(states))
-    sizehint!(combined_coeffs, length(states))
+    unique_states = Vector{typeof(states[1])}(undef, length(states))
+    combined_coeffs = Vector{eltype(coeffs)}(undef, length(states))
+    n_unique = 0  
     for (coeff, state) in zip(coeffs, states)
-        existing_idx = findfirst(s -> isapprox(s, state, atol=1e-12), unique_states)
+        existing_idx = findfirst(s -> isapprox(s, state, atol=1e-12), @view(unique_states[1:n_unique]))
         if existing_idx === nothing
-            push!(unique_states, state)
-            push!(combined_coeffs, coeff)
+            n_unique += 1
+            unique_states[n_unique] = state
+            combined_coeffs[n_unique] = coeff
         else
             combined_coeffs[existing_idx] += coeff
         end
     end
+    resize!(unique_states, n_unique)
+    resize!(combined_coeffs, n_unique)
     final_mask = abs.(combined_coeffs) .> atol
     if !any(final_mask)
         vac = vacuumstate(lc.basis, ħ = lc.ħ)
@@ -535,35 +559,29 @@ The normalization is chosen to ensure the identity property `W₁₁(x) = W₁(x
 - For identical states: `W₁₁(x) = W₁(x)` (reduces to regular Wigner function)
 - The implementation uses log-space arithmetic for numerical stability
 """
-function cross_wigner(state1::GaussianState,
-    state2::GaussianState,
-    x::AbstractVector)
+function cross_wigner(state1::GaussianState, state2::GaussianState, x::AbstractVector)
     μ1, μ2 = state1.mean, state2.mean
     V1, V2 = state1.covar, state2.covar
     n = length(μ1) ÷ 2
     ħ = state1.ħ
-    μ̄ = similar(μ1)     
-    Δμ = similar(μ1)     
-    dx = similar(x)      
-    Vavg = similar(V1)   
-    temp = similar(dx)   
-    for i in eachindex(μ1)
-        μ̄[i] = 0.5 * (μ1[i] + μ2[i])
-        Δμ[i] = μ1[i] - μ2[i]
-    end
-    for i in eachindex(V1)
-        Vavg[i] = 0.5 * (V1[i] + V2[i])
-    end
-    for i in eachindex(x)
-        dx[i] = x[i] - μ̄[i]
-    end
+    dx = similar(x)
+    Vavg = similar(V1)
+    @inbounds @. dx = x - 0.5 * (μ1 + μ2)
+    @inbounds @. Vavg = 0.5 * (V1 + V2)
     Ω = symplecticform(state1.basis)
+    phase_arg = zero(real(eltype(μ1)))
+    @inbounds for i in eachindex(μ1)
+        Δμi = μ1[i] - μ2[i]
+        Ω_dx_i = zero(eltype(dx))
+        @simd for j in eachindex(dx)
+            Ω_dx_i += Ω[i,j] * dx[j]
+        end
+        phase_arg += Δμi * Ω_dx_i
+    end
+    phase = cis(phase_arg / ħ)
     lognorm = -n*log(2π) - 0.5*logdet(Vavg)
     norm = exp(lognorm)
-    mul!(temp, Ω, dx)  
-    phase = cis(dot(Δμ, temp) / ħ)
-    temp .= Vavg \ dx  
-    gauss = exp(-0.5 * dot(dx, temp))
+    gauss = exp(-0.5 * dot(dx, Vavg \ dx))  
     return norm * gauss * phase
 end
 
