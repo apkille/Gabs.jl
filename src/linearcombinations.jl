@@ -467,6 +467,24 @@ function tensor(lc1::GaussianLinearCombination, lc2::GaussianLinearCombination)
     end
     return GaussianLinearCombination(new_basis, new_coeffs, new_states)
 end
+function _tensor(lc1::GaussianLinearCombination, lc2::GaussianLinearCombination)
+    @assert typeof(lc1.basis) == typeof(lc2.basis) "Linear combinations must have compatible bases"
+    @assert lc1.ħ == lc2.ħ "Linear combinations must have the same ħ"
+    new_basis = lc1.basis ⊕ lc2.basis
+    result_size = length(lc1) * length(lc2)
+    CoeffType = promote_type(eltype(lc1.coeffs), eltype(lc2.coeffs))
+    new_coeffs = Vector{CoeffType}(undef, result_size)
+    new_states = Vector{GaussianState}(undef, result_size)
+    idx = 1
+    @inbounds for (c1, s1) in lc1
+        @inbounds for (c2, s2) in lc2
+            new_coeffs[idx] = c1 * c2
+            new_states[idx] = s1 ⊗ s2
+            idx += 1
+        end
+    end
+    return GaussianLinearCombination(new_basis, new_coeffs, new_states)
+end
 
 function ptrace(::Type{Tm}, ::Type{Tc}, lc::GaussianLinearCombination, index::Int) where {Tm,Tc}
     length([index]) < lc.basis.nmodes || throw(ArgumentError(INDEX_ERROR))
