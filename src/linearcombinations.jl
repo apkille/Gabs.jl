@@ -1,4 +1,3 @@
-# Linear combinations of Gaussian states
 """
     GaussianLinearCombination{B<:SymplecticBasis,C,S}
 
@@ -133,7 +132,6 @@ end
 function Base.:+(lc1::GaussianLinearCombination{B1}, lc2::GaussianLinearCombination{B2}) where {B1<:SymplecticBasis,B2<:SymplecticBasis}
     throw(ArgumentError(SYMPLECTIC_ERROR))
 end
-
 """
     -(lc1::GaussianLinearCombination, lc2::GaussianLinearCombination)
 
@@ -145,7 +143,6 @@ end
 function Base.:-(lc1::GaussianLinearCombination{B1}, lc2::GaussianLinearCombination{B2}) where {B1<:SymplecticBasis,B2<:SymplecticBasis}
     throw(ArgumentError(SYMPLECTIC_ERROR))
 end
-
 """
     -(lc::GaussianLinearCombination)
 
@@ -162,14 +159,12 @@ function Base.:*(α::Number, lc::GaussianLinearCombination)
     new_coeffs = α .* lc.coeffs
     return GaussianLinearCombination(lc.basis, new_coeffs, copy(lc.states))
 end
-
 """
     *(lc::GaussianLinearCombination, α::Number)
 
 Multiply a linear combination by a scalar from the right.
 """
 Base.:*(lc::GaussianLinearCombination, α::Number) = α * lc
-
 """
     *(α::Number, state::GaussianState)
 
@@ -179,14 +174,12 @@ function Base.:*(α::Number, state::GaussianState)
     coeff_type = promote_type(typeof(α), eltype(state.mean), eltype(state.covar))
     return GaussianLinearCombination(state.basis, [convert(coeff_type, α)], [state])
 end
-
 """
     *(state::GaussianState, α::Number)
 
 Multiply a Gaussian state by a scalar to create a linear combination.
 """
 Base.:*(state::GaussianState, α::Number) = α * state
-
 """
     +(state1::GaussianState, state2::GaussianState)
 
@@ -199,7 +192,6 @@ function Base.:+(state1::GaussianState, state2::GaussianState)
                               eltype(state2.mean), eltype(state2.covar))
     return GaussianLinearCombination(state1.basis, [one(coeff_type), one(coeff_type)], [state1, state2])
 end
-
 """
     +(state::GaussianState, lc::GaussianLinearCombination)
 
@@ -213,7 +205,6 @@ function Base.:+(state::GaussianState, lc::GaussianLinearCombination)
     new_states = vcat(state, lc.states)
     return GaussianLinearCombination(lc.basis, new_coeffs, new_states)
 end
-
 """
     +(lc::GaussianLinearCombination, state::GaussianState)
 
@@ -227,7 +218,6 @@ function Base.:+(lc::GaussianLinearCombination, state::GaussianState)
     new_states = vcat(lc.states, state)
     return GaussianLinearCombination(lc.basis, new_coeffs, new_states)
 end
-
 """
     -(state1::GaussianState, state2::GaussianState)
 
@@ -240,7 +230,6 @@ function Base.:-(state1::GaussianState, state2::GaussianState)
                               eltype(state2.mean), eltype(state2.covar))
     return GaussianLinearCombination(state1.basis, [one(coeff_type), -one(coeff_type)], [state1, state2])
 end
-
 """
     -(state::GaussianState, lc::GaussianLinearCombination)
 
@@ -251,7 +240,6 @@ function Base.:-(state::GaussianState, lc::GaussianLinearCombination)
     state.ħ == lc.ħ || throw(ArgumentError(HBAR_ERROR))
     return state + (-1) * lc
 end
-
 """
     -(lc::GaussianLinearCombination, state::GaussianState)
 
@@ -265,7 +253,6 @@ function Base.:-(lc::GaussianLinearCombination, state::GaussianState)
     new_states = vcat(lc.states, state)
     return GaussianLinearCombination(lc.basis, new_coeffs, new_states)
 end
-
 """
     -(state::GaussianState)
 
@@ -376,7 +363,7 @@ function Base.show(io::IO, mime::MIME"text/plain", lc::GaussianLinearCombination
     println(io, "  symplectic basis: ", basis_name)
     println(io, "  ħ = $(lc.ħ)")
     max_display = min(length(lc), 5)
-    for i in 1:max_display
+    @inbounds for i in 1:max_display
         coeff, state = lc[i]
         println(io, "  [$i] $(coeff) * GaussianState")
     end
@@ -411,7 +398,6 @@ The unitary is applied to each component state while preserving coefficients.
 function Base.:(*)(op::GaussianUnitary, lc::GaussianLinearCombination)
     op.basis == lc.basis || throw(ArgumentError(ACTION_ERROR))
     op.ħ == lc.ħ || throw(ArgumentError(HBAR_ERROR))
-    
     new_states = [op * state for state in lc.states]
     return GaussianLinearCombination(lc.basis, copy(lc.coeffs), new_states)
 end
@@ -425,7 +411,6 @@ The channel is applied to each component state while preserving coefficients.
 function Base.:(*)(op::GaussianChannel, lc::GaussianLinearCombination)
     op.basis == lc.basis || throw(ArgumentError(ACTION_ERROR))
     op.ħ == lc.ħ || throw(ArgumentError(HBAR_ERROR))
-    
     new_states = [op * state for state in lc.states]
     return GaussianLinearCombination(lc.basis, copy(lc.coeffs), new_states)
 end
@@ -453,7 +438,13 @@ function tensor(::Type{Tm}, ::Type{Tc}, lc1::GaussianLinearCombination, lc2::Gau
     end
     return GaussianLinearCombination(new_basis, new_coeffs, new_states)
 end
-
+function tensor(::Type{T}, lc1::GaussianLinearCombination, lc2::GaussianLinearCombination) where {T}
+    if T <: AbstractMatrix
+        return tensor(Vector{eltype(T)}, T, lc1, lc2)
+    else
+        return tensor(T, T, lc1, lc2)
+    end
+end
 """
     tensor(lc1::GaussianLinearCombination, lc2::GaussianLinearCombination)
 
@@ -484,7 +475,6 @@ function ptrace(::Type{Tm}, ::Type{Tc}, lc::GaussianLinearCombination, index::In
     simplify!(result)
     return result
 end
-
 function ptrace(::Type{Tm}, ::Type{Tc}, lc::GaussianLinearCombination, indices::AbstractVector{<:Int}) where {Tm,Tc}
     length(indices) < lc.basis.nmodes || throw(ArgumentError(INDEX_ERROR))
     traced_states = [ptrace(Tm, Tc, state, indices) for state in lc.states]
@@ -492,7 +482,13 @@ function ptrace(::Type{Tm}, ::Type{Tc}, lc::GaussianLinearCombination, indices::
     simplify!(result)
     return result
 end
-
+function ptrace(::Type{T}, lc::GaussianLinearCombination, indices::Union{Int, AbstractVector{<:Int}}) where {T}
+    if T <: AbstractMatrix
+        return ptrace(Vector{eltype(T)}, T, lc, indices)
+    else
+        return ptrace(T, T, lc, indices)
+    end
+end
 """
     ptrace(lc::GaussianLinearCombination, index::Int)
 
@@ -505,7 +501,6 @@ function ptrace(lc::GaussianLinearCombination, index::Int)
     simplify!(result)
     return result
 end
-
 """
     ptrace(lc::GaussianLinearCombination, indices::AbstractVector{<:Int})
 
@@ -671,20 +666,4 @@ function entropy_vn(lc::GaussianLinearCombination)
     # A GaussianLinearCombination represents a pure superposition state
     # |ψ⟩ = Σᵢ cᵢ|ψᵢ⟩, so S(ρ) = -Tr(ρ log ρ) = 0
     return 0.0
-end
-
-function tensor(::Type{T}, lc1::GaussianLinearCombination, lc2::GaussianLinearCombination) where {T}
-    if T <: AbstractMatrix
-        return tensor(Vector{eltype(T)}, T, lc1, lc2)
-    else
-        return tensor(T, T, lc1, lc2)
-    end
-end
-
-function ptrace(::Type{T}, lc::GaussianLinearCombination, indices::Union{Int, AbstractVector{<:Int}}) where {T}
-    if T <: AbstractMatrix
-        return ptrace(Vector{eltype(T)}, T, lc, indices)
-    else
-        return ptrace(T, T, lc, indices)
-    end
 end

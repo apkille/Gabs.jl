@@ -1,4 +1,3 @@
-# src/nongaussian_states.jl
 """
     catstate_even(basis::SymplecticBasis, α::Number; squeeze_params=nothing, ħ=2)
 
@@ -302,7 +301,7 @@ function catstate_even(basis::SymplecticBasis, αs::AbstractVector; squeeze_para
     end
     result = cat_states[1]
     @inbounds for i in 2:nmodes  
-        result = _tensor(result, cat_states[i])
+        result = tensor(result, cat_states[i])
     end
     return result
 end
@@ -328,7 +327,7 @@ function catstate_odd(basis::SymplecticBasis, αs::AbstractVector; squeeze_param
     end
     result = cat_states[1]
     @inbounds for i in 2:nmodes  
-        result = _tensor(result, cat_states[i])
+        result = tensor(result, cat_states[i])
     end
     return result
 end
@@ -355,31 +354,7 @@ function catstate(basis::SymplecticBasis, αs::AbstractVector, phases::AbstractV
     end
     result = cat_states[1]
     @inbounds for i in 2:nmodes  
-        result = _tensor(result, cat_states[i])
+        result = tensor(result, cat_states[i])
     end
     return result
-end
-
-"""
-    _tensor(lc1::GaussianLinearCombination, lc2::GaussianLinearCombination)
-
-Internal function to compute tensor product of two GaussianLinearCombination objects.
-"""
-function _tensor(lc1::GaussianLinearCombination, lc2::GaussianLinearCombination)
-    @assert typeof(lc1.basis) == typeof(lc2.basis) "Linear combinations must have compatible bases"
-    @assert lc1.ħ == lc2.ħ "Linear combinations must have the same ħ"
-    new_basis = lc1.basis ⊕ lc2.basis
-    result_size = length(lc1) * length(lc2)
-    CoeffType = promote_type(eltype(lc1.coeffs), eltype(lc2.coeffs))
-    new_coeffs = Vector{CoeffType}(undef, result_size)
-    new_states = Vector{GaussianState}(undef, result_size)
-    idx = 1
-    for (c1, s1) in lc1
-        for (c2, s2) in lc2
-            new_coeffs[idx] = c1 * c2
-            new_states[idx] = s1 ⊗ s2
-            idx += 1
-        end
-    end
-    return GaussianLinearCombination(new_basis, new_coeffs, new_states)
 end
