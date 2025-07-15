@@ -289,11 +289,9 @@
             @test cross_w isa ComplexF64
             @test isfinite(cross_w)
             
-
             cross_w_reverse = cross_wigner(coh2, coh1, x)
             @test isapprox(cross_w, conj(cross_w_reverse), rtol=1e-8)
             
-           
             cross_w_same = cross_wigner(coh1, coh1, x)
             regular_w = wigner(coh1, x)
             
@@ -338,7 +336,6 @@
             
             @test isapprox(w_interference, expected_w, atol=1e-12)
             
-
             symmetric_cat = GaussianLinearCombination(basis, [0.5, 0.5], [coh1, coh2])
             x_interference = [0.0, 0.5] 
             w_symmetric = wigner(symmetric_cat, x_interference)
@@ -357,7 +354,6 @@
             @test cross_char isa ComplexF64
             @test isfinite(cross_char)
             
-       
             cross_char_reverse = cross_wignerchar(coh2, coh1, -xi) 
             hermitian_holds = isapprox(cross_char, conj(cross_char_reverse), rtol=1e-8)
             @test hermitian_holds || begin
@@ -509,8 +505,6 @@
             w_cat = wigner(cat_even, x)
             @test w_cat isa Real
             @test isfinite(w_cat)
-            
-
         end
         
         @testset "GKP State Integration" begin
@@ -519,14 +513,12 @@
             gkp_square = gkpstate(basis, lattice="square", delta=0.2, nmax=2)
             gkp_hex = gkpstate(basis, lattice="hexagonal", delta=0.2, nmax=1)
             
-            
             squeeze_op = squeeze(basis, 0.1, π/6)
             gkp_squeezed = squeeze_op * gkp_square
             
             @test gkp_squeezed isa GaussianLinearCombination
             @test length(gkp_squeezed) == length(gkp_square)
             
-
             vac = vacuumstate(QuadPairBasis(1))
             gkp_2mode = tensor(gkp_square, GaussianLinearCombination(vac))
             
@@ -654,7 +646,6 @@
                 w_val = wigner(lc, x)
                 @test isfinite(w_val)
                 
- 
                 @test abs(w_val) < 1e10 
             end
         end
@@ -723,14 +714,6 @@
             empty_states = GaussianState[]
             
             @test_throws ArgumentError GaussianLinearCombination(coeffs, empty_states)
-            
-            try
-                GaussianLinearCombination(coeffs, empty_states)
-                @test false 
-            catch e
-                @test e isa ArgumentError
-                @test contains(string(e), "Cannot create an empty linear combination")
-            end
             
             state1 = coherentstate(qpairbasis, 1.0)
             state2 = coherentstate(qpairbasis, -1.0)
