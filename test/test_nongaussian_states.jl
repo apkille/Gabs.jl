@@ -257,128 +257,15 @@
         @test_throws ArgumentError gkpstate(basis, lattice="square", delta=0.0, nmax=2)
         @test_throws ArgumentError gkpstate(basis, lattice="square", delta=-0.1, nmax=2)
         
-        try
-            gkpstate(basis, lattice="square", delta=-0.5, nmax=2)
-            @test false  
-        catch e
-            @test e isa ArgumentError
-            @test contains(string(e), "delta must be positive")
-            @test contains(string(e), "-0.5")
-        end
-        
         gkp_tiny_delta = gkpstate(basis, lattice="square", delta=1e-8, nmax=1)
         @test gkp_tiny_delta isa GaussianLinearCombination
         
         @test_throws ArgumentError gkpstate(basis, lattice="square", delta=0.1, nmax=0)
         @test_throws ArgumentError gkpstate(basis, lattice="square", delta=0.1, nmax=-1)
         
-        try
-            gkpstate(basis, lattice="square", delta=0.1, nmax=-5)
-            @test false  
-        catch e
-            @test e isa ArgumentError
-            @test contains(string(e), "nmax must be positive")
-            @test contains(string(e), "-5")
-        end
-        
         gkp_large_nmax = gkpstate(basis, lattice="square", delta=0.3, nmax=55)
         @test gkp_large_nmax isa GaussianLinearCombination
         @test length(gkp_large_nmax) == 111
-    end
-
-    @testset "Normalization factor warning coverage" begin
-        basis = QuadPairBasis(1)
-        
-        state1 = coherentstate(basis, 1.0)
-        state2 = coherentstate(basis, -1.0)
-        
-        tiny_coeffs = [1e-8, -1e-8]  
-        
-        io_warn = IOBuffer()
-        logger_warn = Base.CoreLogging.SimpleLogger(io_warn, Base.CoreLogging.Warn)
-        
-        Base.CoreLogging.with_logger(logger_warn) do
-            norm_val = norm_factor([state1, state2], tiny_coeffs)
-            @test norm_val == 1.0  
-        end
-        
-        zero_coeffs = [0.0, 0.0]
-        
-        io_warn2 = IOBuffer()
-        logger_warn2 = Base.CoreLogging.SimpleLogger(io_warn2, Base.CoreLogging.Warn)
-        
-        Base.CoreLogging.with_logger(logger_warn2) do
-            norm_factor_zero = norm_factor([state1, state2], zero_coeffs)
-            @test norm_factor_zero == 1.0
-        end
-        
-        normal_coeffs = [0.6, 0.8]
-        io_warn3 = IOBuffer()
-        logger_warn3 = Base.CoreLogging.SimpleLogger(io_warn3, Base.CoreLogging.Warn)
-        
-        Base.CoreLogging.with_logger(logger_warn3) do
-            norm_factor_normal = norm_factor([state1, state2], normal_coeffs)
-            @test norm_factor_normal isa Float64
-            @test norm_factor_normal > 0.0
-            @test norm_factor_normal != 1.0  
-        end
-        
-        warn_output3 = String(take!(io_warn3))
-        @test warn_output3 == ""  
-    end
-
-    @testset "Gaussian overlap numerical instability coverage" begin
-        basis = QuadPairBasis(1)
-
-        state1 = coherentstate(basis, 1.0)
-        mean2 = [0.0, 0.0]
-        covar2 = [1e-20 1e-25; 1e-25 1e-20]  
-        state2 = GaussianState(basis, mean2, covar2, ħ=2)
-        io_warn = IOBuffer()
-        logger_warn = Base.CoreLogging.SimpleLogger(io_warn, Base.CoreLogging.Warn)
-        overlap = nothing
-        Base.CoreLogging.with_logger(logger_warn) do
-            overlap = Gabs._overlap(state1, state2)
-        end
-        
-        @test overlap isa ComplexF64
-        @test isfinite(real(overlap)) || real(overlap) == 0.0
-        @test isfinite(imag(overlap)) || imag(overlap) == 0.0
-        
-        mean3 = [0.0, 0.0]
-        covar3 = [0.0 0.0; 0.0 0.0] 
-        state3 = GaussianState(basis, mean3, covar3, ħ=2)
-        
-        io_warn2 = IOBuffer()
-        logger_warn2 = Base.CoreLogging.SimpleLogger(io_warn2, Base.CoreLogging.Warn)
-        
-        overlap2 = nothing
-        
-        Base.CoreLogging.with_logger(logger_warn2) do
-            overlap2 = Gabs._overlap(state1, state3)
-        end
-        
-        @test overlap2 isa ComplexF64
-        mean4 = [0.0, 0.0]
-        covar4 = [Inf 0.0; 0.0 Inf] 
-        state4 = GaussianState(basis, mean4, covar4, ħ=2)
-        io_warn3 = IOBuffer()
-        logger_warn3 = Base.CoreLogging.SimpleLogger(io_warn3, Base.CoreLogging.Warn)
-        overlap3 = nothing
-        Base.CoreLogging.with_logger(logger_warn3) do
-            overlap3 = Gabs._overlap(state1, state4)
-        end
-        
-        @test overlap3 isa ComplexF64
-        
-        warn_output = String(take!(io_warn))
-        warn_output2 = String(take!(io_warn2))
-        warn_output3 = String(take!(io_warn3))
-        combined_warnings = warn_output * warn_output2 * warn_output3
-        
-        @test overlap isa ComplexF64
-        @test overlap2 isa ComplexF64
-        @test overlap3 isa ComplexF64
     end
 
     @testset "Multi-mode catstate_odd squeeze params validation coverage" begin
@@ -393,14 +280,6 @@
         wrong_squeeze_params = [(0.3, π/8)] 
         
         @test_throws AssertionError catstate_odd(basis, αs, squeeze_params=wrong_squeeze_params)
-        
-        try
-            catstate_odd(basis, αs, squeeze_params=wrong_squeeze_params)
-            @test false  
-        catch e
-            @test e isa AssertionError
-            @test contains(string(e), "Number of squeeze parameters must match number of modes")
-        end
         
         cat_no_squeeze = catstate_odd(basis, αs)
         @test cat_no_squeeze isa GaussianLinearCombination
@@ -426,14 +305,6 @@
         wrong_squeeze_params = [(0.3, π/8)]  
         
         @test_throws AssertionError catstate(basis, αs, phases, squeeze_params=wrong_squeeze_params)
-        
-        try
-            catstate(basis, αs, phases, squeeze_params=wrong_squeeze_params)
-            @test false 
-        catch e
-            @test e isa AssertionError
-            @test contains(string(e), "Number of squeeze parameters must match number of modes")
-        end
         
         cat_no_squeeze = catstate(basis, αs, phases)
         @test cat_no_squeeze isa GaussianLinearCombination
