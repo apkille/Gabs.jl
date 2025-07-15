@@ -717,7 +717,7 @@
         qpairbasis = QuadPairBasis(nmodes)
         qblockbasis = QuadBlockBasis(nmodes)
     
-        @testset "1. Empty states constructor coverage" begin
+        @testset "Empty states constructor coverage" begin
 
             coeffs = [1.0, 0.5]
             empty_states = GaussianState[]
@@ -744,7 +744,7 @@
             @test lc.basis == qpairbasis
         end
     
-        @testset "2. Empty coeffs in simplify! coverage" begin
+        @testset "Empty coeffs in simplify! coverage" begin
             state = coherentstate(qpairbasis, 1.0)
             lc = GaussianLinearCombination(state)
             lc.coeffs = Float64[]
@@ -755,7 +755,7 @@
             @test isempty(lc.states)
         end
     
-        @testset "3. Show function 'more terms' coverage" begin
+        @testset "Show function 'more terms' coverage" begin
             basis = qpairbasis
             states = [coherentstate(basis, Float64(i)) for i in 1:7]  
             coeffs = [1.0/7 for _ in 1:7]
@@ -772,7 +772,7 @@
             @test contains(output, "(2 more terms)")
         end
     
-        @testset "4. Typed ptrace functions coverage" begin
+        @testset "Typed ptrace functions coverage" begin
             basis = QuadPairBasis(2)
             coh = coherentstate(QuadPairBasis(1), 1.0)
             vac = vacuumstate(QuadPairBasis(1))
@@ -798,7 +798,7 @@
             @test lc_traced_static.states[1].covar isa SMatrix{2,2,Float64}
         end
     
-        @testset "6. Tensor function else branch coverage" begin
+        @testset "Tensor function else branch coverage" begin
             basis = qpairbasis
             state1 = coherentstate(basis, 1.0)
             state2 = vacuumstate(basis)
@@ -823,7 +823,7 @@
             TestArrayType{T}(::UndefInitializer, dims...) where T = TestArrayType(Matrix{T}(undef, dims...))
             Base.similar(a::TestArrayType{T}, ::Type{S}, dims::Dims) where {T,S} = TestArrayType(Matrix{S}(undef, dims))
         end
-        @testset "7. Ptrace function else branch coverage" begin
+        @testset "Ptrace function else branch coverage" begin
             basis = QuadPairBasis(2)
             coh = coherentstate(QuadPairBasis(1), 1.0)
             vac = vacuumstate(QuadPairBasis(1))
