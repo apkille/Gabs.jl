@@ -1,5 +1,10 @@
 # News
 
+## v1.3.2 - dev
+
+- Add `GaussianLinearCombination` interface, with predefined `catstate`, `catstate_even`,
+ `catstate_odd`, and `gkpstate` states.
+
 ## v1.3.1 - 2025-07-02
 
 - Bump QuantumInterface compatibility.
