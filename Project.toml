@@ -19,7 +19,7 @@ StaticArraysExt = "StaticArrays"
 
 [compat]
 LinearAlgebra = "1.9"
-Makie = "0.21, 0.22, 0.23"
+Makie = "0.21, 0.22, 0.23, 0.24"
 QuantumInterface = "0.3.8, 0.4.1"
 Random = "1.9"
 StaticArrays = "1.9.7"
