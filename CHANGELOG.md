@@ -1,6 +1,6 @@
 # News
 
-## v1.3.2 - dev
+## v1.3.2 - 2025-08-12
 
 - Add `GaussianLinearCombination` interface, with predefined `catstate`, `catstate_even`,
  `catstate_odd`, and `gkpstate` states.
