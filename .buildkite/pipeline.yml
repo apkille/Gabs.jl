@@ -5,18 +5,18 @@ env:
 steps:
   - label: "General Tests"
     plugins:
-      - JuliaCI/julia#v1:
+      - QuantumSavory/julia#v1.14:
           version: "1"
-      - QuantumSavory/julia-xvfb#v1:
+      - QuantumSavory/julia-xvfb#v1.2:
       - JuliaCI/julia-test#v1: ~
       - JuliaCI/julia-coverage#v1:
           codecov: true
 
   - label: "Downstream Tests - QuantumSavory"
     plugins:
-      - JuliaCI/julia#v1:
+      - QuantumSavory/julia#v1.14:
           version: "1"
-      - QuantumSavory/julia-xvfb#v1:
+      - QuantumSavory/julia-xvfb#v1.2:
     command: |
       julia --project=$(mktemp -d) -e '
         using Pkg
